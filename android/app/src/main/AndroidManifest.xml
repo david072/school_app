@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.school_app">
-   <application
+    package="de.david072.school_app">
+
+    <application
         android:label="school_app"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
