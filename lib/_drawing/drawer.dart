@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
-import 'package:school_app/types.dart';
+
+import 'types.dart';
 
 // TODO: - Display something under the cursor when hovering
+enum PenType { pen, eraser }
+
 class DrawerState {
   Drawing drawing;
   Color activeColor = Colors.black;
+  PenType activePen = PenType.pen;
 
   void setActiveColor(Color color) => activeColor = color;
 
