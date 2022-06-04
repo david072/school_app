@@ -13,6 +13,15 @@ dependencies:
   perfect_freehand: ^1.0.4
   cupertino_icons: ^1.0.2
 
+  # Firebase
+  firebase_core: ^1.17.1
+  firebase_auth: ^3.3.19
+
+  get: ^4.6.5
+
+  # Util
+  email_validator: ^2.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
