@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:school_app/auth/auth.dart';
-import 'package:school_app/auth/signup_page.dart';
 
 import '../home/home_page.dart';
+import 'auth.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({Key? key}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignUpPageState extends State<SignUpPage> {
   final GlobalKey formKey = GlobalKey<FormState>();
 
   String email = "";
   String password = "";
+  String confirmPassword = "";
 
-  Future<void> signIn() async {
-    var failState = await Authentication.signIn(
+  Future<void> signUp() async {
+    var failState = await Authentication.signUp(
         formKey as GlobalKey<FormState>, email, password);
     if (failState == null) {
       Get.off(() => const HomePage());
@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Registrieren'),
       ),
       body: Center(
         child: SizedBox(
@@ -50,6 +50,7 @@ class _LoginPageState extends State<LoginPage> {
             key: formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 TextFormField(
                   keyboardType: TextInputType.emailAddress,
@@ -65,16 +66,27 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: buildInputDecoration('Passwort'),
                   obscureText: true,
                 ),
+                const SizedBox(height: 30),
+                TextFormField(
+                  keyboardType: TextInputType.visiblePassword,
+                  onChanged: (s) => setState(() => confirmPassword = s),
+                  validator: (s) {
+                    if (s == null || s.isEmpty) {
+                      return 'Bitte gib ein Passwort an';
+                    }
+                    if (s != password) {
+                      return 'Passwörter stimmen nicht überein';
+                    }
+                    return null;
+                  },
+                  decoration: buildInputDecoration('Passwort bestätigen'),
+                  obscureText: true,
+                ),
                 const SizedBox(height: 80),
                 MaterialButton(
-                  onPressed: signIn,
+                  onPressed: signUp,
                   minWidth: double.infinity,
                   color: Theme.of(context).colorScheme.primary,
-                  child: const Text('LOGIN'),
-                ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: () => Get.to(() => const SignUpPage()),
                   child: const Text('REGISTRIEREN'),
                 ),
               ],
