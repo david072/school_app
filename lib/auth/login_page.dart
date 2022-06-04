@@ -15,10 +15,14 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey formKey = GlobalKey<FormState>();
 
+  bool enabled = true;
+
   String email = "";
   String password = "";
 
   Future<void> signIn() async {
+    setState(() => enabled = false);
+
     var failState = await Authentication.signIn(
         formKey as GlobalKey<FormState>, email, password);
     if (failState == null) {
@@ -35,6 +39,8 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     }
+
+    setState(() => enabled = true);
   }
 
   @override
@@ -52,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextFormField(
+                  enabled: enabled,
                   keyboardType: TextInputType.emailAddress,
                   onChanged: (s) => setState(() => email = s),
                   validator: InputValidator.validateEmail,
@@ -59,6 +66,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 30),
                 TextFormField(
+                  enabled: enabled,
                   keyboardType: TextInputType.visiblePassword,
                   onChanged: (s) => setState(() => password = s),
                   validator: InputValidator.validatePassword,
@@ -67,14 +75,17 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 80),
                 MaterialButton(
-                  onPressed: signIn,
+                  onPressed: enabled ? signIn : null,
                   minWidth: double.infinity,
                   color: Theme.of(context).colorScheme.primary,
-                  child: const Text('LOGIN'),
+                  child: enabled
+                      ? const Text('LOGIN')
+                      : const CircularProgressIndicator(),
                 ),
                 const SizedBox(height: 20),
                 TextButton(
-                  onPressed: () => Get.to(() => const SignUpPage()),
+                  onPressed:
+                      enabled ? () => Get.to(() => const SignUpPage()) : null,
                   child: const Text('REGISTRIEREN'),
                 ),
               ],

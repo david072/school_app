@@ -14,14 +14,19 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final GlobalKey formKey = GlobalKey<FormState>();
 
+  bool enabled = true;
+
   String email = "";
   String password = "";
   String confirmPassword = "";
 
   Future<void> signUp() async {
+    setState(() => enabled = false);
+
     var failState = await Authentication.signUp(
         formKey as GlobalKey<FormState>, email, password);
     if (failState == null) {
+      Get.back();
       Get.off(() => const HomePage());
       return;
     }
@@ -35,6 +40,8 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
       );
     }
+
+    setState(() => enabled = true);
   }
 
   @override
@@ -53,6 +60,7 @@ class _SignUpPageState extends State<SignUpPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 TextFormField(
+                  enabled: enabled,
                   keyboardType: TextInputType.emailAddress,
                   onChanged: (s) => setState(() => email = s),
                   validator: InputValidator.validateEmail,
@@ -60,6 +68,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 30),
                 TextFormField(
+                  enabled: enabled,
                   keyboardType: TextInputType.visiblePassword,
                   onChanged: (s) => setState(() => password = s),
                   validator: InputValidator.validatePassword,
@@ -68,6 +77,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 30),
                 TextFormField(
+                  enabled: enabled,
                   keyboardType: TextInputType.visiblePassword,
                   onChanged: (s) => setState(() => confirmPassword = s),
                   validator: (s) {
@@ -84,10 +94,12 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 80),
                 MaterialButton(
-                  onPressed: signUp,
+                  onPressed: enabled ? signUp : null,
                   minWidth: double.infinity,
                   color: Theme.of(context).colorScheme.primary,
-                  child: const Text('REGISTRIEREN'),
+                  child: enabled
+                      ? const Text('REGISTRIEREN')
+                      : const CircularProgressIndicator(),
                 ),
               ],
             ),
