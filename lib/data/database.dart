@@ -30,6 +30,18 @@ class Database {
     });
   }
 
+  static Future<void> editSubject(
+      String id, String name, String abbreviation, Color color) async {
+    var doc =
+        FirebaseFirestore.instance.collection(_subjectsCollection).doc(id);
+    await doc.update({
+      'name': name,
+      'abbreviation': abbreviation,
+      'color': color.value,
+      'user_id': _requireUser().uid,
+    });
+  }
+
   static Future<void> deleteSubject(String id) async {
     var doc =
         FirebaseFirestore.instance.collection(_subjectsCollection).doc(id);

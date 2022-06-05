@@ -4,8 +4,16 @@ import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
 import 'package:school_app/util.dart';
 
+import 'subject.dart';
+
 class CreateSubjectPage extends StatefulWidget {
-  const CreateSubjectPage({Key? key}) : super(key: key);
+  const CreateSubjectPage({
+    Key? key,
+    this.subjectToEdit,
+  }) : super(key: key);
+
+  /// Optional subject. If not null, the screen will edit instead of create.
+  final Subject? subjectToEdit;
 
   @override
   State<CreateSubjectPage> createState() => _CreateSubjectPageState();
@@ -16,9 +24,17 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
 
   var enabled = true.obs;
 
-  String name = "";
-  String abbreviation = "";
-  var color = randomColor();
+  late String name;
+  late String abbreviation;
+  late Color color;
+
+  @override
+  void initState() {
+    super.initState();
+    name = widget.subjectToEdit?.name ?? "";
+    abbreviation = widget.subjectToEdit?.abbreviation ?? "";
+    color = widget.subjectToEdit?.color ?? randomColor();
+  }
 
   void createSubject() async {
     enabled.call(false);
@@ -27,7 +43,13 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
       enabled.call(true);
       return;
     }
-    await Database.createSubject(name, abbreviation, color);
+
+    if (widget.subjectToEdit == null) {
+      await Database.createSubject(name, abbreviation, color);
+    } else {
+      await Database.editSubject(
+          widget.subjectToEdit!.id, name, abbreviation, color);
+    }
 
     enabled.call(true);
     Get.back();
@@ -37,7 +59,9 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fach erstellen'),
+        title: Text(widget.subjectToEdit == null
+            ? 'Fach erstellen'
+            : 'Fach bearbeiten'),
       ),
       body: Center(
         child: SizedBox(
@@ -54,6 +78,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                     Flexible(
                       flex: 2,
                       child: TextFormField(
+                        initialValue: widget.subjectToEdit?.name,
                         enabled: enabled.value,
                         decoration: buildInputDecoration('Name'),
                         onChanged: (s) => name = s,
@@ -64,6 +89,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                     Flexible(
                       flex: 1,
                       child: TextFormField(
+                        initialValue: widget.subjectToEdit?.abbreviation,
                         enabled: enabled.value,
                         decoration: buildInputDecoration('Abkürzung'),
                         onChanged: (s) => abbreviation = s,
@@ -109,7 +135,9 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                   minWidth: double.infinity,
                   color: Theme.of(context).colorScheme.primary,
                   child: enabled.value
-                      ? const Text('ERSTELLEN')
+                      ? Text(widget.subjectToEdit == null
+                          ? 'ERSTELLEN'
+                          : 'SPEICHERN')
                       : const CircularProgressIndicator(),
                 ),
               ],

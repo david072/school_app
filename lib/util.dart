@@ -51,14 +51,22 @@ bool validateForm(GlobalKey key) {
 class LongPressPopupMenu extends StatefulWidget {
   const LongPressPopupMenu({
     Key? key,
-    required this.enabled,
+    this.enabled,
     required this.child,
     required this.items,
+    required this.functions,
   }) : super(key: key);
 
   final bool? enabled;
   final Widget child;
-  final List<PopupMenuEntry> items;
+
+  /// Functions to call after a menu item has been pressed.
+  /// Useful when trying to navigate to another screen, since after the item's
+  /// `onTap`, a route will be popped for the popup menu.
+  /// Set the value of the corresponding popup item of the function to the
+  /// index of the function in this array.
+  final List<void Function()> functions;
+  final List<PopupMenuEntry<int>> items;
 
   @override
   State<LongPressPopupMenu> createState() => _LongPressPopupMenuState();
@@ -67,7 +75,7 @@ class LongPressPopupMenu extends StatefulWidget {
 class _LongPressPopupMenuState extends State<LongPressPopupMenu> {
   late Offset longPressPosition;
 
-  void showPopupMenu() {
+  Future<void> showPopupMenu() async {
     final RenderBox? overlay =
         Overlay.of(context)?.context.findRenderObject() as RenderBox?;
     if (overlay == null) {
@@ -80,7 +88,7 @@ class _LongPressPopupMenuState extends State<LongPressPopupMenu> {
       return;
     }
 
-    showMenu(
+    int? selected = await showMenu(
       context: context,
       items: widget.items,
       position: RelativeRect.fromRect(
@@ -88,6 +96,10 @@ class _LongPressPopupMenuState extends State<LongPressPopupMenu> {
         Offset.zero & overlay.size,
       ),
     );
+
+    if (selected == null) return;
+    if (widget.functions.length <= selected) return;
+    widget.functions[selected]();
   }
 
   bool isEnabled() => widget.enabled == null ? true : widget.enabled!;

@@ -103,13 +103,20 @@ class _SubjectState extends State<_Subject> {
     return LongPressPopupMenu(
       enabled: enabled,
       items: [
+        const PopupMenuItem(
+          value: 0,
+          child: Text('Bearbeiten'),
+        ),
         PopupMenuItem(
           child: const Text('Löschen'),
           onTap: () async {
             setState(() => enabled = false);
             await Database.deleteSubject(widget.subject.id);
           },
-        )
+        ),
+      ],
+      functions: [
+        () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
       ],
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
