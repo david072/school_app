@@ -30,6 +30,12 @@ class Database {
     });
   }
 
+  static Future<void> deleteSubject(String id) async {
+    var doc =
+        FirebaseFirestore.instance.collection(_subjectsCollection).doc(id);
+    await doc.delete();
+  }
+
   static User _requireUser() {
     var user = FirebaseAuth.instance.currentUser;
     assert(user != null, 'User required for operation!');

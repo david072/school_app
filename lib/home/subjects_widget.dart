@@ -39,17 +39,38 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
       child: Column(
         children: [
           Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-              ),
-              itemCount: subjects.length,
-              itemBuilder: (ctx, i) => _Subject(
-                name: subjects[i].name,
-                color: subjects[i].color,
-                taskCount: 0, // TODO!
-              ),
-            ),
+            child: subjects.isNotEmpty
+                ? GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                    ),
+                    itemCount: subjects.length,
+                    itemBuilder: (ctx, i) => _Subject(subject: subjects[i]),
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text('Keine Fächer',
+                          style: Theme.of(context).textTheme.headline5),
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                                text: 'Erstelle Fächer mit dem ',
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            const WidgetSpan(child: Icon(Icons.add, size: 20)),
+                            TextSpan(
+                                text: ' unten rechts.',
+                                style: Theme.of(context).textTheme.bodyMedium),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
           ),
           _Footer(
             subjectCount: subjects.length,
@@ -61,35 +82,86 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
   }
 }
 
-class _Subject extends StatelessWidget {
+class _Subject extends StatefulWidget {
   const _Subject({
     Key? key,
-    required this.name,
-    required this.color,
-    required this.taskCount,
+    required this.subject,
   }) : super(key: key);
 
-  final String name;
-  final Color color;
-  final int taskCount;
+  final Subject subject;
+
+  @override
+  State<_Subject> createState() => _SubjectState();
+}
+
+class _SubjectState extends State<_Subject> {
+  var enabled = true;
+
+  late Offset longPressPosition;
+
+  void showPopupMenu() {
+    final RenderBox? overlay =
+        Overlay.of(context)?.context.findRenderObject() as RenderBox?;
+    if (overlay == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Ein unerwarteter Fehler ist aufgetreten (Error: No RenderBox found).'),
+        ),
+      );
+      return;
+    }
+
+    showMenu(
+      context: context,
+      items: <PopupMenuEntry>[
+        PopupMenuItem(
+          child: const Text('Löschen'),
+          onTap: () async {
+            setState(() => enabled = false);
+            await Database.deleteSubject(widget.subject.id);
+          },
+        )
+      ],
+      position: RelativeRect.fromRect(
+        longPressPosition & const Size(1, 1),
+        Offset.zero & overlay.size,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.book_outlined,
-          color: color,
-          size: 40,
+    return InkWell(
+      onTapDown: enabled
+          ? (details) => longPressPosition = details.globalPosition
+          : null,
+      onLongPress: enabled ? showPopupMenu : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        decoration: BoxDecoration(
+          color: !enabled ? Theme.of(context).disabledColor : null,
         ),
-        const SizedBox(height: 20),
-        Text(name, style: Theme.of(context).textTheme.headline6),
-        const SizedBox(height: 10),
-        Text('$taskCount Aufgabe${taskCount == 1 ? '' : 'n'}',
-            style: Theme.of(context).textTheme.caption),
-      ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.book_outlined,
+              color: widget.subject.color,
+              size: 40,
+            ),
+            const SizedBox(height: 20),
+            Text(widget.subject.name,
+                style: Theme.of(context).textTheme.headline6),
+            const SizedBox(height: 10),
+            // TODO: Task count
+            // Text('$taskCount Aufgabe${taskCount == 1 ? '' : 'n'}',
+            //     style: Theme.of(context).textTheme.caption),
+            Text('0 Aufgaben', style: Theme.of(context).textTheme.caption),
+          ],
+        ),
+      ),
     );
   }
 }
