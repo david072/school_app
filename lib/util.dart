@@ -47,3 +47,59 @@ bool validateForm(GlobalKey key) {
   var formState = (key as GlobalKey<FormState>).currentState;
   return formState != null && formState.validate();
 }
+
+class LongPressPopupMenu extends StatefulWidget {
+  const LongPressPopupMenu({
+    Key? key,
+    required this.enabled,
+    required this.child,
+    required this.items,
+  }) : super(key: key);
+
+  final bool? enabled;
+  final Widget child;
+  final List<PopupMenuEntry> items;
+
+  @override
+  State<LongPressPopupMenu> createState() => _LongPressPopupMenuState();
+}
+
+class _LongPressPopupMenuState extends State<LongPressPopupMenu> {
+  late Offset longPressPosition;
+
+  void showPopupMenu() {
+    final RenderBox? overlay =
+        Overlay.of(context)?.context.findRenderObject() as RenderBox?;
+    if (overlay == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Ein unerwarteter Fehler ist aufgetreten (Error: No RenderBox found).'),
+        ),
+      );
+      return;
+    }
+
+    showMenu(
+      context: context,
+      items: widget.items,
+      position: RelativeRect.fromRect(
+        longPressPosition & const Size(1, 1),
+        Offset.zero & overlay.size,
+      ),
+    );
+  }
+
+  bool isEnabled() => widget.enabled == null ? true : widget.enabled!;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTapDown: isEnabled()
+          ? (details) => longPressPosition = details.globalPosition
+          : null,
+      onLongPress: isEnabled() ? showPopupMenu : null,
+      child: widget.child,
+    );
+  }
+}

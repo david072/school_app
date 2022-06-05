@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
 import 'package:school_app/data/subjects/create_subject_page.dart';
+import 'package:school_app/util.dart';
 
 import '../data/subjects/subject.dart';
 
@@ -97,24 +98,11 @@ class _Subject extends StatefulWidget {
 class _SubjectState extends State<_Subject> {
   var enabled = true;
 
-  late Offset longPressPosition;
-
-  void showPopupMenu() {
-    final RenderBox? overlay =
-        Overlay.of(context)?.context.findRenderObject() as RenderBox?;
-    if (overlay == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Ein unerwarteter Fehler ist aufgetreten (Error: No RenderBox found).'),
-        ),
-      );
-      return;
-    }
-
-    showMenu(
-      context: context,
-      items: <PopupMenuEntry>[
+  @override
+  Widget build(BuildContext context) {
+    return LongPressPopupMenu(
+      enabled: enabled,
+      items: [
         PopupMenuItem(
           child: const Text('Löschen'),
           onTap: () async {
@@ -123,20 +111,6 @@ class _SubjectState extends State<_Subject> {
           },
         )
       ],
-      position: RelativeRect.fromRect(
-        longPressPosition & const Size(1, 1),
-        Offset.zero & overlay.size,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTapDown: enabled
-          ? (details) => longPressPosition = details.globalPosition
-          : null,
-      onLongPress: enabled ? showPopupMenu : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
