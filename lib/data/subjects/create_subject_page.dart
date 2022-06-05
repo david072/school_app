@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
+import 'package:school_app/data/database.dart';
 import 'package:school_app/util.dart';
 
 class CreateSubjectPage extends StatefulWidget {
@@ -22,7 +23,11 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
   void createSubject() async {
     enabled.call(false);
 
-    // TODO: save in database
+    if (!validateForm(formKey)) {
+      enabled.call(true);
+      return;
+    }
+    await Database.createSubject(name, abbreviation, color);
 
     enabled.call(true);
     Get.back();

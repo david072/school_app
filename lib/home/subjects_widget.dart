@@ -1,27 +1,37 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:school_app/data/database.dart';
+import 'package:school_app/data/subjects/create_subject_page.dart';
 
-/// Temporary subject class to test the UI
-class Subject {
-  final String name;
-  final int tasks;
-  final Color color;
+import '../data/subjects/subject.dart';
 
-  const Subject(this.name, this.tasks, this.color);
-}
-
-class SubjectsWidget extends StatelessWidget {
+class SubjectsWidget extends StatefulWidget {
   const SubjectsWidget({
     Key? key,
   }) : super(key: key);
 
-  /// Temporary list of subjects to test the UI
-  final List<Subject> subjects = const [
-    Subject('Englisch', 12, Colors.red),
-    Subject('Chemie', 0, Colors.green),
-    Subject('Französisch', 2, Colors.black),
-    Subject('NwT', 0, Colors.blue),
-    Subject('Deutsch', 3, Colors.cyan),
-  ];
+  @override
+  State<SubjectsWidget> createState() => _SubjectsWidgetState();
+}
+
+class _SubjectsWidgetState extends State<SubjectsWidget> {
+  List<Subject> subjects = [];
+  late StreamSubscription<List<Subject>> subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    subscription = Database.querySubjects()
+        .listen((data) => setState(() => subjects = data));
+  }
+
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +47,7 @@ class SubjectsWidget extends StatelessWidget {
               itemBuilder: (ctx, i) => _Subject(
                 name: subjects[i].name,
                 color: subjects[i].color,
-                taskCount: subjects[i].tasks,
+                taskCount: 0, // TODO!
               ),
             ),
           ),
