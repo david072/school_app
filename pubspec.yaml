@@ -21,6 +21,7 @@ dependencies:
 
   # Util
   email_validator: ^2.0.1
+  flutter_colorpicker: ^1.0.3
 
 dev_dependencies:
   flutter_test:

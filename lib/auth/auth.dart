@@ -1,4 +1,3 @@
-import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -38,33 +37,4 @@ class Authentication {
       return FailState.authentication;
     }
   }
-}
-
-/// Helper for validating user input in login + sign up forms.
-/// (email & password)
-class InputValidator {
-  static String? validateEmail(String? email) {
-    if (email == null || !EmailValidator.validate(email)) {
-      return 'Bitte gib eine gültige Email-Adresse an';
-    }
-
-    return null;
-  }
-
-  static String? validatePassword(String? password) {
-    if (password == null || password.isEmpty) {
-      return 'Bitte gib ein Passwort an';
-    } else if (password.length < 6) {
-      return 'Das Passwort muss mindestens 6 Zeichen lang sein';
-    }
-
-    return null;
-  }
-}
-
-InputDecoration buildInputDecoration(String labelText) {
-  return InputDecoration(
-    labelText: labelText,
-    alignLabelWithHint: true,
-  );
 }

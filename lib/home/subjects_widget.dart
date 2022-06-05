@@ -43,7 +43,7 @@ class SubjectsWidget extends StatelessWidget {
           ),
           _Footer(
             subjectCount: subjects.length,
-            onAdd: () => print("on add"),
+            onAdd: () => Get.to(() => const CreateSubjectPage()),
           ),
         ],
       ),
