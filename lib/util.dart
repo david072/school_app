@@ -48,6 +48,38 @@ bool validateForm(GlobalKey key) {
   return formState != null && formState.validate();
 }
 
+Future<void> showPopupMenu(
+    {required BuildContext context,
+    required List<PopupMenuEntry<int>> items,
+    required Offset longPressPosition,
+    List<void Function()>? functions}) async {
+  final RenderBox? overlay =
+      Overlay.of(context)?.context.findRenderObject() as RenderBox?;
+  if (overlay == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+            'Ein unerwarteter Fehler ist aufgetreten (Error: No RenderBox found).'),
+      ),
+    );
+    return;
+  }
+
+  var selected = await showMenu(
+    context: context,
+    items: items,
+    position: RelativeRect.fromRect(
+      longPressPosition & const Size(1, 1),
+      Offset.zero & overlay.size,
+    ),
+  );
+
+  if (selected == null) return;
+  if (functions == null) return;
+  if (functions.length <= selected) return;
+  functions[selected]();
+}
+
 class LongPressPopupMenu extends StatefulWidget {
   const LongPressPopupMenu({
     Key? key,
@@ -75,31 +107,13 @@ class LongPressPopupMenu extends StatefulWidget {
 class _LongPressPopupMenuState extends State<LongPressPopupMenu> {
   late Offset longPressPosition;
 
-  Future<void> showPopupMenu() async {
-    final RenderBox? overlay =
-        Overlay.of(context)?.context.findRenderObject() as RenderBox?;
-    if (overlay == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Ein unerwarteter Fehler ist aufgetreten (Error: No RenderBox found).'),
-        ),
-      );
-      return;
-    }
-
-    int? selected = await showMenu(
+  Future<void> showPopup() async {
+    await showPopupMenu(
       context: context,
       items: widget.items,
-      position: RelativeRect.fromRect(
-        longPressPosition & const Size(1, 1),
-        Offset.zero & overlay.size,
-      ),
+      longPressPosition: longPressPosition,
+      functions: widget.functions,
     );
-
-    if (selected == null) return;
-    if (widget.functions.length <= selected) return;
-    widget.functions[selected]();
   }
 
   bool isEnabled() => widget.enabled == null ? true : widget.enabled!;
@@ -110,7 +124,7 @@ class _LongPressPopupMenuState extends State<LongPressPopupMenu> {
       onTapDown: isEnabled()
           ? (details) => longPressPosition = details.globalPosition
           : null,
-      onLongPress: isEnabled() ? showPopupMenu : null,
+      onLongPress: isEnabled() ? showPopup : null,
       child: widget.child,
     );
   }
