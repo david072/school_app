@@ -65,7 +65,7 @@ class Database {
     await _collection(_tasksCollection).add({
       'title': title,
       'description': description,
-      'dueDate': dueDate.millisecondsSinceEpoch,
+      'due_date': dueDate.millisecondsSinceEpoch,
       'reminder': reminder.millisecondsSinceEpoch,
       'subject_id': subjectId,
       'user_id': _requireUser().uid,
@@ -78,7 +78,7 @@ class Database {
     await doc.update({
       'title': title,
       'description': description,
-      'dueDate': dueDate.millisecondsSinceEpoch,
+      'due_date': dueDate.millisecondsSinceEpoch,
       'reminder': reminder.millisecondsSinceEpoch,
       'subject_id': subjectId,
       'user_id': _requireUser().uid,

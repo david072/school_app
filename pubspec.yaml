@@ -24,6 +24,7 @@ dependencies:
   email_validator: ^2.0.1
   flutter_colorpicker: ^1.0.3
   lit_relative_date_time: ^1.2.0
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:

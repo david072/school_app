@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
+import 'package:school_app/data/tasks/create_task_page.dart';
 
 import '../data/tasks/task.dart';
 import 'footer.dart';
@@ -73,7 +75,7 @@ class _SoonTasksWidgetState extends State<SoonTasksWidget> {
             reverse: true,
             displayName: 'Aufgaben',
             count: tasks.length,
-            onAdd: () => print("onAdd"),
+            onAdd: () => Get.to(() => const CreateTaskPage()),
           ),
         ],
       ),

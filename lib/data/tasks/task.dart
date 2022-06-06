@@ -36,7 +36,9 @@ class Task {
   }
 
   String formatDueDate() {
-    var rdt = RelativeDateTime(dateTime: dueDate, other: DateTime.now());
+    var now = DateTime.now();
+    var rdt = RelativeDateTime(
+        dateTime: DateTime(now.year, now.month, now.day), other: dueDate);
     return const RelativeDateFormat(Locale('de')).format(rdt);
   }
 }

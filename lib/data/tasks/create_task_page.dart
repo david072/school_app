@@ -1,0 +1,492 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:school_app/data/database.dart';
+import 'package:school_app/data/subjects/subject.dart';
+import 'package:school_app/util.dart';
+
+enum _ReminderMode {
+  none,
+  oneDayBefore,
+  twoDaysBefore,
+  threeDaysBefore,
+  fourDaysBefore,
+  oneWeekBefore,
+  twoWeeksBefore,
+  custom,
+}
+
+extension on _ReminderMode {
+  String get string {
+    switch (this) {
+      case _ReminderMode.none:
+        return 'Keine';
+      case _ReminderMode.oneDayBefore:
+        return 'Einen Tag vorher';
+      case _ReminderMode.twoDaysBefore:
+        return 'Zwei Tage vorher';
+      case _ReminderMode.threeDaysBefore:
+        return 'Drei Tage vorher';
+      case _ReminderMode.fourDaysBefore:
+        return 'Vier Tage vorher';
+      case _ReminderMode.oneWeekBefore:
+        return 'Eine Woche vorher';
+      case _ReminderMode.twoWeeksBefore:
+        return 'Zwei Wochen vorher';
+      case _ReminderMode.custom:
+        return '';
+    }
+  }
+
+  Duration get offset {
+    switch (this) {
+      case _ReminderMode.none:
+        return Duration.zero;
+      case _ReminderMode.oneDayBefore:
+        return const Duration(days: 1);
+      case _ReminderMode.twoDaysBefore:
+        return const Duration(days: 2);
+      case _ReminderMode.threeDaysBefore:
+        return const Duration(days: 3);
+      case _ReminderMode.fourDaysBefore:
+        return const Duration(days: 4);
+      case _ReminderMode.oneWeekBefore:
+        return const Duration(days: 7);
+      case _ReminderMode.twoWeeksBefore:
+        return const Duration(days: 14);
+      case _ReminderMode.custom:
+        return Duration.zero; // Handled elsewhere
+    }
+  }
+}
+
+class CreateTaskPage extends StatefulWidget {
+  const CreateTaskPage({Key? key}) : super(key: key);
+
+  @override
+  State<CreateTaskPage> createState() => _CreateTaskPageState();
+}
+
+class _CreateTaskPageState extends State<CreateTaskPage> {
+  final GlobalKey formKey = GlobalKey<FormState>();
+
+  var enabled = true.obs;
+
+  String title = "";
+  String description = "";
+  late DateTime dueDate;
+  Subject? subject;
+
+  var reminderMode = _ReminderMode.none;
+  var reminderOffset = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    var now = DateTime.now();
+    dueDate = DateTime(now.year, now.month, now.day);
+  }
+
+  void createSubject() async {
+    enabled.call(false);
+
+    if (subject == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Bitte wähle ein Fach aus!')));
+      enabled.call(true);
+      return;
+    }
+    if (!validateForm(formKey)) {
+      enabled.call(true);
+      return;
+    }
+
+    await Database.createTask(
+      title,
+      description,
+      dueDate,
+      dueDate.subtract(reminderOffset),
+      subject!.id,
+    );
+
+    enabled.call(true);
+    Get.back();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Aufgabe erstellen'),
+      ),
+      body: Center(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width / 2,
+          child: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  TextFormField(
+                    enabled: enabled.value,
+                    decoration: buildInputDecoration('Titel'),
+                    onChanged: (s) => title = s,
+                    validator: InputValidator.validateNotEmpty,
+                  ),
+                  const SizedBox(height: 40),
+                  _DatePicker(
+                    enabled: enabled.value,
+                    prefix: 'Fälligkeitsdatum',
+                    date: dueDate,
+                    onChanged: (date) => setState(() => dueDate = date),
+                  ),
+                  const SizedBox(height: 20),
+                  _ReminderPicker(
+                    enabled: enabled.value,
+                    mode: reminderMode,
+                    reminderOffset: reminderOffset,
+                    dueDate: dueDate,
+                    onChanged: (offset, mode) => setState(() {
+                      reminderOffset = offset;
+                      reminderMode = mode;
+                    }),
+                  ),
+                  const SizedBox(height: 20),
+                  _SubjectPicker(
+                    enabled: enabled.value,
+                    onChanged: (s) => setState(() => subject = s),
+                    selectedSubjectId: subject?.id,
+                  ),
+                  const SizedBox(height: 40),
+                  TextFormField(
+                    enabled: enabled.value,
+                    onChanged: (s) => description = s,
+                    decoration: const InputDecoration(
+                      alignLabelWithHint: true,
+                      labelText: 'Beschreibung',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                  ),
+                  const SizedBox(height: 80),
+                  MaterialButton(
+                    onPressed: enabled.value ? createSubject : null,
+                    minWidth: double.infinity,
+                    color: Theme.of(context).colorScheme.primary,
+                    child: enabled.value
+                        ? const Text('ERSTELLEN')
+                        : const CircularProgressIndicator(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DatePicker extends StatelessWidget {
+  _DatePicker({
+    Key? key,
+    this.enabled = true,
+    required this.prefix,
+    this.highlightPrefix = false,
+    DateTime? firstDate,
+    DateTime? lastDate,
+    required this.date,
+    required this.onChanged,
+  }) : super(key: key) {
+    var now = DateTime.now();
+    this.firstDate = firstDate ?? now;
+    this.lastDate = lastDate ?? DateTime(now.year + 5, 12, 31);
+  }
+
+  final bool enabled;
+  final String prefix;
+  final bool highlightPrefix;
+  late final DateTime firstDate;
+  late final DateTime lastDate;
+  final DateTime date;
+  final void Function(DateTime) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ClickableRow(
+      onTap: enabled
+          ? () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: date,
+                firstDate: firstDate,
+                lastDate: lastDate,
+              );
+              if (picked != null && picked != date) onChanged(picked);
+            }
+          : null,
+      left: Text(
+        '$prefix:',
+        style: !highlightPrefix
+            ? Theme.of(context).textTheme.bodyText2
+            : Theme.of(context).textTheme.bodyText1,
+      ),
+      right: Text(
+        DateFormat('dd.MM.yyyy').format(date),
+        style: Theme.of(context).textTheme.bodyLarge,
+      ),
+    );
+  }
+}
+
+class _ReminderPicker extends StatelessWidget {
+  const _ReminderPicker({
+    Key? key,
+    this.enabled = true,
+    required this.mode,
+    required this.reminderOffset,
+    required this.dueDate,
+    required this.onChanged,
+  }) : super(key: key);
+
+  final bool enabled;
+  final _ReminderMode mode;
+  final Duration reminderOffset;
+  final DateTime dueDate;
+  final void Function(Duration, _ReminderMode) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ClickableRow(
+      onTap: enabled
+          ? () => showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Erinnerung:'),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: _ReminderMode.values.map((val) {
+                        if (val == _ReminderMode.custom) {
+                          var now = DateTime.now();
+                          return _DatePicker(
+                            prefix: 'Benutzerdefiniert',
+                            highlightPrefix: mode == val,
+                            date: dueDate.subtract(reminderOffset),
+                            firstDate: DateTime(now.year - 5),
+                            lastDate: dueDate,
+                            onChanged: (date) {
+                              var offset = dueDate.difference(date);
+                              Get.back();
+                              onChanged(offset, _ReminderMode.custom);
+                            },
+                          );
+                        }
+
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                onTap: () {
+                                  Get.back();
+                                  onChanged(val.offset, val);
+                                },
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: 8, bottom: 8),
+                                  child: Text(val.string,
+                                      style: mode == val
+                                          ? Theme.of(context)
+                                              .textTheme
+                                              .bodyText1
+                                          : Theme.of(context)
+                                              .textTheme
+                                              .bodyText2),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              )
+          : null,
+      left: const Text('Erinnerung:'),
+      right: Text(
+        mode != _ReminderMode.custom
+            ? mode.string
+            : DateFormat('dd.MM.yyyy').format(dueDate.subtract(reminderOffset)),
+        style: Theme.of(context).textTheme.bodyLarge,
+      ),
+    );
+  }
+}
+
+class _SubjectPicker extends StatefulWidget {
+  const _SubjectPicker({
+    Key? key,
+    this.enabled = true,
+    this.selectedSubjectId,
+    required this.onChanged,
+  }) : super(key: key);
+
+  final bool enabled;
+  final String? selectedSubjectId;
+  final void Function(Subject) onChanged;
+
+  @override
+  State<_SubjectPicker> createState() => _SubjectPickerState();
+}
+
+class _SubjectPickerState extends State<_SubjectPicker> {
+  List<Subject>? subjects;
+  late StreamSubscription<List<Subject>> subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    getSubjects();
+  }
+
+  // For some reason, stream.first apparently does not work properly on
+  // generator functions, so I have to do it myself.
+  Future<void> getSubjects() async {
+    subscription = Database.querySubjects().listen((data) {
+      setState(() => subjects = data);
+      subscription.cancel();
+    });
+  }
+
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return subjects == null
+        ? Row(
+            children: const [
+              Expanded(
+                child: Center(child: CircularProgressIndicator()),
+              )
+            ],
+          )
+        : _ClickableRow(
+            onTap: widget.enabled
+                ? () => showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Fach auswählen'),
+                        content: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: subjects!
+                                .map(
+                                  (el) => InkWell(
+                                    onTap: () {
+                                      Get.back();
+                                      widget.onChanged(el);
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                top: 8, bottom: 8),
+                                            child: Text(el.name,
+                                                style: widget.selectedSubjectId !=
+                                                            null &&
+                                                        el.id ==
+                                                            widget
+                                                                .selectedSubjectId
+                                                    ? Theme.of(context)
+                                                        .textTheme
+                                                        .bodyText1
+                                                    : Theme.of(context)
+                                                        .textTheme
+                                                        .bodyText2),
+                                          ),
+                                        ),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: el.color,
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                          ),
+                                          height: 25,
+                                          width: 25,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    )
+                : null,
+            left: const Text('Fach:'),
+            right: Text(
+              widget.selectedSubjectId == null
+                  ? 'Fach auswählen'
+                  : subjects!
+                      .firstWhere((el) => el.id == widget.selectedSubjectId)
+                      .name,
+              style: widget.selectedSubjectId == null
+                  ? Theme.of(context)
+                      .textTheme
+                      .caption
+                      ?.copyWith(fontStyle: FontStyle.italic)
+                  : Theme.of(context).textTheme.bodyLarge,
+            ),
+          );
+  }
+}
+
+class _ClickableRow extends StatelessWidget {
+  const _ClickableRow({
+    Key? key,
+    required this.left,
+    required this.right,
+    required this.onTap,
+  }) : super(key: key);
+
+  final Widget left;
+  final Widget right;
+  final void Function()? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8, bottom: 8),
+        child: Row(
+          children: [
+            left,
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: right,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
