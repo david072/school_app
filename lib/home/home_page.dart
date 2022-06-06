@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
 
     List<Widget> children = const [
       SoonTasksWidget(),
+      VerticalDivider(width: 0),
       SubjectsWidget(),
     ];
 

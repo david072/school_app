@@ -10,8 +10,8 @@ class Subject {
 
   const Subject(this.id, this.name, this.abbreviation, this.color);
 
-  static Subject fromDocument(QueryDocumentSnapshot<Map> doc) {
-    var data = doc.data();
+  static Subject fromDocument(DocumentSnapshot<Map> doc) {
+    var data = doc.data()!;
     return Subject(
       doc.id,
       data['name'],
