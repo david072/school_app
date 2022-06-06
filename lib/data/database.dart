@@ -36,8 +36,8 @@ class Database {
     });
   }
 
-  static Future<void> editSubject(String id, String name, String abbreviation,
-      Color color) async {
+  static Future<void> editSubject(
+      String id, String name, String abbreviation, Color color) async {
     var doc = _collection(_subjectsCollection).doc(id);
     await doc.update({
       'name': name,
@@ -47,8 +47,22 @@ class Database {
     });
   }
 
-  static Future<void> deleteSubject(String id) async =>
-      await _delete(_subjectsCollection, id);
+  /// Also deletes tasks associated with this subject
+  static Future<void> deleteSubject(String id) async {
+    // Delete tasks associated with this subject id
+    var tasks = await _collection(_tasksCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('subject_id', isEqualTo: id)
+        .get();
+    // Run deletions in parallel (prob not significant but doesn't hurt)
+    List<Future> futures = [];
+    for (final task in tasks.docs) {
+      futures.add(task.reference.delete());
+    }
+    await Future.wait(futures);
+
+    await _delete(_subjectsCollection, id);
+  }
 
   static Stream<List<Task>> queryTasks() async* {
     var tasks = _collection(_tasksCollection)
@@ -89,7 +103,7 @@ class Database {
       await _delete(_tasksCollection, id);
 
   static CollectionReference<Map<String, dynamic>> _collection(
-      String collection) =>
+          String collection) =>
       FirebaseFirestore.instance.collection(collection);
 
   static Future<void> _delete(String collection, String id) async {

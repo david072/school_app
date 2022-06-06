@@ -104,21 +104,28 @@ class _SubjectState extends State<_Subject> {
   Widget build(BuildContext context) {
     return LongPressPopupMenu(
       enabled: enabled,
-      items: [
-        const PopupMenuItem(
+      items: const [
+        PopupMenuItem(
           value: 0,
           child: Text('Bearbeiten'),
         ),
         PopupMenuItem(
-          child: const Text('Löschen'),
-          onTap: () async {
-            setState(() => enabled = false);
-            await Database.deleteSubject(widget.subject.id);
-          },
+          value: 1,
+          child: Text('Löschen'),
         ),
       ],
       functions: [
         () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
+        () => showConfirmationDialog(
+              context: context,
+              title: 'Löschen',
+              content:
+                  'Möchtest du das Fach \'${widget.subject.name}\' wirklich löschen?\n'
+                  'Dadurch werden auch alle Aufgaben mit diesem Fach gelöscht!',
+              cancelText: 'Abbrechen',
+              confirmText: 'Löschen',
+              onConfirm: () => Database.deleteSubject(widget.subject.id),
+            )
       ],
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
