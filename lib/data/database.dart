@@ -64,11 +64,12 @@ class Database {
     await _delete(_subjectsCollection, id);
   }
 
-  static Stream<List<Task>> queryTasks() async* {
-    var tasks = _collection(_tasksCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
-        .snapshots();
+  static Stream<List<Task>> queryTasks({bool ordered = false}) async* {
+    var query = _collection(_tasksCollection)
+        .where('user_id', isEqualTo: _requireUser().uid);
+    if (ordered) query = query.orderBy('due_date');
 
+    var tasks = query.snapshots();
     await for (final docs in tasks) {
       yield await Future.wait(docs.docs.map((doc) => Task.fromDocument(doc)));
     }
