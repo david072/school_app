@@ -92,13 +92,17 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   void createSubject() async {
     enabled.call(false);
 
+    bool isValid = true;
     if (subject == null) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Bitte wähle ein Fach aus!')));
-      enabled.call(true);
-      return;
+      isValid = false;
     }
     if (!validateForm(formKey)) {
+      isValid = false;
+    }
+
+    if (!isValid) {
       enabled.call(true);
       return;
     }
