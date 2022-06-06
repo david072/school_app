@@ -62,14 +62,20 @@ class _SoonTasksWidgetState extends State<SoonTasksWidget> {
                           task,
                           () => showPopupMenu(
                             context: context,
-                            items: [
-                              const PopupMenuItem(
+                            items: const [
+                              PopupMenuItem(
                                 value: 0,
+                                child: Text('Bearbeiten'),
+                              ),
+                              PopupMenuItem(
+                                value: 1,
                                 child: Text('Löschen'),
                               ),
                             ],
                             longPressPosition: longPressPosition,
                             functions: [
+                              () => Get.to(
+                                  () => CreateTaskPage(taskToEdit: task)),
                               () => showConfirmationDialog(
                                     context: context,
                                     title: 'Löschen',

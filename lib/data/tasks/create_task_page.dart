@@ -7,6 +7,8 @@ import 'package:school_app/data/database.dart';
 import 'package:school_app/data/subjects/subject.dart';
 import 'package:school_app/util.dart';
 
+import 'task.dart';
+
 enum _ReminderMode {
   none,
   oneDayBefore,
@@ -62,8 +64,34 @@ extension on _ReminderMode {
   }
 }
 
+_ReminderMode _reminderModeFromOffset(Duration duration) {
+  switch (duration.inDays) {
+    case 0:
+      return _ReminderMode.none;
+    case 1:
+      return _ReminderMode.oneDayBefore;
+    case 2:
+      return _ReminderMode.twoDaysBefore;
+    case 3:
+      return _ReminderMode.threeDaysBefore;
+    case 4:
+      return _ReminderMode.fourDaysBefore;
+    case 14:
+      return _ReminderMode.oneWeekBefore;
+    case 28:
+      return _ReminderMode.twoWeeksBefore;
+    default:
+      return _ReminderMode.custom;
+  }
+}
+
 class CreateTaskPage extends StatefulWidget {
-  const CreateTaskPage({Key? key}) : super(key: key);
+  const CreateTaskPage({
+    Key? key,
+    this.taskToEdit,
+  }) : super(key: key);
+
+  final Task? taskToEdit;
 
   @override
   State<CreateTaskPage> createState() => _CreateTaskPageState();
@@ -74,19 +102,30 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
   var enabled = true.obs;
 
-  String title = "";
-  String description = "";
+  late String title;
+  late String description;
   late DateTime dueDate;
-  Subject? subject;
+  late Subject? subject;
 
-  var reminderMode = _ReminderMode.none;
-  var reminderOffset = Duration.zero;
+  late _ReminderMode reminderMode;
+  late Duration reminderOffset;
 
   @override
   void initState() {
     super.initState();
+
+    title = widget.taskToEdit?.title ?? "";
+    description = widget.taskToEdit?.title ?? "";
     var now = DateTime.now();
-    dueDate = DateTime(now.year, now.month, now.day);
+    dueDate =
+        widget.taskToEdit?.dueDate ?? DateTime(now.year, now.month, now.day);
+    subject = widget.taskToEdit?.subject; // or null if there is no taskToEdit
+    reminderOffset = widget.taskToEdit != null
+        ? widget.taskToEdit!.dueDate.difference(widget.taskToEdit!.reminder)
+        : Duration.zero;
+    reminderMode = widget.taskToEdit != null
+        ? _reminderModeFromOffset(reminderOffset)
+        : _ReminderMode.none;
   }
 
   void createSubject() async {
@@ -107,13 +146,24 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       return;
     }
 
-    await Database.createTask(
-      title,
-      description,
-      dueDate,
-      dueDate.subtract(reminderOffset),
-      subject!.id,
-    );
+    if (widget.taskToEdit == null) {
+      await Database.createTask(
+        title,
+        description,
+        dueDate,
+        dueDate.subtract(reminderOffset),
+        subject!.id,
+      );
+    } else {
+      await Database.editTask(
+        widget.taskToEdit!.id,
+        title,
+        description,
+        dueDate,
+        dueDate.subtract(reminderOffset),
+        subject!.id,
+      );
+    }
 
     enabled.call(true);
     Get.back();
@@ -123,7 +173,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Aufgabe erstellen'),
+        title: Text(widget.taskToEdit == null
+            ? 'Aufgabe erstellen'
+            : 'Aufgabe bearbeiten'),
       ),
       body: Center(
         child: SizedBox(
@@ -136,6 +188,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   TextFormField(
+                    initialValue: widget.taskToEdit?.title,
                     enabled: enabled.value,
                     decoration: buildInputDecoration('Titel'),
                     onChanged: (s) => title = s,
@@ -167,6 +220,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   const SizedBox(height: 40),
                   TextFormField(
+                    initialValue: widget.taskToEdit?.description,
                     enabled: enabled.value,
                     onChanged: (s) => description = s,
                     decoration: const InputDecoration(
@@ -183,7 +237,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                     minWidth: double.infinity,
                     color: Theme.of(context).colorScheme.primary,
                     child: enabled.value
-                        ? const Text('ERSTELLEN')
+                        ? Text(widget.taskToEdit == null
+                            ? 'ERSTELLEN'
+                            : 'SPEICHERN')
                         : const CircularProgressIndicator(),
                   ),
                 ],
