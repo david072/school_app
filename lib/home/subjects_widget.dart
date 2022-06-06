@@ -7,6 +7,7 @@ import 'package:school_app/data/subjects/create_subject_page.dart';
 import 'package:school_app/util.dart';
 
 import '../data/subjects/subject.dart';
+import 'footer.dart';
 
 class SubjectsWidget extends StatefulWidget {
   const SubjectsWidget({
@@ -73,8 +74,9 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
                     ],
                   ),
           ),
-          _Footer(
-            subjectCount: subjects.length,
+          Footer(
+            displayName: 'Fächer',
+            count: subjects.length,
             onAdd: () => Get.to(() => const CreateSubjectPage()),
           ),
         ],
@@ -142,48 +144,6 @@ class _SubjectState extends State<_Subject> {
             Text('0 Aufgaben', style: Theme.of(context).textTheme.caption),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _Footer extends StatelessWidget {
-  const _Footer({
-    Key? key,
-    required this.subjectCount,
-    required this.onAdd,
-  }) : super(key: key);
-
-  final int subjectCount;
-  final void Function() onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).cardColor,
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Text(
-            'Fächer: $subjectCount',
-            style: Theme.of(context).textTheme.caption,
-          ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Material(
-                color: Colors.transparent,
-                child: IconButton(
-                  onPressed: onAdd,
-                  icon: const Icon(Icons.add),
-                  constraints: const BoxConstraints(),
-                  padding: const EdgeInsets.all(5),
-                ),
-              ),
-            ),
-          )
-        ],
       ),
     );
   }
