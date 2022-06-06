@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 /// Helper for validating user input in login + sign up forms.
 /// (email & password)
@@ -129,3 +130,32 @@ class _LongPressPopupMenuState extends State<LongPressPopupMenu> {
     );
   }
 }
+
+void showConfirmationDialog({
+  required BuildContext context,
+  required String title,
+  required String content,
+  required String confirmText,
+  required String cancelText,
+  required void Function() onConfirm,
+}) =>
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(cancelText),
+          ),
+          TextButton(
+            onPressed: () {
+              onConfirm();
+              Get.back();
+            },
+            child: Text(confirmText),
+          ),
+        ],
+      ),
+    );
