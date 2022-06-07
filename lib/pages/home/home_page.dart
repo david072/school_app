@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/subjects/subjects_widget.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
+import 'package:school_app/util.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -18,10 +19,11 @@ class _HomePageState extends State<HomePage> {
     var isHorizontal =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
-    List<Widget> children = const [
-      SoonTasksWidget(),
-      VerticalDivider(width: 0),
-      SubjectsWidget(),
+    List<Widget> children = [
+      TaskListWidget(
+          maxDateTime: DateTime.now().date.add(const Duration(days: 7))),
+      const VerticalDivider(width: 0),
+      const SubjectsWidget(),
     ];
 
     return Scaffold(

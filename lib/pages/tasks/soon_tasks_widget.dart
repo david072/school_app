@@ -3,22 +3,28 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
+import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/home/footer.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
 import 'package:school_app/pages/tasks/view_task_page.dart';
 import 'package:school_app/util.dart';
 
-class SoonTasksWidget extends StatefulWidget {
-  const SoonTasksWidget({
+class TaskListWidget extends StatefulWidget {
+  const TaskListWidget({
     Key? key,
+    this.maxDateTime,
+    this.subjectFilter,
   }) : super(key: key);
 
+  final DateTime? maxDateTime;
+  final Subject? subjectFilter;
+
   @override
-  State<SoonTasksWidget> createState() => _SoonTasksWidgetState();
+  State<TaskListWidget> createState() => _TaskListWidgetState();
 }
 
-class _SoonTasksWidgetState extends State<SoonTasksWidget> {
+class _TaskListWidgetState extends State<TaskListWidget> {
   List<Task> tasks = [];
   late StreamSubscription subscription;
 
@@ -28,8 +34,13 @@ class _SoonTasksWidgetState extends State<SoonTasksWidget> {
   void initState() {
     super.initState();
     subscription = Database.queryTasks(
-      maxDueDate: DateTime.now().date.add(const Duration(days: 7)),
-    ).listen((data) => setState(() => tasks = data));
+      maxDueDate: widget.maxDateTime,
+    ).listen((data) => setState(() {
+          tasks = data.where((task) {
+            if (widget.subjectFilter == null) return true;
+            return task.subject.id == widget.subjectFilter!.id;
+          }).toList();
+        }));
   }
 
   @override
@@ -101,7 +112,8 @@ class _SoonTasksWidgetState extends State<SoonTasksWidget> {
             reverse: true,
             displayName: 'Aufgaben',
             count: tasks.length,
-            onAdd: () => Get.to(() => const CreateTaskPage()),
+            onAdd: () => Get.to(
+                () => CreateTaskPage(initialSubject: widget.subjectFilter)),
           ),
         ],
       ),

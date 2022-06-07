@@ -89,6 +89,7 @@ class LongPressPopupMenu extends StatefulWidget {
     required this.child,
     required this.items,
     required this.functions,
+    this.onTap,
   }) : super(key: key);
 
   final bool? enabled;
@@ -101,6 +102,8 @@ class LongPressPopupMenu extends StatefulWidget {
   /// index of the function in this array.
   final List<void Function()> functions;
   final List<PopupMenuEntry<int>> items;
+
+  final void Function()? onTap;
 
   @override
   State<LongPressPopupMenu> createState() => _LongPressPopupMenuState();
@@ -123,6 +126,7 @@ class _LongPressPopupMenuState extends State<LongPressPopupMenu> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      onTap: widget.onTap,
       onTapDown: isEnabled()
           ? (details) => longPressPosition = details.globalPosition
           : null,

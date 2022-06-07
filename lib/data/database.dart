@@ -21,7 +21,14 @@ class Database {
     }
   }
 
-  static Future<Subject> querySubject(String id) async {
+  static Stream<Subject> querySubject(String id) async* {
+    var doc = _collection(_subjectsCollection).doc(id).snapshots();
+    await for (final subject in doc) {
+      yield Subject.fromDocument(subject);
+    }
+  }
+
+  static Future<Subject> querySubjectOnce(String id) async {
     var doc = await _collection(_subjectsCollection).doc(id).get();
     return Subject.fromDocument(doc);
   }

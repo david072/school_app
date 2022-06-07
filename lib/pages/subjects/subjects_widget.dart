@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
+import 'package:school_app/pages/subjects/subject_page.dart';
 import 'package:school_app/util.dart';
 
 import '../../data/subject.dart';
@@ -103,6 +104,7 @@ class _SubjectState extends State<_Subject> {
   @override
   Widget build(BuildContext context) {
     return LongPressPopupMenu(
+      onTap: () => Get.to(() => SubjectPage(subjectId: widget.subject.id)),
       enabled: enabled,
       items: const [
         PopupMenuItem(
@@ -115,17 +117,17 @@ class _SubjectState extends State<_Subject> {
         ),
       ],
       functions: [
-        () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
-        () => showConfirmationDialog(
-              context: context,
-              title: 'Löschen',
-              content:
-                  'Möchtest du das Fach \'${widget.subject.name}\' wirklich löschen?\n'
-                  'Dadurch werden auch alle Aufgaben mit diesem Fach gelöscht!',
-              cancelText: 'Abbrechen',
-              confirmText: 'Löschen',
-              onConfirm: () => Database.deleteSubject(widget.subject.id),
-            )
+            () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
+            () => showConfirmationDialog(
+          context: context,
+          title: 'Löschen',
+          content:
+          'Möchtest du das Fach \'${widget.subject.name}\' wirklich löschen?\n'
+              'Dadurch werden auch alle Aufgaben mit diesem Fach gelöscht!',
+          cancelText: 'Abbrechen',
+          confirmText: 'Löschen',
+          onConfirm: () => Database.deleteSubject(widget.subject.id),
+        )
       ],
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),

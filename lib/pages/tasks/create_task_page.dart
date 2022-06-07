@@ -12,9 +12,11 @@ class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({
     Key? key,
     this.taskToEdit,
+    this.initialSubject,
   }) : super(key: key);
 
   final Task? taskToEdit;
+  final Subject? initialSubject;
 
   @override
   State<CreateTaskPage> createState() => _CreateTaskPageState();
@@ -40,7 +42,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     title = widget.taskToEdit?.title ?? "";
     description = widget.taskToEdit?.description ?? "";
     dueDate = widget.taskToEdit?.dueDate ?? DateTime.now().date;
-    subject = widget.taskToEdit?.subject; // or null if there is no taskToEdit
+    subject = widget.taskToEdit?.subject ?? widget.initialSubject;
     reminderOffset = widget.taskToEdit != null
         ? widget.taskToEdit!.dueDate.difference(widget.taskToEdit!.reminder)
         : Duration.zero;

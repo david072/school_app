@@ -32,7 +32,7 @@ class Task {
       data['description'],
       DateTime.fromMillisecondsSinceEpoch(data['due_date']),
       DateTime.fromMillisecondsSinceEpoch(data['reminder']),
-      await Database.querySubject(data['subject_id']),
+      await Database.querySubjectOnce(data['subject_id']),
     );
   }
 
