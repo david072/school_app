@@ -64,10 +64,14 @@ class Database {
     await _delete(_subjectsCollection, id);
   }
 
-  static Stream<List<Task>> queryTasks({bool ordered = false}) async* {
+  static Stream<List<Task>> queryTasks({DateTime? maxDueDate}) async* {
     var query = _collection(_tasksCollection)
         .where('user_id', isEqualTo: _requireUser().uid);
-    if (ordered) query = query.orderBy('due_date');
+    if (maxDueDate != null) {
+      query = query.where('due_date',
+          isLessThan: maxDueDate.millisecondsSinceEpoch);
+    }
+    query = query.orderBy('due_date');
 
     var tasks = query.snapshots();
     await for (final docs in tasks) {

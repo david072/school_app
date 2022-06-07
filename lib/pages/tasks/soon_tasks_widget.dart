@@ -27,8 +27,9 @@ class _SoonTasksWidgetState extends State<SoonTasksWidget> {
   @override
   void initState() {
     super.initState();
-    subscription = Database.queryTasks(ordered: true)
-        .listen((data) => setState(() => tasks = data));
+    subscription = Database.queryTasks(
+      maxDueDate: DateTime.now().date.add(const Duration(days: 7)),
+    ).listen((data) => setState(() => tasks = data));
   }
 
   @override

@@ -162,3 +162,7 @@ void showConfirmationDialog({
     );
 
 String formatDate(DateTime date) => DateFormat('dd.MM.yyyy').format(date);
+
+extension Date on DateTime {
+  DateTime get date => DateTime(year, month, day);
+}

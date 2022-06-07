@@ -39,9 +39,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
     title = widget.taskToEdit?.title ?? "";
     description = widget.taskToEdit?.description ?? "";
-    var now = DateTime.now();
-    dueDate =
-        widget.taskToEdit?.dueDate ?? DateTime(now.year, now.month, now.day);
+    dueDate = widget.taskToEdit?.dueDate ?? DateTime.now().date;
     subject = widget.taskToEdit?.subject; // or null if there is no taskToEdit
     reminderOffset = widget.taskToEdit != null
         ? widget.taskToEdit!.dueDate.difference(widget.taskToEdit!.reminder)
@@ -257,12 +255,11 @@ class _ReminderPicker extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: ReminderMode.values.map((val) {
                         if (val == ReminderMode.custom) {
-                          var now = DateTime.now();
                           return _DatePicker(
                             prefix: 'Benutzerdefiniert',
                             highlightPrefix: mode == val,
                             date: dueDate.subtract(reminderOffset),
-                            firstDate: DateTime(now.year - 5),
+                            firstDate: DateTime(DateTime.now().year - 5),
                             lastDate: dueDate,
                             onChanged: (date) {
                               var offset = dueDate.difference(date);
