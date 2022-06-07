@@ -2,9 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:school_app/background_worker.dart';
 import 'package:school_app/firebase_options.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/home/home_page.dart';
+import 'package:workmanager/workmanager.dart';
+
+void callbackDispatcher() {
+  Workmanager().executeTask((taskName, inputData) => BackgroundWorker.run());
+}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,8 +36,12 @@ class _SetupState extends State<Setup> {
   }
 
   Future<void> setup() async {
+    await Workmanager().initialize(callbackDispatcher);
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
+
+    await BackgroundWorker.requestNotificationPermissions();
+    BackgroundWorker.schedule();
 
     var user = FirebaseAuth.instance.currentUser;
     if (user == null) {

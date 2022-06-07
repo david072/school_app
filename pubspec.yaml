@@ -20,11 +20,16 @@ dependencies:
 
   get: ^4.6.5
 
+  # Background notification worker
+  workmanager: ^0.5.0
+  flutter_local_notifications: ^9.6.0
+
   # Util
   email_validator: ^2.0.1
   flutter_colorpicker: ^1.0.3
   lit_relative_date_time: ^1.2.0
   intl: ^0.17.0
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
   flutter_test:
