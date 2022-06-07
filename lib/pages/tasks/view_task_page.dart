@@ -28,6 +28,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
 
   Task? task;
   String reminderString = "";
+  bool completed = false;
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
       task = t;
       titleController.text = task!.title;
       descriptionController.text = task!.description;
+      completed = task!.completed;
 
       var reminderMode = reminderModeFromOffset(task!.reminderOffset());
       if (reminderMode == ReminderMode.custom) {
@@ -80,6 +82,14 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                   icon: const Icon(Icons.delete),
                 ),
               ],
+            ),
+            floatingActionButton: FloatingActionButton.extended(
+              onPressed: () {
+                setState(() => completed = !completed);
+                Database.updateTaskStatus(task!.id, completed);
+              },
+              label: Text(!completed ? 'Abschließen' : 'Wieder öffnen'),
+              icon: Icon(!completed ? Icons.done : Icons.close),
             ),
             body: Center(
               child: SizedBox(

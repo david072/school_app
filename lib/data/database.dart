@@ -71,19 +71,39 @@ class Database {
     await _delete(_subjectsCollection, id);
   }
 
-  static Stream<List<Task>> queryTasks({DateTime? maxDueDate}) async* {
+  static Query<Map<String, dynamic>> _tasksQuery({DateTime? maxDueDate}) {
     var query = _collection(_tasksCollection)
         .where('user_id', isEqualTo: _requireUser().uid);
     if (maxDueDate != null) {
       query = query.where('due_date',
           isLessThan: maxDueDate.millisecondsSinceEpoch);
     }
-    query = query.orderBy('due_date');
+    return query.orderBy('due_date');
+  }
 
-    var tasks = query.snapshots();
-    await for (final docs in tasks) {
-      yield await Future.wait(docs.docs.map((doc) => Task.fromDocument(doc)));
+  static Stream<List<Task>> queryTasks({DateTime? maxDueDate}) async* {
+    var query = _tasksQuery(maxDueDate: maxDueDate).snapshots();
+
+    await for (final docs in query) {
+      var tasks = await Future.wait(docs.docs.map(Task.fromDocument));
+
+      List<Task> result = [];
+      // Sort tasks, so that completed tasks are always at the bottom
+      for (int i = tasks.length - 1; i >= 0; i--) {
+        final task = tasks[i];
+        if (task.completed) {
+          result.add(task);
+        } else {
+          result.insert(0, task);
+        }
+      }
+      yield result;
     }
+  }
+
+  static Future<List<Task>> queryTasksOnce({DateTime? maxDueDate}) async {
+    var tasks = await _tasksQuery(maxDueDate: maxDueDate).get();
+    return await Future.wait(tasks.docs.map(Task.fromDocument));
   }
 
   static Stream<Task> queryTask(String taskId) async* {
@@ -101,6 +121,7 @@ class Database {
       'due_date': dueDate.millisecondsSinceEpoch,
       'reminder': reminder.millisecondsSinceEpoch,
       'subject_id': subjectId,
+      'completed': false,
       'user_id': _requireUser().uid,
     });
   }
@@ -116,6 +137,11 @@ class Database {
       'subject_id': subjectId,
       'user_id': _requireUser().uid,
     });
+  }
+
+  static Future<void> updateTaskStatus(String id, bool completed) async {
+    var doc = _collection(_tasksCollection).doc(id);
+    await doc.update({'completed': completed});
   }
 
   static Future<void> deleteTask(String id) async =>

@@ -14,6 +14,7 @@ class Task {
   final DateTime dueDate;
   final DateTime reminder;
   final Subject subject;
+  final bool completed;
 
   const Task(
     this.id,
@@ -22,6 +23,7 @@ class Task {
     this.dueDate,
     this.reminder,
     this.subject,
+    this.completed,
   );
 
   static Future<Task> fromDocument(DocumentSnapshot<Map> doc) async {
@@ -33,6 +35,7 @@ class Task {
       DateTime.fromMillisecondsSinceEpoch(data['due_date']),
       DateTime.fromMillisecondsSinceEpoch(data['reminder']),
       await Database.querySubjectOnce(data['subject_id']),
+      data['completed'],
     );
   }
 
