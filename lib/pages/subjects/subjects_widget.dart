@@ -117,17 +117,17 @@ class _SubjectState extends State<_Subject> {
         ),
       ],
       functions: [
-            () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
-            () => showConfirmationDialog(
-          context: context,
-          title: 'Löschen',
-          content:
-          'Möchtest du das Fach \'${widget.subject.name}\' wirklich löschen?\n'
-              'Dadurch werden auch alle Aufgaben mit diesem Fach gelöscht!',
-          cancelText: 'Abbrechen',
-          confirmText: 'Löschen',
-          onConfirm: () => Database.deleteSubject(widget.subject.id),
-        )
+        () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
+        () => showConfirmationDialog(
+              context: context,
+              title: 'Löschen',
+              content:
+                  'Möchtest du das Fach \'${widget.subject.name}\' wirklich löschen?\n'
+                  'Dadurch werden auch alle Aufgaben mit diesem Fach gelöscht!',
+              cancelText: 'Abbrechen',
+              confirmText: 'Löschen',
+              onConfirm: () => Database.deleteSubject(widget.subject.id),
+            )
       ],
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -144,8 +144,13 @@ class _SubjectState extends State<_Subject> {
               size: 40,
             ),
             const SizedBox(height: 20),
-            Text(widget.subject.name,
-                style: Theme.of(context).textTheme.headline6),
+            Text(
+              widget.subject.name,
+              style: Theme.of(context).textTheme.headline6,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
             const SizedBox(height: 10),
             // TODO: Task count
             // Text('$taskCount Aufgabe${taskCount == 1 ? '' : 'n'}',
