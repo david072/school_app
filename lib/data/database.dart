@@ -75,6 +75,13 @@ class Database {
     }
   }
 
+  static Stream<Task> queryTask(String taskId) async* {
+    var query = _collection(_tasksCollection).doc(taskId).snapshots();
+    await for (final task in query) {
+      yield await Task.fromDocument(task);
+    }
+  }
+
   static Future<void> createTask(String title, String description,
       DateTime dueDate, DateTime reminder, String subjectId) async {
     await _collection(_tasksCollection).add({

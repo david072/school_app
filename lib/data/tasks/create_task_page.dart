@@ -9,81 +9,6 @@ import 'package:school_app/util.dart';
 
 import 'task.dart';
 
-enum _ReminderMode {
-  none,
-  oneDayBefore,
-  twoDaysBefore,
-  threeDaysBefore,
-  fourDaysBefore,
-  oneWeekBefore,
-  twoWeeksBefore,
-  custom,
-}
-
-extension on _ReminderMode {
-  String get string {
-    switch (this) {
-      case _ReminderMode.none:
-        return 'Keine';
-      case _ReminderMode.oneDayBefore:
-        return 'Einen Tag vorher';
-      case _ReminderMode.twoDaysBefore:
-        return 'Zwei Tage vorher';
-      case _ReminderMode.threeDaysBefore:
-        return 'Drei Tage vorher';
-      case _ReminderMode.fourDaysBefore:
-        return 'Vier Tage vorher';
-      case _ReminderMode.oneWeekBefore:
-        return 'Eine Woche vorher';
-      case _ReminderMode.twoWeeksBefore:
-        return 'Zwei Wochen vorher';
-      case _ReminderMode.custom:
-        return '';
-    }
-  }
-
-  Duration get offset {
-    switch (this) {
-      case _ReminderMode.none:
-        return Duration.zero;
-      case _ReminderMode.oneDayBefore:
-        return const Duration(days: 1);
-      case _ReminderMode.twoDaysBefore:
-        return const Duration(days: 2);
-      case _ReminderMode.threeDaysBefore:
-        return const Duration(days: 3);
-      case _ReminderMode.fourDaysBefore:
-        return const Duration(days: 4);
-      case _ReminderMode.oneWeekBefore:
-        return const Duration(days: 7);
-      case _ReminderMode.twoWeeksBefore:
-        return const Duration(days: 14);
-      case _ReminderMode.custom:
-        return Duration.zero; // Handled elsewhere
-    }
-  }
-}
-
-_ReminderMode _reminderModeFromOffset(Duration duration) {
-  switch (duration.inDays) {
-    case 0:
-      return _ReminderMode.none;
-    case 1:
-      return _ReminderMode.oneDayBefore;
-    case 2:
-      return _ReminderMode.twoDaysBefore;
-    case 3:
-      return _ReminderMode.threeDaysBefore;
-    case 4:
-      return _ReminderMode.fourDaysBefore;
-    case 14:
-      return _ReminderMode.oneWeekBefore;
-    case 28:
-      return _ReminderMode.twoWeeksBefore;
-    default:
-      return _ReminderMode.custom;
-  }
-}
 
 class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({
@@ -107,7 +32,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   late DateTime dueDate;
   late Subject? subject;
 
-  late _ReminderMode reminderMode;
+  late ReminderMode reminderMode;
   late Duration reminderOffset;
 
   @override
@@ -124,8 +49,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         ? widget.taskToEdit!.dueDate.difference(widget.taskToEdit!.reminder)
         : Duration.zero;
     reminderMode = widget.taskToEdit != null
-        ? _reminderModeFromOffset(reminderOffset)
-        : _ReminderMode.none;
+        ? reminderModeFromOffset(reminderOffset)
+        : ReminderMode.none;
   }
 
   void createSubject() async {
@@ -315,10 +240,10 @@ class _ReminderPicker extends StatelessWidget {
   }) : super(key: key);
 
   final bool enabled;
-  final _ReminderMode mode;
+  final ReminderMode mode;
   final Duration reminderOffset;
   final DateTime dueDate;
-  final void Function(Duration, _ReminderMode) onChanged;
+  final void Function(Duration, ReminderMode) onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -333,8 +258,8 @@ class _ReminderPicker extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
-                      children: _ReminderMode.values.map((val) {
-                        if (val == _ReminderMode.custom) {
+                      children: ReminderMode.values.map((val) {
+                        if (val == ReminderMode.custom) {
                           var now = DateTime.now();
                           return _DatePicker(
                             prefix: 'Benutzerdefiniert',
@@ -345,7 +270,7 @@ class _ReminderPicker extends StatelessWidget {
                             onChanged: (date) {
                               var offset = dueDate.difference(date);
                               Get.back();
-                              onChanged(offset, _ReminderMode.custom);
+                              onChanged(offset, ReminderMode.custom);
                             },
                           );
                         }
@@ -382,7 +307,7 @@ class _ReminderPicker extends StatelessWidget {
           : null,
       left: const Text('Erinnerung:'),
       right: Text(
-        mode != _ReminderMode.custom
+        mode != ReminderMode.custom
             ? mode.string
             : DateFormat('dd.MM.yyyy').format(dueDate.subtract(reminderOffset)),
         style: Theme.of(context).textTheme.bodyLarge,
