@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
 import 'package:school_app/data/tasks/create_task_page.dart';
+import 'package:school_app/data/tasks/view_task_page.dart';
 import 'package:school_app/util.dart';
 
 import '../data/tasks/task.dart';
@@ -88,6 +89,7 @@ class _SoonTasksWidgetState extends State<SoonTasksWidget> {
                                   ),
                             ],
                           ),
+                          () => Get.to(() => ViewTaskPage(taskId: task.id)),
                         ),
                       )
                       .toList(),
@@ -107,7 +109,8 @@ class _SoonTasksWidgetState extends State<SoonTasksWidget> {
   }
 }
 
-DataRow _taskRow(BuildContext context, Task task, void Function() onLongPress) {
+DataRow _taskRow(BuildContext context, Task task, void Function() onLongPress,
+    void Function() onSelectChanged) {
   return DataRow(
     cells: [
       DataCell(Text(task.formatDueDate(),
@@ -132,5 +135,6 @@ DataRow _taskRow(BuildContext context, Task task, void Function() onLongPress) {
       )),
     ],
     onLongPress: onLongPress,
+    onSelectChanged: (_) => onSelectChanged(),
   );
 }

@@ -40,7 +40,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     super.initState();
 
     title = widget.taskToEdit?.title ?? "";
-    description = widget.taskToEdit?.title ?? "";
+    description = widget.taskToEdit?.description ?? "";
     var now = DateTime.now();
     dueDate =
         widget.taskToEdit?.dueDate ?? DateTime(now.year, now.month, now.day);

@@ -41,6 +41,8 @@ class Task {
         dateTime: DateTime(now.year, now.month, now.day), other: dueDate);
     return const RelativeDateFormat(Locale('de')).format(rdt);
   }
+
+  Duration reminderOffset() => dueDate.difference(reminder);
 }
 
 enum ReminderMode {
