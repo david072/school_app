@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lit_relative_date_time/controller/relative_date_format.dart';
 import 'package:lit_relative_date_time/model/relative_date_time.dart';
 import 'package:school_app/data/database.dart';
-import 'package:school_app/data/subjects/subject.dart';
+import 'package:school_app/data/subject.dart';
 
 class Task {
   final String id;
@@ -35,7 +35,7 @@ class Task {
     );
   }
 
-  String formatDueDate() {
+  String formatRelativeDueDate() {
     var now = DateTime.now();
     var rdt = RelativeDateTime(
         dateTime: DateTime(now.year, now.month, now.day), other: dueDate);

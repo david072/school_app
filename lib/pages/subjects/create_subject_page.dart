@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
 import 'package:school_app/util.dart';
 
-import 'subject.dart';
+import '../../data/subject.dart';
 
 class CreateSubjectPage extends StatefulWidget {
   const CreateSubjectPage({
@@ -22,7 +22,7 @@ class CreateSubjectPage extends StatefulWidget {
 class _CreateSubjectPageState extends State<CreateSubjectPage> {
   final GlobalKey formKey = GlobalKey<FormState>();
 
-  var enabled = true.obs;
+  var enabled = true;
 
   late String name;
   late String abbreviation;
@@ -37,10 +37,10 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
   }
 
   void createSubject() async {
-    enabled.call(false);
+    setState(() => enabled = false);
 
     if (!validateForm(formKey)) {
-      enabled.call(true);
+      setState(() => enabled = true);
       return;
     }
 
@@ -51,7 +51,6 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
           widget.subjectToEdit!.id, name, abbreviation, color);
     }
 
-    enabled.call(true);
     Get.back();
   }
 
@@ -79,7 +78,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                       flex: 2,
                       child: TextFormField(
                         initialValue: widget.subjectToEdit?.name,
-                        enabled: enabled.value,
+                        enabled: enabled,
                         decoration: buildInputDecoration('Name'),
                         onChanged: (s) => name = s,
                         validator: InputValidator.validateNotEmpty,
@@ -90,7 +89,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                       flex: 1,
                       child: TextFormField(
                         initialValue: widget.subjectToEdit?.abbreviation,
-                        enabled: enabled.value,
+                        enabled: enabled,
                         decoration: buildInputDecoration('Abkürzung'),
                         onChanged: (s) => abbreviation = s,
                         validator: InputValidator.validateNotEmpty,
@@ -131,10 +130,10 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                 ),
                 const SizedBox(height: 80),
                 MaterialButton(
-                  onPressed: enabled.value ? createSubject : null,
+                  onPressed: enabled ? createSubject : null,
                   minWidth: double.infinity,
                   color: Theme.of(context).colorScheme.primary,
-                  child: enabled.value
+                  child: enabled
                       ? Text(widget.subjectToEdit == null
                           ? 'ERSTELLEN'
                           : 'SPEICHERN')

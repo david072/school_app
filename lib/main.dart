@@ -3,9 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/firebase_options.dart';
-
-import 'auth/login_page.dart';
-import 'home/home_page.dart';
+import 'package:school_app/pages/auth/login_page.dart';
+import 'package:school_app/pages/home/home_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

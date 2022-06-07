@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:school_app/data/tasks/task.dart';
+import 'package:school_app/data/task.dart';
 
-import './subjects/subject.dart';
+import 'subject.dart';
 
 class Database {
   static const _subjectsCollection = 'subjects';

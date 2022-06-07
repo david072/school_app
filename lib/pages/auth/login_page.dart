@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:school_app/auth/auth.dart';
-import 'package:school_app/auth/signup_page.dart';
-
-import '../home/home_page.dart';
-import '../util.dart';
+import 'package:school_app/data/auth.dart';
+import 'package:school_app/pages/auth/signup_page.dart';
+import 'package:school_app/pages/home/home_page.dart';
+import 'package:school_app/util.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);

@@ -2,12 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-import 'package:school_app/data/tasks/create_task_page.dart';
-
-import '../../util.dart';
-import '../database.dart';
-import 'task.dart';
+import 'package:school_app/data/database.dart';
+import 'package:school_app/data/task.dart';
+import 'package:school_app/pages/tasks/clickable_row.dart';
+import 'package:school_app/pages/tasks/create_task_page.dart';
+import 'package:school_app/util.dart';
 
 class ViewTaskPage extends StatefulWidget {
   const ViewTaskPage({
@@ -40,7 +39,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
 
       var reminderMode = reminderModeFromOffset(task!.reminderOffset());
       if (reminderMode == ReminderMode.custom) {
-        reminderString = DateFormat('dd.MM.yyyy').format(task!.reminder);
+        reminderString = formatDate(task!.reminder);
       } else {
         reminderString = reminderMode.string;
       }
@@ -97,15 +96,15 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                         validator: InputValidator.validateNotEmpty,
                       ),
                       const SizedBox(height: 40),
-                      _Row(
+                      ClickableRow(
                         left: const Text('Fälligkeitsdatum:'),
                         right: Text(
-                          '${DateFormat('dd.MM.yyyy').format(task!.dueDate)} (${task!.formatDueDate()})',
+                          '${formatDate(task!.dueDate)} (${task!.formatRelativeDueDate()})',
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ),
                       const SizedBox(height: 20),
-                      _Row(
+                      ClickableRow(
                         left: const Text('Erinnerung:'),
                         right: Text(
                           reminderString,
@@ -113,7 +112,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      _Row(
+                      ClickableRow(
                         left: const Text('Fach:'),
                         right: Text(
                           task!.subject.name,
@@ -143,34 +142,5 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
               child: CircularProgressIndicator(),
             ),
           );
-  }
-}
-
-class _Row extends StatelessWidget {
-  const _Row({
-    Key? key,
-    required this.left,
-    required this.right,
-  }) : super(key: key);
-
-  final Widget left;
-  final Widget right;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 8),
-      child: Row(
-        children: [
-          left,
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: right,
-            ),
-          )
-        ],
-      ),
-    );
   }
 }

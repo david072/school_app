@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 /// Helper for validating user input in login + sign up forms.
 /// (email & password)
@@ -159,3 +160,5 @@ void showConfirmationDialog({
         ],
       ),
     );
+
+String formatDate(DateTime date) => DateFormat('dd.MM.yyyy').format(date);

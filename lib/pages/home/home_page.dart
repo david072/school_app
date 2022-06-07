@@ -1,10 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:school_app/home/soon_tasks_widget.dart';
-import 'package:school_app/home/subjects_widget.dart';
-
-import '../auth/login_page.dart';
+import 'package:school_app/pages/auth/login_page.dart';
+import 'package:school_app/pages/subjects/subjects_widget.dart';
+import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);

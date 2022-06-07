@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
-import 'package:school_app/data/subjects/create_subject_page.dart';
+import 'package:school_app/pages/subjects/create_subject_page.dart';
 import 'package:school_app/util.dart';
 
-import '../data/subjects/subject.dart';
-import 'footer.dart';
+import '../../data/subject.dart';
+import '../home/footer.dart';
 
 class SubjectsWidget extends StatefulWidget {
   const SubjectsWidget({

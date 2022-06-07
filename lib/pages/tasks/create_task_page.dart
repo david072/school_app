@@ -2,13 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:school_app/data/database.dart';
-import 'package:school_app/data/subjects/subject.dart';
+import 'package:school_app/data/subject.dart';
+import 'package:school_app/data/task.dart';
+import 'package:school_app/pages/tasks/clickable_row.dart';
 import 'package:school_app/util.dart';
-
-import 'task.dart';
-
 
 class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({
@@ -25,7 +23,7 @@ class CreateTaskPage extends StatefulWidget {
 class _CreateTaskPageState extends State<CreateTaskPage> {
   final GlobalKey formKey = GlobalKey<FormState>();
 
-  var enabled = true.obs;
+  var enabled = true;
 
   late String title;
   late String description;
@@ -54,7 +52,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   }
 
   void createSubject() async {
-    enabled.call(false);
+    setState(() => enabled = false);
 
     bool isValid = true;
     if (subject == null) {
@@ -67,7 +65,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     }
 
     if (!isValid) {
-      enabled.call(true);
+      setState(() => enabled = true);
       return;
     }
 
@@ -90,7 +88,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       );
     }
 
-    enabled.call(true);
     Get.back();
   }
 
@@ -114,21 +111,21 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 children: [
                   TextFormField(
                     initialValue: widget.taskToEdit?.title,
-                    enabled: enabled.value,
+                    enabled: enabled,
                     decoration: buildInputDecoration('Titel'),
                     onChanged: (s) => title = s,
                     validator: InputValidator.validateNotEmpty,
                   ),
                   const SizedBox(height: 40),
                   _DatePicker(
-                    enabled: enabled.value,
+                    enabled: enabled,
                     prefix: 'Fälligkeitsdatum',
                     date: dueDate,
                     onChanged: (date) => setState(() => dueDate = date),
                   ),
                   const SizedBox(height: 20),
                   _ReminderPicker(
-                    enabled: enabled.value,
+                    enabled: enabled,
                     mode: reminderMode,
                     reminderOffset: reminderOffset,
                     dueDate: dueDate,
@@ -139,14 +136,14 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   const SizedBox(height: 20),
                   _SubjectPicker(
-                    enabled: enabled.value,
+                    enabled: enabled,
                     onChanged: (s) => setState(() => subject = s),
                     selectedSubjectId: subject?.id,
                   ),
                   const SizedBox(height: 40),
                   TextFormField(
                     initialValue: widget.taskToEdit?.description,
-                    enabled: enabled.value,
+                    enabled: enabled,
                     onChanged: (s) => description = s,
                     decoration: const InputDecoration(
                       alignLabelWithHint: true,
@@ -158,10 +155,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   const SizedBox(height: 80),
                   MaterialButton(
-                    onPressed: enabled.value ? createSubject : null,
+                    onPressed: enabled ? createSubject : null,
                     minWidth: double.infinity,
                     color: Theme.of(context).colorScheme.primary,
-                    child: enabled.value
+                    child: enabled
                         ? Text(widget.taskToEdit == null
                             ? 'ERSTELLEN'
                             : 'SPEICHERN')
@@ -203,7 +200,7 @@ class _DatePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ClickableRow(
+    return ClickableRow(
       onTap: enabled
           ? () async {
               final picked = await showDatePicker(
@@ -222,7 +219,7 @@ class _DatePicker extends StatelessWidget {
             : Theme.of(context).textTheme.bodyText1,
       ),
       right: Text(
-        DateFormat('dd.MM.yyyy').format(date),
+        formatDate(date),
         style: Theme.of(context).textTheme.bodyLarge,
       ),
     );
@@ -247,7 +244,7 @@ class _ReminderPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ClickableRow(
+    return ClickableRow(
       onTap: enabled
           ? () => showDialog(
                 context: context,
@@ -309,7 +306,7 @@ class _ReminderPicker extends StatelessWidget {
       right: Text(
         mode != ReminderMode.custom
             ? mode.string
-            : DateFormat('dd.MM.yyyy').format(dueDate.subtract(reminderOffset)),
+            : formatDate(dueDate.subtract(reminderOffset)),
         style: Theme.of(context).textTheme.bodyLarge,
       ),
     );
@@ -367,7 +364,7 @@ class _SubjectPickerState extends State<_SubjectPicker> {
               )
             ],
           )
-        : _ClickableRow(
+        : ClickableRow(
             onTap: widget.enabled
                 ? () => showDialog(
                       context: context,
@@ -380,42 +377,10 @@ class _SubjectPickerState extends State<_SubjectPicker> {
                             mainAxisSize: MainAxisSize.min,
                             children: subjects!
                                 .map(
-                                  (el) => InkWell(
-                                    onTap: () {
-                                      Get.back();
-                                      widget.onChanged(el);
-                                    },
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                top: 8, bottom: 8),
-                                            child: Text(el.name,
-                                                style: widget.selectedSubjectId !=
-                                                            null &&
-                                                        el.id ==
-                                                            widget
-                                                                .selectedSubjectId
-                                                    ? Theme.of(context)
-                                                        .textTheme
-                                                        .bodyText1
-                                                    : Theme.of(context)
-                                                        .textTheme
-                                                        .bodyText2),
-                                          ),
-                                        ),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: el.color,
-                                            borderRadius:
-                                                BorderRadius.circular(5),
-                                          ),
-                                          height: 25,
-                                          width: 25,
-                                        )
-                                      ],
-                                    ),
+                                  (el) => _AlertDialogSubject(
+                                    subject: el,
+                                    selectedSubjectId: widget.selectedSubjectId,
+                                    onChanged: widget.onChanged,
                                   ),
                                 )
                                 .toList(),
@@ -442,35 +407,48 @@ class _SubjectPickerState extends State<_SubjectPicker> {
   }
 }
 
-class _ClickableRow extends StatelessWidget {
-  const _ClickableRow({
+class _AlertDialogSubject extends StatelessWidget {
+  const _AlertDialogSubject({
     Key? key,
-    required this.left,
-    required this.right,
-    required this.onTap,
+    required this.subject,
+    required this.selectedSubjectId,
+    required this.onChanged,
   }) : super(key: key);
 
-  final Widget left;
-  final Widget right;
-  final void Function()? onTap;
+  final Subject subject;
+  final String? selectedSubjectId;
+  final void Function(Subject) onChanged;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Row(
-          children: [
-            left,
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: right,
+      onTap: () {
+        Get.back();
+        onChanged(subject);
+      },
+      child: Row(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 8),
+              child: Text(
+                subject.name,
+                style:
+                    selectedSubjectId != null && subject.id == selectedSubjectId
+                        ? Theme.of(context).textTheme.bodyText1
+                        : Theme.of(context).textTheme.bodyText2,
               ),
-            )
-          ],
-        ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: subject.color,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            height: 25,
+            width: 25,
+          )
+        ],
       ),
     );
   }

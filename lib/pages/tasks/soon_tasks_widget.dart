@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
-import 'package:school_app/data/tasks/create_task_page.dart';
-import 'package:school_app/data/tasks/view_task_page.dart';
+import 'package:school_app/data/task.dart';
+import 'package:school_app/pages/home/footer.dart';
+import 'package:school_app/pages/tasks/create_task_page.dart';
+import 'package:school_app/pages/tasks/view_task_page.dart';
 import 'package:school_app/util.dart';
-
-import '../data/tasks/task.dart';
-import 'footer.dart';
 
 class SoonTasksWidget extends StatefulWidget {
   const SoonTasksWidget({
@@ -113,7 +112,7 @@ DataRow _taskRow(BuildContext context, Task task, void Function() onLongPress,
     void Function() onSelectChanged) {
   return DataRow(
     cells: [
-      DataCell(Text(task.formatDueDate(),
+      DataCell(Text(task.formatRelativeDueDate(),
           style: Theme.of(context).textTheme.bodyLarge)),
       DataCell(Text(task.title, style: Theme.of(context).textTheme.bodyLarge)),
       DataCell(RichText(
