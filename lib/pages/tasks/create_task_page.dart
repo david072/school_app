@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:school_app/data/database.dart';
+import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/tasks/clickable_row.dart';
@@ -69,7 +69,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     }
 
     if (widget.taskToEdit == null) {
-      Database.createTask(
+      Database.I.createTask(
         title,
         description,
         dueDate,
@@ -77,7 +77,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         subject!.id,
       );
     } else {
-      Database.editTask(
+      Database.I.editTask(
         widget.taskToEdit!.id,
         title,
         description,
@@ -340,7 +340,7 @@ class _SubjectPickerState extends State<_SubjectPicker> {
   // For some reason, stream.first apparently does not work properly on
   // generator functions, so I have to do it myself.
   void getSubjects() {
-    subscription = Database.querySubjects().listen((data) {
+    subscription = Database.I.querySubjects().listen((data) {
       setState(() => subjects = data);
       subscription.cancel();
     });

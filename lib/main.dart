@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:school_app/background_worker.dart';
+import 'package:school_app/data/database/database.dart';
+import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/firebase_options.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/home/home_page.dart';
@@ -43,6 +46,7 @@ class _SetupState extends State<Setup> {
     BackgroundWorker.schedule();
 
     if (!mounted) return;
+    GetIt.I.registerSingleton<Database>(DatabaseFirestore());
 
     var user = FirebaseAuth.instance.currentUser;
     if (user == null) {

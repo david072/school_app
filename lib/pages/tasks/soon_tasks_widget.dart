@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:school_app/data/database.dart';
+import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/home/footer.dart';
@@ -32,14 +32,16 @@ class _TaskListWidgetState extends State<TaskListWidget> {
   @override
   void initState() {
     super.initState();
-    subscription = Database.queryTasks(
-      maxDueDate: widget.maxDateTime,
-    ).listen((data) => setState(() {
-          tasks = data.where((task) {
-            if (widget.subjectFilter == null) return true;
-            return task.subject.id == widget.subjectFilter!.id;
-          }).toList();
-        }));
+    subscription = Database.I
+        .queryTasks(
+          maxDueDate: widget.maxDateTime,
+        )
+        .listen((data) => setState(() {
+              tasks = data.where((task) {
+                if (widget.subjectFilter == null) return true;
+                return task.subject.id == widget.subjectFilter!.id;
+              }).toList();
+            }));
   }
 
   @override
@@ -94,14 +96,14 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                                     ),
                                   ),
                               () => showConfirmationDialog(
-                                    context: context,
+                                context: context,
                                     title: 'Löschen',
                                     content:
                                         'Möchtest du die Aufgabe \'${task.title}\' wirklich löschen?',
                                     cancelText: 'Abbrechen',
                                     confirmText: 'Löschen',
                                     onConfirm: () =>
-                                        Database.deleteTask(task.id),
+                                        Database.I.deleteTask(task.id),
                                   ),
                             ],
                           ),
@@ -154,7 +156,7 @@ DataRow _taskRow(BuildContext context, Task task, void Function() onLongPress,
                   onChanged: (b) {
                     if (b == null) return;
                     setState(() => value = b);
-                    Database.updateTaskStatus(task.id, b);
+                    Database.I.updateTaskStatus(task.id, b);
                   },
                   value: value,
                 ),

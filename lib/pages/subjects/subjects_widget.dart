@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:school_app/data/database.dart';
+import 'package:school_app/data/database/database.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
 import 'package:school_app/pages/subjects/subject_page.dart';
 import 'package:school_app/util.dart';
@@ -25,7 +25,8 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
   @override
   void initState() {
     super.initState();
-    subscription = Database.querySubjects()
+    subscription = Database.I
+        .querySubjects()
         .listen((data) => setState(() => subjects = data));
   }
 
@@ -126,14 +127,14 @@ class _SubjectState extends State<_Subject> {
                 builder: (_) =>
                     CreateSubjectPage(subjectToEdit: widget.subject))),
         () => showConfirmationDialog(
-              context: context,
+          context: context,
               title: 'Löschen',
               content:
                   'Möchtest du das Fach \'${widget.subject.name}\' wirklich löschen?\n'
                   'Dadurch werden auch alle Aufgaben mit diesem Fach gelöscht!',
               cancelText: 'Abbrechen',
               confirmText: 'Löschen',
-              onConfirm: () => Database.deleteSubject(widget.subject.id),
+              onConfirm: () => Database.I.deleteSubject(widget.subject.id),
             )
       ],
       child: AnimatedContainer(

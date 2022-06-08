@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:school_app/data/database.dart';
+import 'package:school_app/data/database/database.dart';
 import 'package:school_app/util.dart';
 
 import '../../data/subject.dart';
@@ -44,9 +44,10 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
     }
 
     if (widget.subjectToEdit == null) {
-      Database.createSubject(name, abbreviation, color);
+      Database.I.createSubject(name, abbreviation, color);
     } else {
-      Database.editSubject(widget.subjectToEdit!.id, name, abbreviation, color);
+      Database.I
+          .editSubject(widget.subjectToEdit!.id, name, abbreviation, color);
     }
 
     Navigator.pop(context);

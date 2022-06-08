@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:school_app/data/database.dart';
+import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/tasks/clickable_row.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
@@ -32,7 +32,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
   @override
   void initState() {
     super.initState();
-    subscription = Database.queryTask(widget.taskId).listen((t) {
+    subscription = Database.I.queryTask(widget.taskId).listen((t) {
       task = t;
       titleController.text = task!.title;
       descriptionController.text = task!.description;
@@ -77,7 +77,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                       cancelText: 'Abbrechen',
                       confirmText: 'Löschen',
                       onConfirm: () {
-                        Database.deleteTask(task!.id);
+                        Database.I.deleteTask(task!.id);
                         Navigator.pop(context);
                       }),
                   icon: const Icon(Icons.delete),
@@ -87,7 +87,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
             floatingActionButton: FloatingActionButton.extended(
               onPressed: () {
                 setState(() => completed = !completed);
-                Database.updateTaskStatus(task!.id, completed);
+                Database.I.updateTaskStatus(task!.id, completed);
               },
               label: Text(!completed ? 'Abschließen' : 'Wieder öffnen'),
               icon: Icon(!completed ? Icons.done : Icons.close),

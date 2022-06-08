@@ -2,15 +2,17 @@ import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/task.dart';
 
-import 'subject.dart';
+import '../subject.dart';
 
-class Database {
+class DatabaseFirestore implements Database {
   static const _subjectsCollection = 'subjects';
   static const _tasksCollection = 'tasks';
 
-  static Stream<List<Subject>> querySubjects() async* {
+  @override
+  Stream<List<Subject>> querySubjects() async* {
     // TODO: Query / store task count
     var subjects = _collection(_subjectsCollection)
         .where('user_id', isEqualTo: _requireUser().uid)
@@ -21,19 +23,22 @@ class Database {
     }
   }
 
-  static Stream<Subject> querySubject(String id) async* {
+  @override
+  Stream<Subject> querySubject(String id) async* {
     var doc = _collection(_subjectsCollection).doc(id).snapshots();
     await for (final subject in doc) {
       yield Subject.fromDocument(subject);
     }
   }
 
-  static Future<Subject> querySubjectOnce(String id) async {
+  @override
+  Future<Subject> querySubjectOnce(String id) async {
     var doc = await _collection(_subjectsCollection).doc(id).get();
     return Subject.fromDocument(doc);
   }
 
-  static void createSubject(String name, String abbreviation, Color color) {
+  @override
+  void createSubject(String name, String abbreviation, Color color) {
     _collection(_subjectsCollection).add({
       'name': name,
       'abbreviation': abbreviation,
@@ -42,8 +47,8 @@ class Database {
     });
   }
 
-  static void editSubject(
-      String id, String name, String abbreviation, Color color) {
+  @override
+  void editSubject(String id, String name, String abbreviation, Color color) {
     var doc = _collection(_subjectsCollection).doc(id);
     doc.update({
       'name': name,
@@ -54,7 +59,8 @@ class Database {
   }
 
   /// Also deletes tasks associated with this subject
-  static Future<void> deleteSubject(String id) async {
+  @override
+  Future<void> deleteSubject(String id) async {
     // Delete tasks associated with this subject id
     var tasks = await _collection(_tasksCollection)
         .where('user_id', isEqualTo: _requireUser().uid)
@@ -69,7 +75,7 @@ class Database {
     _delete(_subjectsCollection, id);
   }
 
-  static Query<Map<String, dynamic>> _tasksQuery({DateTime? maxDueDate}) {
+  Query<Map<String, dynamic>> _tasksQuery({DateTime? maxDueDate}) {
     var query = _collection(_tasksCollection)
         .where('user_id', isEqualTo: _requireUser().uid);
     if (maxDueDate != null) {
@@ -79,7 +85,8 @@ class Database {
     return query.orderBy('due_date');
   }
 
-  static Stream<List<Task>> queryTasks({DateTime? maxDueDate}) async* {
+  @override
+  Stream<List<Task>> queryTasks({DateTime? maxDueDate}) async* {
     var query = _tasksQuery(maxDueDate: maxDueDate).snapshots();
 
     await for (final docs in query) {
@@ -99,19 +106,22 @@ class Database {
     }
   }
 
-  static Future<List<Task>> queryTasksOnce({DateTime? maxDueDate}) async {
+  @override
+  Future<List<Task>> queryTasksOnce({DateTime? maxDueDate}) async {
     var tasks = await _tasksQuery(maxDueDate: maxDueDate).get();
     return await Future.wait(tasks.docs.map(Task.fromDocument));
   }
 
-  static Stream<Task> queryTask(String taskId) async* {
+  @override
+  Stream<Task> queryTask(String taskId) async* {
     var query = _collection(_tasksCollection).doc(taskId).snapshots();
     await for (final task in query) {
       yield await Task.fromDocument(task);
     }
   }
 
-  static void createTask(String title, String description, DateTime dueDate,
+  @override
+  void createTask(String title, String description, DateTime dueDate,
       DateTime reminder, String subjectId) {
     _collection(_tasksCollection).add({
       'title': title,
@@ -124,8 +134,9 @@ class Database {
     });
   }
 
-  static void editTask(String id, String title, String description,
-      DateTime dueDate, DateTime reminder, String subjectId) {
+  @override
+  void editTask(String id, String title, String description, DateTime dueDate,
+      DateTime reminder, String subjectId) {
     var doc = _collection(_tasksCollection).doc(id);
     doc.update({
       'title': title,
@@ -137,23 +148,24 @@ class Database {
     });
   }
 
-  static void updateTaskStatus(String id, bool completed) {
+  @override
+  void updateTaskStatus(String id, bool completed) {
     var doc = _collection(_tasksCollection).doc(id);
     doc.update({'completed': completed});
   }
 
-  static void deleteTask(String id) => _delete(_tasksCollection, id);
+  @override
+  void deleteTask(String id) => _delete(_tasksCollection, id);
 
-  static CollectionReference<Map<String, dynamic>> _collection(
-          String collection) =>
+  CollectionReference<Map<String, dynamic>> _collection(String collection) =>
       FirebaseFirestore.instance.collection(collection);
 
-  static void _delete(String collection, String id) {
+  void _delete(String collection, String id) {
     var doc = _collection(collection).doc(id);
     doc.delete();
   }
 
-  static User _requireUser() {
+  User _requireUser() {
     var user = FirebaseAuth.instance.currentUser;
     assert(user != null, 'User required for operation!');
     return user!;

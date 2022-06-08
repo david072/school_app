@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lit_relative_date_time/controller/relative_date_format.dart';
 import 'package:lit_relative_date_time/model/relative_date_time.dart';
-import 'package:school_app/data/database.dart';
+import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/util.dart';
 
@@ -34,7 +34,7 @@ class Task {
       data['description'],
       DateTime.fromMillisecondsSinceEpoch(data['due_date']),
       DateTime.fromMillisecondsSinceEpoch(data['reminder']),
-      await Database.querySubjectOnce(data['subject_id']),
+      await Database.I.querySubjectOnce(data['subject_id']),
       data['completed'],
     );
   }

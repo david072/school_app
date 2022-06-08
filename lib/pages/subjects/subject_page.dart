@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:school_app/data/database.dart';
+import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
@@ -29,7 +29,7 @@ class _SubjectPageState extends State<SubjectPage> {
   void initState() {
     super.initState();
     subscription =
-        Database.querySubject(widget.subjectId).listen((s) => setState(() {
+        Database.I.querySubject(widget.subjectId).listen((s) => setState(() {
               subject = s;
               appBarContentColor = subject!.color.computeLuminance() > 0.5
                   ? Colors.black
@@ -73,7 +73,7 @@ class _SubjectPageState extends State<SubjectPage> {
                     cancelText: 'Abbrechen',
                     confirmText: 'Löschen',
                     onConfirm: () {
-                      Database.deleteSubject(subject!.id);
+                      Database.I.deleteSubject(subject!.id);
                       Navigator.pop(context);
                     },
                   ),

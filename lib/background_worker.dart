@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:school_app/data/database.dart';
+import 'package:school_app/data/database/database.dart';
 import 'package:school_app/firebase_options.dart';
 import 'package:school_app/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,11 +23,11 @@ class BackgroundWorker {
     var sharedPreferences = await SharedPreferences.getInstance();
     var notificationId = sharedPreferences.getInt(_notificationIdKey) ?? 0;
 
-    var tasks = await Database.queryTasksOnce();
+    var tasks = await Database.I.queryTasksOnce();
     var now = DateTime.now().date;
     for (final task in tasks) {
       if (task.dueDate.isBefore(now) || task.dueDate.isAtSameMomentAs(now)) {
-        Database.deleteTask(task.id);
+        Database.I.deleteTask(task.id);
         continue;
       }
 
@@ -53,7 +53,6 @@ class BackgroundWorker {
 
   static Future<void> sendNotification(
       int id, String title, String body) async {
-    print("notifiacation title: $title, body: $body");
     await localNotificationsPlugin.show(
       id,
       title,
