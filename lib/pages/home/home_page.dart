@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
-          IconButton(
+          TextButton.icon(
             onPressed: () async {
               if (widget.hasAccount) {
                 await FirebaseAuth.instance.signOut();
@@ -49,7 +49,12 @@ class _HomePageState extends State<HomePage> {
                         builder: (_) => const SignUpPage(migrate: true)));
               }
             },
-            icon: Icon(widget.hasAccount ? Icons.logout : Icons.login),
+            label: Text(widget.hasAccount ? 'Logout' : 'Account erstellen',
+                style: const TextStyle(color: Colors.white)),
+            icon: Icon(
+              widget.hasAccount ? Icons.logout : Icons.login,
+              color: Colors.white,
+            ),
           ),
         ],
       ),
