@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/auth/signup_page.dart';
+import 'package:school_app/pages/home/account_dialog.dart';
 import 'package:school_app/pages/subjects/subjects_widget.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 import 'package:school_app/util.dart';
@@ -35,6 +36,13 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => const AccountDialog(),
+            ),
+          ),
           TextButton.icon(
             onPressed: () async {
               if (widget.hasAccount) {
