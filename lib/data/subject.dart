@@ -10,13 +10,20 @@ class Subject {
 
   const Subject(this.id, this.name, this.abbreviation, this.color);
 
-  static Subject fromDocument(DocumentSnapshot<Map> doc) {
-    var data = doc.data()!;
+  static Subject fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
+    return _fromMap(doc.id, doc.data()!);
+  }
+
+  static Subject fromRow(Map<String, dynamic> row) {
+    return _fromMap(row['id'].toString(), row);
+  }
+
+  static Subject _fromMap(String id, Map<String, dynamic> map) {
     return Subject(
-      doc.id,
-      data['name'],
-      data['abbreviation'],
-      Color(data['color']),
+      id,
+      map['name'],
+      map['abbreviation'],
+      Color(map['color']),
     );
   }
 }

@@ -26,16 +26,31 @@ class Task {
     this.completed,
   );
 
-  static Future<Task> fromDocument(DocumentSnapshot<Map> doc) async {
-    var data = doc.data()!;
+  static Future<Task> fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
+    return _fromMap(doc.id, doc.data()!, hasBool: true);
+  }
+
+  static Future<Task> fromRow(Map<String, dynamic> row) {
+    return _fromMap(row['id'].toString(), row, hasBool: false);
+  }
+
+  static Future<Task> _fromMap(String id, Map<String, dynamic> map,
+      {bool hasBool = true}) async {
+    bool completed;
+    if (hasBool) {
+      completed = map['completed'];
+    } else {
+      completed = map['completed'] as int == 1 ? true : false;
+    }
+
     return Task(
-      doc.id,
-      data['title'],
-      data['description'],
-      DateTime.fromMillisecondsSinceEpoch(data['due_date']),
-      DateTime.fromMillisecondsSinceEpoch(data['reminder']),
-      await Database.I.querySubjectOnce(data['subject_id']),
-      data['completed'],
+      id,
+      map['title'],
+      map['description'],
+      DateTime.fromMillisecondsSinceEpoch(map['due_date']),
+      DateTime.fromMillisecondsSinceEpoch(map['reminder']),
+      await Database.I.querySubjectOnce(map['subject_id'].toString()),
+      completed,
     );
   }
 

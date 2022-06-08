@@ -16,7 +16,11 @@ dependencies:
   # Firebase
   firebase_core: ^1.17.1
   firebase_auth: ^3.3.19
+
+  # Databases
   cloud_firestore: ^3.1.17
+  sqflite: ^2.0.2+1
+  sqlbrite: ^2.2.0
 
   # Background notification worker
   workmanager: ^0.5.0
@@ -29,6 +33,7 @@ dependencies:
   intl: ^0.17.0
   shared_preferences: ^2.0.15
   get_it: ^7.2.0
+  path: ^1.8.1
 
 dev_dependencies:
   flutter_test:

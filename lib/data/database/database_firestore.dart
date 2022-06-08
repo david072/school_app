@@ -38,13 +38,15 @@ class DatabaseFirestore implements Database {
   }
 
   @override
-  void createSubject(String name, String abbreviation, Color color) {
-    _collection(_subjectsCollection).add({
+  String createSubject(String name, String abbreviation, Color color) {
+    var newSubject = _collection(_subjectsCollection).doc();
+    newSubject.set({
       'name': name,
       'abbreviation': abbreviation,
       'color': color.value,
       'user_id': _requireUser().uid,
     });
+    return newSubject.id;
   }
 
   @override
@@ -90,19 +92,8 @@ class DatabaseFirestore implements Database {
     var query = _tasksQuery(maxDueDate: maxDueDate).snapshots();
 
     await for (final docs in query) {
-      var tasks = await Future.wait(docs.docs.map(Task.fromDocument));
-
-      List<Task> result = [];
-      // Sort tasks, so that completed tasks are always at the bottom
-      for (int i = tasks.length - 1; i >= 0; i--) {
-        final task = tasks[i];
-        if (task.completed) {
-          result.add(task);
-        } else {
-          result.insert(0, task);
-        }
-      }
-      yield result;
+      yield orderByCompleted(
+          await Future.wait(docs.docs.map(Task.fromDocument)));
     }
   }
 

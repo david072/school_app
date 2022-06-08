@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:school_app/data/auth.dart';
+import 'package:school_app/data/database/database.dart';
+import 'package:school_app/data/database/database_firestore.dart';
+import 'package:school_app/data/database/database_sqlite.dart';
+import 'package:school_app/main.dart';
 import 'package:school_app/pages/home/home_page.dart';
 import 'package:school_app/util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({Key? key}) : super(key: key);
+  const SignUpPage({
+    Key? key,
+    this.migrate = false,
+  }) : super(key: key);
+
+  final bool migrate;
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
@@ -25,7 +35,14 @@ class _SignUpPageState extends State<SignUpPage> {
     var failState = await Authentication.signUp(
         formKey as GlobalKey<FormState>, email, password);
     if (failState == null) {
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+      sharedPreferences.setBool(noAccountKey, false);
+
+      if (widget.migrate) await DatabaseSqlite.migrateToFirestore();
+
       if (!mounted) return;
+      Database.use(DatabaseFirestore());
       Navigator.pop(context);
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const HomePage()));
