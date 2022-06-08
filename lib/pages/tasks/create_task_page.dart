@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
@@ -51,7 +50,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         : ReminderMode.none;
   }
 
-  void createSubject() async {
+  void createSubject() {
     setState(() => enabled = false);
 
     bool isValid = true;
@@ -88,7 +87,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       );
     }
 
-    Get.back();
+    Navigator.pop(context);
   }
 
   @override
@@ -265,7 +264,7 @@ class _ReminderPicker extends StatelessWidget {
                             lastDate: dueDate,
                             onChanged: (date) {
                               var offset = dueDate.difference(date);
-                              Get.back();
+                              Navigator.pop(context);
                               onChanged(offset, ReminderMode.custom);
                             },
                           );
@@ -276,7 +275,7 @@ class _ReminderPicker extends StatelessWidget {
                             Expanded(
                               child: InkWell(
                                 onTap: () {
-                                  Get.back();
+                                  Navigator.pop(context);
                                   onChanged(val.offset, val);
                                 },
                                 child: Padding(
@@ -340,7 +339,7 @@ class _SubjectPickerState extends State<_SubjectPicker> {
 
   // For some reason, stream.first apparently does not work properly on
   // generator functions, so I have to do it myself.
-  Future<void> getSubjects() async {
+  void getSubjects() {
     subscription = Database.querySubjects().listen((data) {
       setState(() => subjects = data);
       subscription.cancel();
@@ -422,7 +421,7 @@ class _AlertDialogSubject extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Get.back();
+        Navigator.pop(context);
         onChanged(subject);
       },
       child: Row(

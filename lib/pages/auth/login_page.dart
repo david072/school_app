@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:school_app/data/auth.dart';
 import 'package:school_app/pages/auth/signup_page.dart';
 import 'package:school_app/pages/home/home_page.dart';
@@ -26,7 +25,9 @@ class _LoginPageState extends State<LoginPage> {
     var failState = await Authentication.signIn(
         formKey as GlobalKey<FormState>, email, password);
     if (failState == null) {
-      Get.off(() => const HomePage());
+      if (!mounted) return;
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const HomePage()));
       return;
     }
 
@@ -84,8 +85,10 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 20),
                 TextButton(
-                  onPressed:
-                      enabled ? () => Get.to(() => const SignUpPage()) : null,
+                  onPressed: enabled
+                      ? () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => const SignUpPage()))
+                      : null,
                   child: const Text('REGISTRIEREN'),
                 ),
               ],

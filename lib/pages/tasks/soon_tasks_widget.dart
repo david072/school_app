@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
@@ -87,8 +86,13 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                             ],
                             longPressPosition: longPressPosition,
                             functions: [
-                              () => Get.to(
-                                  () => CreateTaskPage(taskToEdit: task)),
+                              () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          CreateTaskPage(taskToEdit: task),
+                                    ),
+                                  ),
                               () => showConfirmationDialog(
                                     context: context,
                                     title: 'Löschen',
@@ -101,7 +105,11 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                                   ),
                             ],
                           ),
-                          () => Get.to(() => ViewTaskPage(taskId: task.id)),
+                          () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      ViewTaskPage(taskId: task.id))),
                         ),
                       )
                       .toList(),
@@ -113,8 +121,11 @@ class _TaskListWidgetState extends State<TaskListWidget> {
             reverse: true,
             displayName: 'Aufgaben',
             count: tasks.length,
-            onAdd: () => Get.to(
-                () => CreateTaskPage(initialSubject: widget.subjectFilter)),
+            onAdd: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) =>
+                        CreateTaskPage(initialSubject: widget.subjectFilter))),
           ),
         ],
       ),

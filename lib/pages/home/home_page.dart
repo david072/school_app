@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/subjects/subjects_widget.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
@@ -33,7 +32,9 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
-              Get.off(() => const LoginPage());
+              if (!mounted) return;
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const LoginPage()));
             },
             icon: const Icon(Icons.logout),
           ),

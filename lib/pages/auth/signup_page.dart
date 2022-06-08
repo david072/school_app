@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:school_app/data/auth.dart';
 import 'package:school_app/pages/home/home_page.dart';
 import 'package:school_app/util.dart';
@@ -26,8 +25,10 @@ class _SignUpPageState extends State<SignUpPage> {
     var failState = await Authentication.signUp(
         formKey as GlobalKey<FormState>, email, password);
     if (failState == null) {
-      Get.back();
-      Get.off(() => const HomePage());
+      if (!mounted) return;
+      Navigator.pop(context);
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const HomePage()));
       return;
     }
 

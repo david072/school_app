@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
 import 'package:school_app/pages/subjects/subject_page.dart';
@@ -78,7 +77,8 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
           Footer(
             displayName: 'Fächer',
             count: subjects.length,
-            onAdd: () => Get.to(() => const CreateSubjectPage()),
+            onAdd: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const CreateSubjectPage())),
           ),
         ],
       ),
@@ -104,7 +104,10 @@ class _SubjectState extends State<_Subject> {
   @override
   Widget build(BuildContext context) {
     return LongPressPopupMenu(
-      onTap: () => Get.to(() => SubjectPage(subjectId: widget.subject.id)),
+      onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (_) => SubjectPage(subjectId: widget.subject.id))),
       enabled: enabled,
       items: const [
         PopupMenuItem(
@@ -117,7 +120,11 @@ class _SubjectState extends State<_Subject> {
         ),
       ],
       functions: [
-        () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
+        () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) =>
+                    CreateSubjectPage(subjectToEdit: widget.subject))),
         () => showConfirmationDialog(
               context: context,
               title: 'Löschen',

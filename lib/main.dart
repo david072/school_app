@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:school_app/background_worker.dart';
 import 'package:school_app/firebase_options.dart';
 import 'package:school_app/pages/auth/login_page.dart';
@@ -14,7 +13,7 @@ void callbackDispatcher() {
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const GetMaterialApp(
+  runApp(const MaterialApp(
     debugShowCheckedModeBanner: false,
     title: 'School App',
     home: Setup(),
@@ -43,11 +42,15 @@ class _SetupState extends State<Setup> {
     await BackgroundWorker.requestNotificationPermissions();
     BackgroundWorker.schedule();
 
+    if (!mounted) return;
+
     var user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      Get.off(() => const LoginPage());
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const LoginPage()));
     } else {
-      Get.off(() => const HomePage());
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const HomePage()));
     }
   }
 

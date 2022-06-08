@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
 import 'package:school_app/util.dart';
 
@@ -36,7 +35,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
     color = widget.subjectToEdit?.color ?? randomColor();
   }
 
-  void createSubject() async {
+  void createSubject() {
     setState(() => enabled = false);
 
     if (!validateForm(formKey)) {
@@ -50,7 +49,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
       Database.editSubject(widget.subjectToEdit!.id, name, abbreviation, color);
     }
 
-    Get.back();
+    Navigator.pop(context);
   }
 
   @override

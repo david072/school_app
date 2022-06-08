@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:school_app/data/database.dart';
 import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/tasks/clickable_row.dart';
@@ -64,8 +63,10 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  onPressed: () =>
-                      Get.to(() => CreateTaskPage(taskToEdit: task)),
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => CreateTaskPage(taskToEdit: task))),
                 ),
                 IconButton(
                   onPressed: () => showConfirmationDialog(
@@ -75,9 +76,9 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                           'Möchtest du die Aufgabe \'${task!.title}\' wirklich löschen?',
                       cancelText: 'Abbrechen',
                       confirmText: 'Löschen',
-                      onConfirm: () async {
+                      onConfirm: () {
                         Database.deleteTask(task!.id);
-                        Get.back();
+                        Navigator.pop(context);
                       }),
                   icon: const Icon(Icons.delete),
                 ),
