@@ -76,7 +76,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                       cancelText: 'Abbrechen',
                       confirmText: 'Löschen',
                       onConfirm: () async {
-                        await Database.deleteTask(task!.id);
+                        Database.deleteTask(task!.id);
                         Get.back();
                       }),
                   icon: const Icon(Icons.delete),

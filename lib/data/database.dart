@@ -33,9 +33,8 @@ class Database {
     return Subject.fromDocument(doc);
   }
 
-  static Future<void> createSubject(
-      String name, String abbreviation, Color color) async {
-    await _collection(_subjectsCollection).add({
+  static void createSubject(String name, String abbreviation, Color color) {
+    _collection(_subjectsCollection).add({
       'name': name,
       'abbreviation': abbreviation,
       'color': color.value,
@@ -43,10 +42,10 @@ class Database {
     });
   }
 
-  static Future<void> editSubject(
-      String id, String name, String abbreviation, Color color) async {
+  static void editSubject(
+      String id, String name, String abbreviation, Color color) {
     var doc = _collection(_subjectsCollection).doc(id);
-    await doc.update({
+    doc.update({
       'name': name,
       'abbreviation': abbreviation,
       'color': color.value,
@@ -62,13 +61,12 @@ class Database {
         .where('subject_id', isEqualTo: id)
         .get();
     // Run deletions in parallel (prob not significant but doesn't hurt)
-    List<Future> futures = [];
     for (final task in tasks.docs) {
-      futures.add(task.reference.delete());
+      task.reference.delete();
     }
-    await Future.wait(futures);
+    // await Future.wait(futures);
 
-    await _delete(_subjectsCollection, id);
+    _delete(_subjectsCollection, id);
   }
 
   static Query<Map<String, dynamic>> _tasksQuery({DateTime? maxDueDate}) {
@@ -113,9 +111,9 @@ class Database {
     }
   }
 
-  static Future<void> createTask(String title, String description,
-      DateTime dueDate, DateTime reminder, String subjectId) async {
-    await _collection(_tasksCollection).add({
+  static void createTask(String title, String description, DateTime dueDate,
+      DateTime reminder, String subjectId) {
+    _collection(_tasksCollection).add({
       'title': title,
       'description': description,
       'due_date': dueDate.millisecondsSinceEpoch,
@@ -126,10 +124,10 @@ class Database {
     });
   }
 
-  static Future<void> editTask(String id, String title, String description,
-      DateTime dueDate, DateTime reminder, String subjectId) async {
+  static void editTask(String id, String title, String description,
+      DateTime dueDate, DateTime reminder, String subjectId) {
     var doc = _collection(_tasksCollection).doc(id);
-    await doc.update({
+    doc.update({
       'title': title,
       'description': description,
       'due_date': dueDate.millisecondsSinceEpoch,
@@ -139,21 +137,20 @@ class Database {
     });
   }
 
-  static Future<void> updateTaskStatus(String id, bool completed) async {
+  static void updateTaskStatus(String id, bool completed) {
     var doc = _collection(_tasksCollection).doc(id);
-    await doc.update({'completed': completed});
+    doc.update({'completed': completed});
   }
 
-  static Future<void> deleteTask(String id) async =>
-      await _delete(_tasksCollection, id);
+  static void deleteTask(String id) => _delete(_tasksCollection, id);
 
   static CollectionReference<Map<String, dynamic>> _collection(
           String collection) =>
       FirebaseFirestore.instance.collection(collection);
 
-  static Future<void> _delete(String collection, String id) async {
+  static void _delete(String collection, String id) {
     var doc = _collection(collection).doc(id);
-    await doc.delete();
+    doc.delete();
   }
 
   static User _requireUser() {

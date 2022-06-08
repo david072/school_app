@@ -70,7 +70,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     }
 
     if (widget.taskToEdit == null) {
-      await Database.createTask(
+      Database.createTask(
         title,
         description,
         dueDate,
@@ -78,7 +78,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         subject!.id,
       );
     } else {
-      await Database.editTask(
+      Database.editTask(
         widget.taskToEdit!.id,
         title,
         description,
