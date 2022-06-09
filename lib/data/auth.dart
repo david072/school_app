@@ -47,4 +47,20 @@ class Authentication {
       return e.code;
     }
   }
+
+  static Future<String?> updatePassword(
+      String oldPassword, String newPassword) async {
+    var user = FirebaseAuth.instance.currentUser;
+    if (user == null) return 'No user';
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: user.email!, password: oldPassword);
+      await FirebaseAuth.instance.currentUser!.updatePassword(newPassword);
+      return null;
+    } on FirebaseAuthException catch (e) {
+      print("update password error: $e");
+      return e.code;
+    }
+  }
 }
