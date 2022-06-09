@@ -36,13 +36,15 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () => showDialog(
-              context: context,
-              builder: (_) => const AccountDialog(),
-            ),
-          ),
+          widget.hasAccount
+              ? IconButton(
+                  icon: const Icon(Icons.account_circle),
+                  onPressed: () => showDialog(
+                    context: context,
+                    builder: (_) => const AccountDialog(),
+                  ),
+                )
+              : Container(),
           TextButton.icon(
             onPressed: () async {
               if (widget.hasAccount) {
