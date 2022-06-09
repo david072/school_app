@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:path/path.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
+import 'package:school_app/data/notebook.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
@@ -12,6 +13,7 @@ import 'package:sqlbrite/sqlbrite.dart' as b;
 class DatabaseSqlite extends Database {
   static const _subjectsTable = 'subjects';
   static const _tasksTable = 'tasks';
+  static const _notebooksTable = 'notebooks';
 
   b.BriteDatabase? database;
 
@@ -182,6 +184,54 @@ class DatabaseSqlite extends Database {
     database!.delete(_tasksTable, where: 'id = ?', whereArgs: [int.parse(id)]);
   }
 
+  @override
+  Stream<List<Notebook>> queryNotebooks(String subjectId) async* {
+    await _open();
+
+    var query = database!.createQuery(
+      _notebooksTable,
+      where: 'subject_id = ?',
+      whereArgs: [int.parse(subjectId)],
+    );
+    await for (final func in query) {
+      var row = await func();
+      yield await Future.wait(row.map(Notebook.fromRow));
+    }
+  }
+
+  @override
+  void createNotebook(String name, String subjectId) async {
+    await _open();
+    database!.insert(_notebooksTable, {
+      'name': name,
+      'subject_id': subjectId,
+    });
+  }
+
+  @override
+  void editNotebook(String id, String name, String subjectId) async {
+    await _open();
+    database!.update(
+      _notebooksTable,
+      {
+        'name': name,
+        'subject_id': subjectId,
+      },
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+  }
+
+  @override
+  void deleteNotebook(String id) async {
+    await _open();
+    database!.delete(
+      _notebooksTable,
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+  }
+
   /// NOTE: Calls to this function wait for a previous call to finish. This
   /// prevents overriding [database] with a following call to the function.
   /// Each execution waits for the previous one, using the [_openRunning]
@@ -218,8 +268,20 @@ class DatabaseSqlite extends Database {
             'completed INTEGER,'
             'subject_id INTEGER'
             ')');
+        await db.execute('CREATE TABLE $_notebooksTable('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+            'name TEXT,'
+            'subject_id INTEGER'
+            ')');
       },
-      version: 1,
+      onUpgrade: (db, _, __) async {
+        await db.execute('CREATE TABLE $_notebooksTable('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+            'name TEXT,'
+            'subject_id INTEGER'
+            ')');
+      },
+      version: 2,
     );
 
     database = b.BriteDatabase(db, logger: null);
@@ -257,6 +319,12 @@ class DatabaseSqlite extends Database {
         DateTime.fromMillisecondsSinceEpoch(row['reminder']! as int),
         subjectId,
       );
+    }
+
+    var notebooks = await db.query(_notebooksTable);
+    for (final row in notebooks) {
+      var subjectId = subjectIdsMap[row['subject_id'] as int]!;
+      firestoreDb.createNotebook(row['name'] as String, subjectId);
     }
 
     sqflite.deleteDatabase(await _databasePath());

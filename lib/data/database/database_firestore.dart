@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:school_app/data/database/database.dart';
+import 'package:school_app/data/notebook.dart';
 import 'package:school_app/data/task.dart';
 
 import '../subject.dart';
@@ -10,6 +11,7 @@ import '../subject.dart';
 class DatabaseFirestore implements Database {
   static const _subjectsCollection = 'subjects';
   static const _tasksCollection = 'tasks';
+  static const _notebooksCollection = 'notebooks';
 
   @override
   Stream<List<Subject>> querySubjects() async* {
@@ -147,6 +149,39 @@ class DatabaseFirestore implements Database {
 
   @override
   void deleteTask(String id) => _delete(_tasksCollection, id);
+
+  @override
+  Stream<List<Notebook>> queryNotebooks(String subjectId) async* {
+    var query = _collection(_notebooksCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('subject_id', isEqualTo: subjectId)
+        .snapshots();
+    await for (final subjects in query) {
+      yield await Future.wait(subjects.docs.map(Notebook.fromDocument));
+    }
+  }
+
+  @override
+  void createNotebook(String name, String subjectId) {
+    _collection(_notebooksCollection).add({
+      'name': name,
+      'subject_id': subjectId,
+      'user_id': _requireUser().uid,
+    });
+  }
+
+  @override
+  void editNotebook(String id, String name, String subjectId) {
+    var doc = _collection(_notebooksCollection).doc(id);
+    doc.update({
+      'name': name,
+      'subject_id': subjectId,
+      'user_id': _requireUser().uid,
+    });
+  }
+
+  @override
+  void deleteNotebook(String id) => _delete(_notebooksCollection, id);
 
   CollectionReference<Map<String, dynamic>> _collection(String collection) =>
       FirebaseFirestore.instance.collection(collection);

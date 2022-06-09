@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
+import 'package:school_app/pages/drawing/notebooks_widget.dart';
+import 'package:school_app/pages/split_layout.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 import 'package:school_app/util.dart';
@@ -81,10 +83,9 @@ class _SubjectPageState extends State<SubjectPage> {
                 ),
               ],
             ),
-            body: Row(
-              children: [
-                TaskListWidget(subjectFilter: subject!),
-              ],
+            body: SplitLayout(
+              first: TaskListWidget(subjectFilter: subject!),
+              second: NotebooksWidget(subjectId: subject!.id),
             ),
           )
         : const Scaffold(

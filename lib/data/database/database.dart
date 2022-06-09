@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:get_it/get_it.dart';
+import 'package:school_app/data/notebook.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
 
@@ -39,6 +40,14 @@ abstract class Database {
   void updateTaskStatus(String id, bool completed);
 
   void deleteTask(String id);
+
+  Stream<List<Notebook>> queryNotebooks(String subjectId);
+
+  void createNotebook(String name, String subjectId);
+
+  void editNotebook(String id, String name, String subjectId);
+
+  void deleteNotebook(String id);
 }
 
 /// Helper to move all completed tasks to the bottom of the list,
