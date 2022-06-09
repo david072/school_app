@@ -45,7 +45,7 @@ class _NotebooksWidgetState extends State<NotebooksWidget> {
           Expanded(
             child: notebooks.isNotEmpty
                 ? GridView.builder(
-              gridDelegate:
+                    gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 4,
                     ),
@@ -119,7 +119,11 @@ class _NotebookState extends State<_Notebook> {
         ),
       ],
       functions: [
-        () => print("edit notebook"),
+        () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) =>
+                    CreateNotebookPage(notebookToEdit: widget.notebook))),
         () => showConfirmationDialog(
               context: context,
               title: 'Löschen',

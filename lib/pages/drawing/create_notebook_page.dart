@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:school_app/data/database/database.dart';
+import 'package:school_app/data/notebook.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/pages/subject_picker_widget.dart';
 import 'package:school_app/util.dart';
 
 class CreateNotebookPage extends StatefulWidget {
-  const CreateNotebookPage({Key? key}) : super(key: key);
+  const CreateNotebookPage({
+    Key? key,
+    this.notebookToEdit,
+  }) : super(key: key);
+
+  final Notebook? notebookToEdit;
 
   @override
   State<CreateNotebookPage> createState() => _CreateNotebookPageState();
@@ -16,8 +22,15 @@ class _CreateNotebookPageState extends State<CreateNotebookPage> {
 
   var enabled = true;
 
-  String name = "";
-  Subject? subject;
+  late String name;
+  late Subject? subject;
+
+  @override
+  void initState() {
+    super.initState();
+    name = widget.notebookToEdit?.name ?? "";
+    subject = widget.notebookToEdit?.subject;
+  }
 
   void createSubject() {
     setState(() => enabled = false);
@@ -38,7 +51,11 @@ class _CreateNotebookPageState extends State<CreateNotebookPage> {
       return;
     }
 
-    Database.I.createNotebook(name, subject!.id);
+    if (widget.notebookToEdit == null) {
+      Database.I.createNotebook(name, subject!.id);
+    } else {
+      Database.I.editNotebook(widget.notebookToEdit!.id, name, subject!.id);
+    }
 
     Navigator.pop(context);
   }
@@ -47,7 +64,9 @@ class _CreateNotebookPageState extends State<CreateNotebookPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Heft erstellen'),
+        title: Text(widget.notebookToEdit == null
+            ? 'Heft erstellen'
+            : 'Heft bearbeiten'),
       ),
       body: Center(
         child: SizedBox(
@@ -59,6 +78,7 @@ class _CreateNotebookPageState extends State<CreateNotebookPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 TextFormField(
+                  initialValue: widget.notebookToEdit?.name,
                   enabled: enabled,
                   decoration: buildInputDecoration('Name'),
                   onChanged: (s) => name = s,
@@ -76,7 +96,9 @@ class _CreateNotebookPageState extends State<CreateNotebookPage> {
                   minWidth: double.infinity,
                   color: Theme.of(context).colorScheme.primary,
                   child: enabled
-                      ? const Text('ERSTELLEN')
+                      ? Text(widget.notebookToEdit == null
+                          ? 'ERSTELLEN'
+                          : 'SPEICHERN')
                       : const CircularProgressIndicator(),
                 ),
               ],
