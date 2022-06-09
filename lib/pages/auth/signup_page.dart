@@ -91,8 +91,18 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 30),
                 PasswordTextFormField(
+                  labelText: 'Passwort bestätigen',
                   enabled: enabled,
                   onChanged: (s) => setState(() => confirmPassword = s),
+                  validator: (s) {
+                    if (s == null || s.isEmpty) {
+                      return 'Bitte gib ein Passwort an';
+                    }
+                    if (s != password) {
+                      return 'Passwörter stimmen nicht überein';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 80),
                 MaterialButton(

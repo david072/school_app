@@ -174,11 +174,15 @@ class PasswordTextFormField extends StatefulWidget {
   const PasswordTextFormField({
     Key? key,
     this.enabled = true,
+    this.labelText = 'Passwort',
+    this.validator = InputValidator.validatePassword,
     required this.onChanged,
   }) : super(key: key);
 
   final bool enabled;
+  final String labelText;
   final void Function(String) onChanged;
+  final String? Function(String?)? validator;
 
   @override
   State<PasswordTextFormField> createState() => _PasswordTextFormFieldState();
@@ -193,9 +197,9 @@ class _PasswordTextFormFieldState extends State<PasswordTextFormField> {
       enabled: widget.enabled,
       keyboardType: TextInputType.visiblePassword,
       onChanged: widget.onChanged,
-      validator: InputValidator.validatePassword,
+      validator: widget.validator,
       decoration: InputDecoration(
-        labelText: 'Passwort',
+        labelText: widget.labelText,
         alignLabelWithHint: true,
         suffixIcon: IconButton(
           onPressed: () => setState(() => obscureText = !obscureText),
