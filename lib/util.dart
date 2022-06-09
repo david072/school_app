@@ -169,3 +169,40 @@ String formatDate(DateTime date) => DateFormat('dd.MM.yyyy').format(date);
 extension Date on DateTime {
   DateTime get date => DateTime(year, month, day);
 }
+
+class PasswordTextFormField extends StatefulWidget {
+  const PasswordTextFormField({
+    Key? key,
+    this.enabled = true,
+    required this.onChanged,
+  }) : super(key: key);
+
+  final bool enabled;
+  final void Function(String) onChanged;
+
+  @override
+  State<PasswordTextFormField> createState() => _PasswordTextFormFieldState();
+}
+
+class _PasswordTextFormFieldState extends State<PasswordTextFormField> {
+  bool obscureText = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      enabled: widget.enabled,
+      keyboardType: TextInputType.visiblePassword,
+      onChanged: widget.onChanged,
+      validator: InputValidator.validatePassword,
+      decoration: InputDecoration(
+        labelText: 'Passwort',
+        alignLabelWithHint: true,
+        suffixIcon: IconButton(
+          onPressed: () => setState(() => obscureText = !obscureText),
+          icon: Icon(!obscureText ? Icons.visibility : Icons.visibility_off),
+        ),
+      ),
+      obscureText: obscureText,
+    );
+  }
+}

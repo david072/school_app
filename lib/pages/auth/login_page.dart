@@ -100,13 +100,9 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: buildInputDecoration('Email'),
                 ),
                 const SizedBox(height: 30),
-                TextFormField(
+                PasswordTextFormField(
                   enabled: enabled,
-                  keyboardType: TextInputType.visiblePassword,
-                  onChanged: (s) => setState(() => password = s),
-                  validator: InputValidator.validatePassword,
-                  decoration: buildInputDecoration('Passwort'),
-                  obscureText: true,
+                  onChanged: (s) => password = s,
                 ),
                 const SizedBox(height: 80),
                 MaterialButton(
