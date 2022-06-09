@@ -1,9 +1,13 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:school_app/data/database/database.dart';
+import 'package:school_app/data/database/database_firestore.dart';
+import 'package:school_app/data/database/database_sqlite.dart';
 import 'package:school_app/firebase_options.dart';
+import 'package:school_app/main.dart';
 import 'package:school_app/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
@@ -22,6 +26,15 @@ class BackgroundWorker {
 
     var sharedPreferences = await SharedPreferences.getInstance();
     var notificationId = sharedPreferences.getInt(_notificationIdKey) ?? 0;
+
+    var noAccount = sharedPreferences.getBool(noAccountKey);
+    if (noAccount ?? false) {
+      Database.use(DatabaseSqlite());
+    } else {
+      // DatabaseFirestore requires a user. If there is no user, we can't query
+      if (FirebaseAuth.instance.currentUser == null) return true;
+      Database.use(DatabaseFirestore());
+    }
 
     var tasks = await Database.I.queryTasksOnce();
     var now = DateTime.now().date;
@@ -130,12 +143,8 @@ class BackgroundWorker {
 
   static void schedule() {
     var now = DateTime.now();
-    DateTime nextRunTime;
-    if (now.hour == 12) {
-      nextRunTime = now;
-    } else {
-      nextRunTime = DateTime(now.year, now.month, now.day + 1, 12);
-    }
+    var day = now.hour < 12 ? now.day : now.day + 1;
+    var nextRunTime = DateTime(now.year, now.month, day, 12);
 
     Workmanager().registerOneOffTask(
       _workName,
