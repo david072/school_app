@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/notebook.dart';
+import 'package:school_app/pages/drawing/create_notebook_page.dart';
 import 'package:school_app/pages/home/footer.dart';
 
 class NotebooksWidget extends StatefulWidget {
@@ -78,7 +79,8 @@ class _NotebooksWidgetState extends State<NotebooksWidget> {
           Footer(
             displayName: 'Hefte',
             count: notebooks.length,
-            onAdd: () => print("creating notebook"),
+            onAdd: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const CreateNotebookPage())),
           ),
         ],
       ),

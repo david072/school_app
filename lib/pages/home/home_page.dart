@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/auth/signup_page.dart';
 import 'package:school_app/pages/home/account_dialog.dart';
-import 'package:school_app/pages/split_layout.dart';
+import 'package:school_app/pages/split_layout_widget.dart';
 import 'package:school_app/pages/subjects/subjects_widget.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 import 'package:school_app/util.dart';
