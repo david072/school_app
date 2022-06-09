@@ -5,6 +5,7 @@ import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/notebook.dart';
 import 'package:school_app/pages/drawing/create_notebook_page.dart';
 import 'package:school_app/pages/home/footer.dart';
+import 'package:school_app/util.dart';
 
 class NotebooksWidget extends StatefulWidget {
   const NotebooksWidget({
@@ -44,13 +45,12 @@ class _NotebooksWidgetState extends State<NotebooksWidget> {
           Expanded(
             child: notebooks.isNotEmpty
                 ? GridView.builder(
-                    gridDelegate:
+              gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 4,
                     ),
                     itemCount: notebooks.length,
-                    itemBuilder: (ctx, i) =>
-                        Center(child: Text(notebooks[i].name)),
+                    itemBuilder: (ctx, i) => _Notebook(notebook: notebooks[i]),
                   )
                 : Column(
                     mainAxisSize: MainAxisSize.min,
@@ -83,6 +83,76 @@ class _NotebooksWidgetState extends State<NotebooksWidget> {
                 MaterialPageRoute(builder: (_) => const CreateNotebookPage())),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _Notebook extends StatefulWidget {
+  const _Notebook({
+    Key? key,
+    required this.notebook,
+  }) : super(key: key);
+
+  final Notebook notebook;
+
+  @override
+  State<_Notebook> createState() => _NotebookState();
+}
+
+class _NotebookState extends State<_Notebook> {
+  var enabled = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return LongPressPopupMenu(
+      onTap: () => print("open notebook"),
+      enabled: enabled,
+      items: const [
+        PopupMenuItem(
+          value: 0,
+          child: Text('Bearbeiten'),
+        ),
+        PopupMenuItem(
+          value: 1,
+          child: Text('Löschen'),
+        ),
+      ],
+      functions: [
+        () => print("edit notebook"),
+        () => showConfirmationDialog(
+              context: context,
+              title: 'Löschen',
+              content:
+                  'Möchtest du das Heft \'${widget.notebook.name}\' wirklich löschen?',
+              cancelText: 'Abbrechen',
+              confirmText: 'Löschen',
+              onConfirm: () => Database.I.deleteNotebook(widget.notebook.id),
+            ),
+      ],
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        decoration: BoxDecoration(
+          color: !enabled ? Theme.of(context).disabledColor : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.note,
+              size: 40,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              widget.notebook.name,
+              style: Theme.of(context).textTheme.headline6,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
