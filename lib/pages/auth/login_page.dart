@@ -18,6 +18,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey formKey = GlobalKey<FormState>();
+  final GlobalKey emailFieldKey = GlobalKey<FormFieldState>();
 
   bool showContinueWithoutAccountButton = false;
 
@@ -57,6 +58,16 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => enabled = true);
   }
 
+  Future<void> resetPassword() async {
+    var emailFieldState = emailFieldKey.currentState as FormFieldState?;
+    if (emailFieldState == null || !emailFieldState.validate()) return;
+
+    showDialog(
+      context: context,
+      builder: (_) => _PasswordResetDialog(email: email),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -81,6 +92,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextFormField(
+                  key: emailFieldKey,
                   enabled: enabled,
                   keyboardType: TextInputType.emailAddress,
                   onChanged: (s) => setState(() => email = s),
@@ -105,6 +117,19 @@ class _LoginPageState extends State<LoginPage> {
                       ? const Text('LOGIN')
                       : const CircularProgressIndicator(),
                 ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: resetPassword,
+                          child: const Text('PASSWORT VERGESSEN'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 20),
                 TextButton(
                   onPressed: enabled
@@ -113,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
                       : null,
                   child: const Text('REGISTRIEREN'),
                 ),
-                showContinueWithoutAccountButton
+                !showContinueWithoutAccountButton
                     ? TextButton(
                         onPressed: enabled
                             ? () async {
@@ -144,6 +169,90 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PasswordResetDialog extends StatefulWidget {
+  const _PasswordResetDialog({
+    Key? key,
+    required this.email,
+  }) : super(key: key);
+
+  final String email;
+
+  @override
+  State<_PasswordResetDialog> createState() => _PasswordResetDialogState();
+}
+
+class _PasswordResetDialogState extends State<_PasswordResetDialog> {
+  bool hasSentEmail = false;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    Authentication.sendPasswordReset(widget.email).then((e) {
+      if (e != null) {
+        error = e;
+      } else {
+        hasSentEmail = true;
+      }
+      setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Passwort zurücksetzen'),
+      content: error != null
+          ? Text(
+              'Ein Fehler ist aufgetreten. Bitte versuche es später nochmal.\nFehler: $error')
+          : hasSentEmail
+              ? SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Es wurde eine Email an ',
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle1
+                              ?.copyWith(color: Colors.black),
+                        ),
+                        TextSpan(
+                          text: widget.email,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        TextSpan(
+                          text: ' gesendet, mit welcher du '
+                              'dein Passwort zurücksetzen kannst. Dann kannst du dich hier mit '
+                              'deinem neuen Passwort anmelden.\n\n'
+                              'Bitte schaue auch in deinen Spam-Ordner.',
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle1
+                              ?.copyWith(color: Colors.black),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: const [CircularProgressIndicator()],
+                ),
+      actions: [
+        error != null || hasSentEmail
+            ? TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              )
+            : Container(),
+      ],
     );
   }
 }

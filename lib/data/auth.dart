@@ -29,12 +29,22 @@ class Authentication {
     }
 
     try {
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email.trim(), password: password.trim());
       return null;
     } catch (e) {
       print('sign in error $e');
       return FailState.authentication;
+    }
+  }
+
+  static Future<String?> sendPasswordReset(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
+      return null;
+    } on FirebaseAuthException catch (e) {
+      print("send password reset error: $e");
+      return e.code;
     }
   }
 }
