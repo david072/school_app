@@ -183,6 +183,9 @@ class DatabaseFirestore implements Database {
   @override
   void deleteNotebook(String id) => _delete(_notebooksCollection, id);
 
+  @override
+  bool hasAccount() => true;
+
   CollectionReference<Map<String, dynamic>> _collection(String collection) =>
       FirebaseFirestore.instance.collection(collection);
 

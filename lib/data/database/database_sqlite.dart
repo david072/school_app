@@ -232,6 +232,9 @@ class DatabaseSqlite extends Database {
     );
   }
 
+  @override
+  bool hasAccount() => false;
+
   /// NOTE: Calls to this function wait for a previous call to finish. This
   /// prevents overriding [database] with a following call to the function.
   /// Each execution waits for the previous one, using the [_openRunning]

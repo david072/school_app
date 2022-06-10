@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/notebook.dart';
-import 'package:school_app/pages/drawing/create_notebook_page.dart';
+import 'package:school_app/drawing/load_drawing_page.dart';
 import 'package:school_app/pages/home/footer.dart';
+import 'package:school_app/pages/notebooks/create_notebook_page.dart';
 import 'package:school_app/util.dart';
 
 class NotebooksWidget extends StatefulWidget {
@@ -106,7 +107,10 @@ class _NotebookState extends State<_Notebook> {
   @override
   Widget build(BuildContext context) {
     return LongPressPopupMenu(
-      onTap: () => print("open notebook"),
+      onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (_) => LoadDrawingPage(notebook: widget.notebook))),
       enabled: enabled,
       items: const [
         PopupMenuItem(

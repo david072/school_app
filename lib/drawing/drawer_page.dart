@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:school_app/_drawing/drawer.dart';
+import 'package:school_app/drawing/drawing_painter.dart';
+import 'package:school_app/drawing/drawing_state.dart';
 
-import 'types.dart';
+class DrawerPage extends StatefulWidget {
+  const DrawerPage({
+    Key? key,
+    this.drawing,
+  }) : super(key: key);
 
-void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: 'School App',
-    home: HomePage(),
-  ));
-}
-
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final Drawing? drawing;
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<DrawerPage> createState() => _DrawerPageState();
 }
 
 // TODO: Use InteractiveViewer or something for panning
-class _HomePageState extends State<HomePage> {
-  DrawerState state = DrawerState(drawing: Drawing());
+class _DrawerPageState extends State<DrawerPage> {
+  late DrawerState state;
+
+  @override
+  void initState() {
+    super.initState();
+    state = DrawerState(drawing: widget.drawing ?? Drawing());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +81,7 @@ class _HomePageState extends State<HomePage> {
               onPointerMove: (event) =>
                   setState(() => state.addPointOffset(event.localPosition)),
               child: SizedBox.expand(
-                child: CustomPaint(painter: DrawerPainter(state: state)),
+                child: CustomPaint(painter: DrawingPainter(state: state)),
               ),
             ),
           ),

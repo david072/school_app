@@ -1,41 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
+import 'package:school_app/drawing/drawing_state.dart';
 
-import 'types.dart';
-
-// TODO: - Display something under the cursor when hovering
-enum PenType { pen, eraser }
-
-class DrawerState {
-  Drawing drawing;
-  Color activeColor = Colors.black;
-  PenType activePen = PenType.pen;
-
-  void setActiveColor(Color color) => activeColor = color;
-
-  void newLine() => drawing.lines.add(Line(color: activeColor));
-
-  void addPoint(double x, double y) {
-    // TODO: With this approach, the two ends are being connected when entering
-    //  again
-    if (x < 0 || y < 0) return;
-    drawing.addPoint(x, y);
-  }
-
-  void addPointOffset(Offset offset) => addPoint(offset.dx, offset.dy);
-
-  DrawerState({
-    required this.drawing,
-    Color? activeColor,
-  }) {
-    if (activeColor != null) this.activeColor = activeColor;
-  }
-}
-
-class DrawerPainter extends CustomPainter {
-  DrawerPainter({
-    required this.state,
-  });
+class DrawingPainter extends CustomPainter {
+  DrawingPainter({required this.state});
 
   final DrawerState state;
 

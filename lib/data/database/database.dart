@@ -48,6 +48,8 @@ abstract class Database {
   void editNotebook(String id, String name, String subjectId);
 
   void deleteNotebook(String id);
+
+  bool hasAccount();
 }
 
 /// Helper to move all completed tasks to the bottom of the list,

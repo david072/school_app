@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:email_validator/email_validator.dart';
@@ -208,5 +209,14 @@ class _PasswordTextFormFieldState extends State<PasswordTextFormField> {
       ),
       obscureText: obscureText,
     );
+  }
+}
+
+Future<bool> isNetworkAvailable() async {
+  try {
+    final result = await InternetAddress.lookup('example.com');
+    return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+  } catch (_) {
+    return false;
   }
 }
