@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:school_app/data/notebook.dart';
 import 'package:school_app/drawing/drawer_page.dart';
 import 'package:school_app/drawing/drawing_state.dart';
@@ -28,9 +26,7 @@ class _LoadDrawingPageState extends State<LoadDrawingPage> {
   }
 
   Future<void> loadDrawing() async {
-    final documentsDir = await getApplicationDocumentsDirectory();
-    final path = p.join(documentsDir.path, widget.notebook.subject.id,
-        '${widget.notebook.id}.sanote');
+    final path = await widget.notebook.filePath();
     final file = File(path);
 
     // TEMP!

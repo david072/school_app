@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:school_app/data/database/database.dart';
@@ -129,13 +130,16 @@ class _NotebookState extends State<_Notebook> {
                 builder: (_) =>
                     CreateNotebookPage(notebookToEdit: widget.notebook))),
         () => showConfirmationDialog(
-              context: context,
+          context: context,
               title: 'Löschen',
               content:
                   'Möchtest du das Heft \'${widget.notebook.name}\' wirklich löschen?',
               cancelText: 'Abbrechen',
               confirmText: 'Löschen',
-              onConfirm: () => Database.I.deleteNotebook(widget.notebook.id),
+              onConfirm: () async {
+                widget.notebook.filePath().then((path) => File(path).delete());
+                Database.I.deleteNotebook(widget.notebook.id);
+              },
             ),
       ],
       child: AnimatedContainer(
