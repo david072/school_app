@@ -137,7 +137,9 @@ class _NotebookState extends State<_Notebook> {
               cancelText: 'Abbrechen',
               confirmText: 'Löschen',
               onConfirm: () async {
-                widget.notebook.filePath().then((path) => File(path).delete());
+                widget.notebook
+                    .fullFilePath()
+                    .then((path) => File(path).delete());
                 Database.I.deleteNotebook(widget.notebook.id);
               },
             ),

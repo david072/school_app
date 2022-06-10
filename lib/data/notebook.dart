@@ -11,10 +11,12 @@ class Notebook {
 
   const Notebook(this.id, this.name, this.subject);
 
-  Future<String> filePath() async {
+  Future<String> fullFilePath() async {
     final documentsDir = await getApplicationDocumentsDirectory();
-    return join(documentsDir.path, subject.id, '${id}.sanote');
+    return join(documentsDir.path, filePath());
   }
+
+  String filePath() => join(subject.id, '$id.sanote');
 
   static Future<Notebook> fromDocument(
       DocumentSnapshot<Map<String, dynamic>> doc) {

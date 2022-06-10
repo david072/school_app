@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/notebook.dart';
 import 'package:school_app/drawing/drawer_page.dart';
 import 'package:school_app/drawing/drawing_state.dart';
@@ -26,12 +28,11 @@ class _LoadDrawingPageState extends State<LoadDrawingPage> {
   }
 
   Future<void> loadDrawing() async {
-    final path = await widget.notebook.filePath();
+    final path = await widget.notebook.fullFilePath();
     final file = File(path);
 
     // TEMP!
-    // if (!Database.I.hasAccount() || !await isNetworkAvailable()) {
-    if (true) {
+    if (!Database.I.hasAccount() || !await isNetworkAvailable()) {
       // Load local file
       if (!await file.exists()) {
         await file.create(recursive: true);
@@ -44,7 +45,20 @@ class _LoadDrawingPageState extends State<LoadDrawingPage> {
         await file.writeAsString(string);
       }
     } else {
-      // Download from Firebase Storage
+      var ref =
+          FirebaseStorage.instance.ref().child(widget.notebook.filePath());
+      try {
+        var metadata = await ref.getMetadata();
+        if (!await file.exists()) {
+          ref.writeToFile(file);
+        } else {
+          var modified = await file.lastModified();
+          if (metadata.updated != null &&
+              modified.isBefore(metadata.updated!)) {
+            ref.writeToFile(file);
+          }
+        }
+      } catch (_) {}
     }
 
     final drawing = await Drawing.fromFile(path);
@@ -59,6 +73,10 @@ class _LoadDrawingPageState extends State<LoadDrawingPage> {
     // `drawing` was modified by [DrawerPage]
     var newFileContent = drawing.toString();
     await file.writeAsString(newFileContent);
+    await FirebaseStorage.instance
+        .ref()
+        .child(widget.notebook.filePath())
+        .putFile(file);
   }
 
   @override
