@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/notebook.dart';
+import 'package:school_app/data/remote_storage.dart';
 import 'package:school_app/drawing/load_drawing_page.dart';
 import 'package:school_app/pages/home/footer.dart';
 import 'package:school_app/pages/notebooks/create_notebook_page.dart';
@@ -140,6 +141,7 @@ class _NotebookState extends State<_Notebook> {
                 widget.notebook
                     .fullFilePath()
                     .then((path) => File(path).delete());
+                RemoteStorage.delete(widget.notebook);
                 Database.I.deleteNotebook(widget.notebook.id);
               },
             ),
