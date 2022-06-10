@@ -162,12 +162,14 @@ class DatabaseFirestore implements Database {
   }
 
   @override
-  void createNotebook(String name, String subjectId) {
-    _collection(_notebooksCollection).add({
+  String createNotebook(String name, String subjectId) {
+    var newNotebook = _collection(_notebooksCollection).doc();
+    newNotebook.set({
       'name': name,
       'subject_id': subjectId,
       'user_id': _requireUser().uid,
     });
+    return newNotebook.id;
   }
 
   @override

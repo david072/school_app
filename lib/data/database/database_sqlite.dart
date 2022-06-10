@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/notebook.dart';
+import 'package:school_app/data/remote_storage.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
@@ -297,6 +300,8 @@ class DatabaseSqlite extends Database {
     if (!await sqflite.databaseExists(await _databasePath())) return;
 
     var db = await sqflite.openDatabase(await _databasePath());
+
+    Database.use(DatabaseSqlite());
     var firestoreDb = DatabaseFirestore();
 
     var subjects = await db.query(_subjectsTable);
@@ -326,8 +331,33 @@ class DatabaseSqlite extends Database {
 
     var notebooks = await db.query(_notebooksTable);
     for (final row in notebooks) {
+      var notebook = await Notebook.fromRow(row);
       var subjectId = subjectIdsMap[row['subject_id'] as int]!;
-      firestoreDb.createNotebook(row['name'] as String, subjectId);
+      var notebookId = firestoreDb.createNotebook(notebook.name, subjectId);
+
+      // Notebook file
+      var file = File(await notebook.fullFilePath());
+      if (!await file.exists()) continue;
+
+      final documentsDir = await getApplicationDocumentsDirectory();
+      // Create new directory structure with the correct ids
+      var newFile =
+          File(join(documentsDir.path, subjectId, '$notebookId.sanote'));
+      await newFile.create(recursive: true);
+      // Copy `file` to `newFile`
+      var oldFileContent = await file.readAsString();
+      await newFile.writeAsString(oldFileContent);
+
+      // Delete old file (`file`)
+      var parent = file.parent;
+      await file.delete();
+      // If old parent dir is empty, delete it too
+      if (parent.listSync().isEmpty) await parent.delete();
+
+      await RemoteStorage.uploadStringToPath(
+        oldFileContent,
+        '$subjectId/$notebookId.sanote',
+      );
     }
 
     sqflite.deleteDatabase(await _databasePath());

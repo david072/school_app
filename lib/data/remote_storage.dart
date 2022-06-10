@@ -27,6 +27,17 @@ class RemoteStorage {
     await ref.delete();
   }
 
+  static Future<void> uploadFromFile(Notebook notebook, File file) async {
+    await FirebaseStorage.instance
+        .ref()
+        .child(notebook.filePath().replaceAll('\\', '/'))
+        .putFile(file);
+  }
+
+  static Future<void> uploadStringToPath(String contents, String path) async {
+    await FirebaseStorage.instance.ref().child(path).putString(contents);
+  }
+
   /// There is no `.exists()` function on a reference, so we have to use this
   /// workaround.
   static Future<bool> _exists(Reference reference) async {
@@ -39,5 +50,7 @@ class RemoteStorage {
   }
 
   static Reference _notebookReference(Notebook notebook) =>
-      FirebaseStorage.instance.ref().child(notebook.filePath());
+      FirebaseStorage.instance
+          .ref()
+          .child(notebook.filePath().replaceAll('\\', '/'));
 }

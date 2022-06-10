@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/notebook.dart';
@@ -64,10 +63,7 @@ class _LoadDrawingPageState extends State<LoadDrawingPage> {
     var newFileContent = drawing.toString();
     await file.writeAsString(newFileContent);
     if (Database.I.hasAccount()) {
-      await FirebaseStorage.instance
-          .ref()
-          .child(widget.notebook.filePath())
-          .putFile(file);
+      RemoteStorage.uploadFromFile(widget.notebook, file);
     }
   }
 

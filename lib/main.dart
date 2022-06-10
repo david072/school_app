@@ -56,8 +56,8 @@ class _SetupState extends State<Setup> {
 
     if (sharedPreferences.getBool(noAccountKey) ?? false) {
       Database.use(DatabaseSqlite());
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const HomePage()));
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (_) => const HomePage(hasAccount: false)));
       return;
     }
 
