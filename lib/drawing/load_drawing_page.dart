@@ -32,18 +32,9 @@ class _LoadDrawingPageState extends State<LoadDrawingPage> {
     final path = await widget.notebook.fullFilePath();
     final file = File(path);
 
-    // TEMP!
     if (!Database.I.hasAccount() || !await isNetworkAvailable()) {
-      // Load local file
       if (!await file.exists()) {
         await file.create(recursive: true);
-
-        var string = "";
-        for (int i = 0; i < 100; i++) {
-          string += '$i;$i|';
-        }
-        string += randomColor().value.toString();
-        await file.writeAsString(string);
       }
     } else {
       var ref =
