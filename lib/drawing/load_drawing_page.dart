@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/notebook.dart';
+import 'package:school_app/data/remote_storage.dart';
 import 'package:school_app/drawing/drawer_page.dart';
 import 'package:school_app/drawing/drawing_state.dart';
 import 'package:school_app/util.dart';
@@ -37,21 +38,17 @@ class _LoadDrawingPageState extends State<LoadDrawingPage> {
         await file.create(recursive: true);
       }
     } else {
-      var ref =
-          FirebaseStorage.instance.ref().child(widget.notebook.filePath());
-      try {
-        var metadata = await ref.getMetadata();
-        if (!await file.exists()) {
-          await file.create(recursive: true);
-          await ref.writeToFile(file);
-        } else {
-          var modified = await file.lastModified();
-          if (metadata.updated != null &&
-              modified.isBefore(metadata.updated!)) {
-            await ref.writeToFile(file);
-          }
+      var metadata = await RemoteStorage.getMetadata(widget.notebook);
+      if (metadata == null) return;
+
+      if (!await file.exists()) {
+        await RemoteStorage.download(file, widget.notebook);
+      } else {
+        var modified = await file.lastModified();
+        if (metadata.updated != null && modified.isBefore(metadata.updated!)) {
+          await RemoteStorage.download(file, widget.notebook);
         }
-      } catch (_) {}
+      }
     }
 
     final drawing = await Drawing.fromFile(path);
