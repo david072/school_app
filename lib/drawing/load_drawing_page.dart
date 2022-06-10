@@ -38,14 +38,15 @@ class _LoadDrawingPageState extends State<LoadDrawingPage> {
       }
     } else {
       var metadata = await RemoteStorage.getMetadata(widget.notebook);
-      if (metadata == null) return;
-
-      if (!await file.exists()) {
-        await RemoteStorage.download(file, widget.notebook);
-      } else {
-        var modified = await file.lastModified();
-        if (metadata.updated != null && modified.isBefore(metadata.updated!)) {
+      if (metadata != null) {
+        if (!await file.exists()) {
           await RemoteStorage.download(file, widget.notebook);
+        } else {
+          var modified = await file.lastModified();
+          if (metadata.updated != null &&
+              modified.isBefore(metadata.updated!)) {
+            await RemoteStorage.download(file, widget.notebook);
+          }
         }
       }
     }
