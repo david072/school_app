@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -50,12 +51,13 @@ class _LoadDrawingPageState extends State<LoadDrawingPage> {
       try {
         var metadata = await ref.getMetadata();
         if (!await file.exists()) {
-          ref.writeToFile(file);
+          await file.create(recursive: true);
+          await ref.writeToFile(file);
         } else {
           var modified = await file.lastModified();
           if (metadata.updated != null &&
               modified.isBefore(metadata.updated!)) {
-            ref.writeToFile(file);
+            await ref.writeToFile(file);
           }
         }
       } catch (_) {}
@@ -73,10 +75,12 @@ class _LoadDrawingPageState extends State<LoadDrawingPage> {
     // `drawing` was modified by [DrawerPage]
     var newFileContent = drawing.toString();
     await file.writeAsString(newFileContent);
-    await FirebaseStorage.instance
-        .ref()
-        .child(widget.notebook.filePath())
-        .putFile(file);
+    if (Database.I.hasAccount()) {
+      await FirebaseStorage.instance
+          .ref()
+          .child(widget.notebook.filePath())
+          .putFile(file);
+    }
   }
 
   @override
