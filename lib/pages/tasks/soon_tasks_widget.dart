@@ -7,15 +7,18 @@ import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/home/footer.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
 import 'package:school_app/pages/tasks/view_task_page.dart';
+import 'package:school_app/sizes.dart';
 import 'package:school_app/util.dart';
 
 class TaskListWidget extends StatefulWidget {
   const TaskListWidget({
     Key? key,
+    this.isHorizontal = false,
     this.maxDateTime,
     this.subjectFilter,
   }) : super(key: key);
 
+  final bool isHorizontal;
   final DateTime? maxDateTime;
   final Subject? subjectFilter;
 
@@ -57,70 +60,80 @@ class _TaskListWidgetState extends State<TaskListWidget> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              child: GestureDetector(
-                onTapDown: (details) =>
-                    longPressPosition = details.globalPosition,
-                child: DataTable(
-                  showCheckboxColumn: false,
-                  columns: const [
-                    DataColumn(label: Text('Fertig')),
-                    DataColumn(label: Text('Fälligkeitsdatum')),
-                    DataColumn(label: Text('Titel')),
-                    DataColumn(label: Text('Fach')),
-                  ],
-                  rows: tasks
-                      .map(
-                        (task) => _taskRow(
-                          context,
-                          task,
-                          () => showPopupMenu(
-                            context: context,
-                            items: const [
-                              PopupMenuItem(
-                                value: 0,
-                                child: Text('Bearbeiten'),
-                              ),
-                              PopupMenuItem(
-                                value: 1,
-                                child: Text('Löschen'),
-                              ),
-                            ],
-                            longPressPosition: longPressPosition,
-                            functions: [
-                              () => Navigator.push(
+            child: LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: GestureDetector(
+                    onTapDown: (details) =>
+                        longPressPosition = details.globalPosition,
+                    child: ConstrainedBox(
+                      constraints:
+                          BoxConstraints(minWidth: constraints.minWidth),
+                      child: DataTable(
+                        columnSpacing: isSmallScreen(context) ? 20 : null,
+                        showCheckboxColumn: false,
+                        columns: const [
+                          DataColumn(label: Text('Fertig')),
+                          DataColumn(label: Text('Fällig')),
+                          DataColumn(label: Text('Titel')),
+                          DataColumn(label: Text('Fach')),
+                        ],
+                        rows: tasks
+                            .map(
+                              (task) => _taskRow(
+                                context,
+                                task,
+                                () => showPopupMenu(
+                                  context: context,
+                                  items: const [
+                                    PopupMenuItem(
+                                      value: 0,
+                                      child: Text('Bearbeiten'),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 1,
+                                      child: Text('Löschen'),
+                                    ),
+                                  ],
+                                  longPressPosition: longPressPosition,
+                                  functions: [
+                                    () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => CreateTaskPage(
+                                                taskToEdit: task),
+                                          ),
+                                        ),
+                                    () => showConfirmationDialog(
+                                          context: context,
+                                          title: 'Löschen',
+                                          content:
+                                              'Möchtest du die Aufgabe \'${task.title}\' wirklich löschen?',
+                                          cancelText: 'Abbrechen',
+                                          confirmText: 'Löschen',
+                                          onConfirm: () =>
+                                              Database.I.deleteTask(task.id),
+                                        ),
+                                  ],
+                                ),
+                                () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          CreateTaskPage(taskToEdit: task),
-                                    ),
-                                  ),
-                              () => showConfirmationDialog(
-                                context: context,
-                                    title: 'Löschen',
-                                    content:
-                                        'Möchtest du die Aufgabe \'${task.title}\' wirklich löschen?',
-                                    cancelText: 'Abbrechen',
-                                    confirmText: 'Löschen',
-                                    onConfirm: () =>
-                                        Database.I.deleteTask(task.id),
-                                  ),
-                            ],
-                          ),
-                          () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) =>
-                                      ViewTaskPage(taskId: task.id))),
-                        ),
-                      )
-                      .toList(),
+                                        builder: (_) =>
+                                            ViewTaskPage(taskId: task.id))),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
           Footer(
-            reverse: true,
+            reverse: widget.isHorizontal ? true : false,
             displayName: 'Aufgaben',
             count: tasks.length,
             onAdd: () => Navigator.push(

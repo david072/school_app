@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
 import 'package:school_app/pages/subjects/subject_page.dart';
+import 'package:school_app/sizes.dart';
 import 'package:school_app/util.dart';
 
 import '../../data/subject.dart';
@@ -44,9 +45,8 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
           Expanded(
             child: subjects.isNotEmpty
                 ? GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: isSmallScreen(context) ? 3 : 4,
                     ),
                     itemCount: subjects.length,
                     itemBuilder: (ctx, i) => _Subject(subject: subjects[i]),
@@ -151,15 +151,17 @@ class _SubjectState extends State<_Subject> {
               color: widget.subject.color,
               size: 40,
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: isSmallScreen(context) ? 10 : 20),
             Text(
               widget.subject.name,
-              style: Theme.of(context).textTheme.headline6,
+              style: isSmallScreen(context)
+                  ? Theme.of(context).textTheme.bodyLarge
+                  : Theme.of(context).textTheme.headline6,
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: isSmallScreen(context) ? 5 : 10),
             // TODO: Task count
             // Text('$taskCount Aufgabe${taskCount == 1 ? '' : 'n'}',
             //     style: Theme.of(context).textTheme.caption),

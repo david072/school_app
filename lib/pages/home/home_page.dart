@@ -27,7 +27,9 @@ class _HomePageState extends State<HomePage> {
 
     List<Widget> children = [
       TaskListWidget(
-          maxDateTime: DateTime.now().date.add(const Duration(days: 7))),
+        isHorizontal: isHorizontal,
+        maxDateTime: DateTime.now().date.add(const Duration(days: 7)),
+      ),
       const VerticalDivider(width: 0),
       const SubjectsWidget(),
     ];

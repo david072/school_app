@@ -6,6 +6,7 @@ import 'package:school_app/data/database/database_sqlite.dart';
 import 'package:school_app/main.dart';
 import 'package:school_app/pages/auth/signup_page.dart';
 import 'package:school_app/pages/home/home_page.dart';
+import 'package:school_app/sizes.dart';
 import 'package:school_app/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -84,84 +85,89 @@ class _LoginPageState extends State<LoginPage> {
         title: const Text('Login'),
       ),
       body: Center(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width / 2,
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextFormField(
-                  key: emailFieldKey,
-                  enabled: enabled,
-                  keyboardType: TextInputType.emailAddress,
-                  onChanged: (s) => setState(() => email = s),
-                  validator: InputValidator.validateEmail,
-                  decoration: buildInputDecoration('Email'),
-                ),
-                const SizedBox(height: 30),
-                PasswordTextFormField(
-                  enabled: enabled,
-                  onChanged: (s) => password = s,
-                ),
-                const SizedBox(height: 80),
-                MaterialButton(
-                  onPressed: enabled ? signIn : null,
-                  minWidth: double.infinity,
-                  color: Theme.of(context).colorScheme.primary,
-                  child: enabled || isContinuingWithoutAccount
-                      ? const Text('LOGIN')
-                      : const CircularProgressIndicator(),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: resetPassword,
-                          child: const Text('PASSWORT VERGESSEN'),
+        child: SingleChildScrollView(
+          child: SizedBox(
+            width: formWidth(context),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  TextFormField(
+                    key: emailFieldKey,
+                    enabled: enabled,
+                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (s) => setState(() => email = s),
+                    validator: InputValidator.validateEmail,
+                    decoration: buildInputDecoration('Email'),
+                  ),
+                  const SizedBox(height: 30),
+                  PasswordTextFormField(
+                    enabled: enabled,
+                    onChanged: (s) => password = s,
+                  ),
+                  const SizedBox(height: 80),
+                  MaterialButton(
+                    onPressed: enabled ? signIn : null,
+                    minWidth: double.infinity,
+                    color: Theme.of(context).colorScheme.primary,
+                    child: enabled || isContinuingWithoutAccount
+                        ? const Text('LOGIN')
+                        : const CircularProgressIndicator(),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: resetPassword,
+                            child: const Text('PASSWORT VERGESSEN'),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: enabled
-                      ? () => Navigator.push(context,
-                          MaterialPageRoute(builder: (_) => const SignUpPage()))
-                      : null,
-                  child: const Text('REGISTRIEREN'),
-                ),
-                showContinueWithoutAccountButton
-                    ? TextButton(
-                        onPressed: enabled
-                            ? () async {
-                                setState(() {
-                                  enabled = false;
-                                  isContinuingWithoutAccount = true;
-                                });
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  TextButton(
+                    onPressed: enabled
+                        ? () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const SignUpPage()))
+                        : null,
+                    child: const Text('REGISTRIEREN'),
+                  ),
+                  showContinueWithoutAccountButton
+                      ? TextButton(
+                          onPressed: enabled
+                              ? () async {
+                                  setState(() {
+                                    enabled = false;
+                                    isContinuingWithoutAccount = true;
+                                  });
 
-                                var sharedPreferences =
-                                    await SharedPreferences.getInstance();
-                                sharedPreferences.setBool(noAccountKey, true);
+                                  var sharedPreferences =
+                                      await SharedPreferences.getInstance();
+                                  sharedPreferences.setBool(noAccountKey, true);
 
-                                if (!mounted) return;
-                                Database.use(DatabaseSqlite());
-                                Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) =>
-                                            const HomePage(hasAccount: false)));
-                              }
-                            : null,
-                        child: !isContinuingWithoutAccount
-                            ? const Text('OHNE ACCOUNT FORTFAHREN')
-                            : const CircularProgressIndicator(),
-                      )
-                    : Container(),
-              ],
+                                  if (!mounted) return;
+                                  Database.use(DatabaseSqlite());
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => const HomePage(
+                                              hasAccount: false)));
+                                }
+                              : null,
+                          child: !isContinuingWithoutAccount
+                              ? const Text('OHNE ACCOUNT FORTFAHREN')
+                              : const CircularProgressIndicator(),
+                        )
+                      : Container(),
+                ],
+              ),
             ),
           ),
         ),

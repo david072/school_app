@@ -5,6 +5,7 @@ import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/database/database_sqlite.dart';
 import 'package:school_app/main.dart';
 import 'package:school_app/pages/home/home_page.dart';
+import 'package:school_app/sizes.dart';
 import 'package:school_app/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -69,51 +70,53 @@ class _SignUpPageState extends State<SignUpPage> {
         title: const Text('Registrieren'),
       ),
       body: Center(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width / 2,
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                TextFormField(
-                  enabled: enabled,
-                  keyboardType: TextInputType.emailAddress,
-                  onChanged: (s) => setState(() => email = s),
-                  validator: InputValidator.validateEmail,
-                  decoration: buildInputDecoration('Email'),
-                ),
-                const SizedBox(height: 30),
-                PasswordTextFormField(
-                  enabled: enabled,
-                  onChanged: (s) => setState(() => password = s),
-                ),
-                const SizedBox(height: 30),
-                PasswordTextFormField(
-                  labelText: 'Passwort bestätigen',
-                  enabled: enabled,
-                  onChanged: (s) => setState(() => confirmPassword = s),
-                  validator: (s) {
-                    if (s == null || s.isEmpty) {
-                      return 'Bitte gib ein Passwort an';
-                    }
-                    if (s != password) {
-                      return 'Passwörter stimmen nicht überein';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 80),
-                MaterialButton(
-                  onPressed: enabled ? signUp : null,
-                  minWidth: double.infinity,
-                  color: Theme.of(context).colorScheme.primary,
-                  child: enabled
-                      ? const Text('REGISTRIEREN')
-                      : const CircularProgressIndicator(),
-                ),
-              ],
+        child: SingleChildScrollView(
+          child: SizedBox(
+            width: formWidth(context),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  TextFormField(
+                    enabled: enabled,
+                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (s) => setState(() => email = s),
+                    validator: InputValidator.validateEmail,
+                    decoration: buildInputDecoration('Email'),
+                  ),
+                  const SizedBox(height: 30),
+                  PasswordTextFormField(
+                    enabled: enabled,
+                    onChanged: (s) => setState(() => password = s),
+                  ),
+                  const SizedBox(height: 30),
+                  PasswordTextFormField(
+                    labelText: 'Passwort bestätigen',
+                    enabled: enabled,
+                    onChanged: (s) => setState(() => confirmPassword = s),
+                    validator: (s) {
+                      if (s == null || s.isEmpty) {
+                        return 'Bitte gib ein Passwort an';
+                      }
+                      if (s != password) {
+                        return 'Passwörter stimmen nicht überein';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 80),
+                  MaterialButton(
+                    onPressed: enabled ? signUp : null,
+                    minWidth: double.infinity,
+                    color: Theme.of(context).colorScheme.primary,
+                    child: enabled
+                        ? const Text('REGISTRIEREN')
+                        : const CircularProgressIndicator(),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

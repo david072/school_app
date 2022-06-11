@@ -5,6 +5,7 @@ import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/tasks/clickable_row.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
+import 'package:school_app/sizes.dart';
 import 'package:school_app/util.dart';
 
 class ViewTaskPage extends StatefulWidget {
@@ -94,7 +95,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
             ),
             body: Center(
               child: SizedBox(
-                width: MediaQuery.of(context).size.width / 2,
+                width: formWidth(context),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
