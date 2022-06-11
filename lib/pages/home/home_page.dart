@@ -48,19 +48,26 @@ class _HomePageState extends State<HomePage> {
                 )
               : Container(),
           TextButton.icon(
-            onPressed: () async {
-              if (widget.hasAccount) {
-                await FirebaseAuth.instance.signOut();
-                if (!mounted) return;
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (_) => const LoginPage()));
-              } else {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const SignUpPage(migrate: true)));
-              }
-            },
+            onPressed: () => showConfirmationDialog(
+              context: context,
+              title: 'Ausloggen',
+              content: 'Möchtest du dich wirklich ausloggen?',
+              cancelText: 'Abbrechen',
+              confirmText: 'Ausloggen',
+              onConfirm: () async {
+                if (widget.hasAccount) {
+                  await FirebaseAuth.instance.signOut();
+                  if (!mounted) return;
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (_) => const LoginPage()));
+                } else {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const SignUpPage(migrate: true)));
+                }
+              },
+            ),
             label: Text(widget.hasAccount ? 'Logout' : 'Account erstellen',
                 style: const TextStyle(color: Colors.white)),
             icon: Icon(
