@@ -134,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                       : null,
                   child: const Text('REGISTRIEREN'),
                 ),
-                !showContinueWithoutAccountButton
+                showContinueWithoutAccountButton
                     ? TextButton(
                         onPressed: enabled
                             ? () async {
@@ -152,7 +152,8 @@ class _LoginPageState extends State<LoginPage> {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (_) => const HomePage()));
+                                        builder: (_) =>
+                                            const HomePage(hasAccount: false)));
                               }
                             : null,
                         child: !isContinuingWithoutAccount

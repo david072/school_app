@@ -31,10 +31,10 @@
               "client_type": 3
             },
             {
-              "client_id": "1010403205282-ganafi5brb37emiktlesjpoig0u5n4i4.apps.googleusercontent.com",
+              "client_id": "1010403205282-20m1cs5bkrt7krpo4irqn9ebbii5i1bl.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.schoolApp"
+                "bundle_id": "de.david072.schoolApp"
               }
             }
           ]

@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app/background_worker.dart';
@@ -35,57 +37,97 @@ class Setup extends StatefulWidget {
 }
 
 class _SetupState extends State<Setup> {
+  String? error;
+
   @override
   void initState() {
     super.initState();
     setup();
   }
 
+  /// Initializes app dependencies and decides whether the user should
+  /// continue on the [LoginPage] or on the [HomePage].
   Future<void> setup() async {
-    await Workmanager().initialize(callbackDispatcher);
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
+    bool crashlyticsReady = false;
+    try {
+      await Workmanager().initialize(callbackDispatcher);
 
-    await BackgroundWorker.requestNotificationPermissions();
-    BackgroundWorker.schedule();
+      await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform);
 
-    GetIt.I.allowReassignment = true;
+      // Disable Crashlytics when in debug mode
+      if (kDebugMode) {
+        await FirebaseCrashlytics.instance
+            .setCrashlyticsCollectionEnabled(false);
+      } else {
+        FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+        crashlyticsReady = true;
+      }
 
-    var sharedPreferences = await SharedPreferences.getInstance();
-    if (!mounted) return;
+      // Initialize BackgroundWorker and schedule if necessary
+      await BackgroundWorker.requestNotificationPermissions();
+      BackgroundWorker.schedule();
 
-    if (sharedPreferences.getBool(noAccountKey) ?? false) {
-      Database.use(DatabaseSqlite());
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const HomePage()));
-      return;
-    }
+      // Allow reassignment of in GetIt registered singletons
+      GetIt.I.allowReassignment = true;
 
-    var user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const LoginPage()));
-    } else {
-      Database.use(DatabaseFirestore());
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const HomePage()));
+      var sharedPreferences = await SharedPreferences.getInstance();
+      if (!mounted) return;
+
+      // Go to HomePage without login if the user does not have an account
+      if (sharedPreferences.getBool(noAccountKey) ?? false) {
+        Database.use(DatabaseSqlite());
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (_) => const HomePage(hasAccount: false)));
+        return;
+      }
+
+      // Go to LoginPage / HomePage depending on whether the user is logged in
+      var user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => const LoginPage()));
+      } else {
+        Database.use(DatabaseFirestore());
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => const HomePage()));
+      }
+    } catch (e, stack) {
+      setState(() => error = '$e\n\n$stack');
+
+      if (!kDebugMode && !crashlyticsReady) {
+        FirebaseCrashlytics.instance.recordError(e, stack);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    var children = [
+      error == null
+          ? const CircularProgressIndicator()
+          : const Icon(Icons.error, color: Colors.red),
+      const SizedBox(height: 40),
+      Text(
+        error == null ? 'Starte...' : 'Fehler!',
+        style: Theme.of(context).textTheme.headline5,
+      ),
+    ];
+
+    if (error != null) {
+      children.add(const SizedBox(height: 20));
+      children.add(Text(error!));
+    }
+
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 40),
-            Text(
-              'Starte...',
-              style: Theme.of(context).textTheme.headline5,
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: children,
+          ),
         ),
       ),
     );
