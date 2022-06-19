@@ -143,8 +143,8 @@ class BackgroundWorker {
 
   static void schedule() {
     var now = DateTime.now();
-    var day = now.hour < 12 ? now.day : now.day + 1;
-    var nextRunTime = DateTime(now.year, now.month, day, 12);
+    var day = now.hour < 14 ? now.day : now.day + 1;
+    var nextRunTime = DateTime(now.year, now.month, day, 14);
 
     Workmanager().registerOneOffTask(
       _workName,
