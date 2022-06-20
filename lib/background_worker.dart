@@ -15,19 +15,25 @@ import 'package:workmanager/workmanager.dart';
 class BackgroundWorker {
   static const _workName = 'notification-background-worker';
   static const _notificationIdKey = 'background-worker-notification-id';
+  static const _processedTaskIdsKey = 'background-worker-processed-task-ids';
+
+  static const _lastRunHourKey = 'background-worker-last-run-hour';
+  static const _runHours = [13, 14, 15, 16, 18];
 
   static late AndroidNotificationChannel notificationChannel;
   static late FlutterLocalNotificationsPlugin localNotificationsPlugin;
+
+  static SharedPreferences? sharedPreferences;
 
   static Future<bool> run() async {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
     await initializeNotifications();
 
-    var sharedPreferences = await SharedPreferences.getInstance();
-    var notificationId = sharedPreferences.getInt(_notificationIdKey) ?? 0;
+    sharedPreferences = await SharedPreferences.getInstance();
+    var notificationId = sharedPreferences!.getInt(_notificationIdKey) ?? 0;
 
-    var noAccount = sharedPreferences.getBool(noAccountKey);
+    var noAccount = sharedPreferences!.getBool(noAccountKey);
     if (noAccount ?? false) {
       Database.use(DatabaseSqlite());
     } else {
@@ -39,6 +45,8 @@ class BackgroundWorker {
     var tasks = await Database.I.queryTasksOnce();
     var now = DateTime.now().date;
     for (final task in tasks) {
+      if (await hasProcessedTask(task.id)) continue;
+
       if (task.dueDate.isBefore(now) || task.dueDate.isAtSameMomentAs(now)) {
         Database.I.deleteTask(task.id);
         continue;
@@ -53,15 +61,34 @@ class BackgroundWorker {
           'Die Aufgabe \'${task.title}\' (${task.subject.name}) ist ${task.formatRelativeDueDate()} fällig.',
         );
       }
+
+      markTaskProcessed(task.id);
     }
 
     // Loop around at 200
     if (notificationId > 200) notificationId = 0;
-    sharedPreferences.setInt(_notificationIdKey, notificationId);
+    sharedPreferences!.setInt(_notificationIdKey, notificationId);
 
     // Re-schedule self to have a periodic worker
     schedule();
     return true;
+  }
+
+  static Future<bool> hasProcessedTask(String id) async {
+    sharedPreferences ??= await SharedPreferences.getInstance();
+
+    var list = sharedPreferences!.getStringList(_processedTaskIdsKey);
+    if (list == null) return false;
+
+    return list.contains(id);
+  }
+
+  static Future<void> markTaskProcessed(String id) async {
+    sharedPreferences ??= await SharedPreferences.getInstance();
+
+    var list = sharedPreferences!.getStringList(_processedTaskIdsKey) ?? [];
+    if (!list.contains(id)) list.add(id);
+    sharedPreferences!.setStringList(_processedTaskIdsKey, list);
   }
 
   static Future<void> sendNotification(
@@ -141,15 +168,40 @@ class BackgroundWorker {
     }
   }
 
-  static void schedule() {
+  static Future<int> getNextRunHour() async {
+    sharedPreferences ??= await SharedPreferences.getInstance();
+    var lastRunHour = sharedPreferences!.getInt(_lastRunHourKey);
+
+    var nextRunHour = 0;
+    if (lastRunHour == null) {
+      nextRunHour = _runHours[0];
+    } else {
+      nextRunHour =
+          _runHours[(_runHours.indexOf(lastRunHour) + 1) % _runHours.length];
+    }
+
+    sharedPreferences!.setInt(_lastRunHourKey, nextRunHour);
+    return nextRunHour;
+  }
+
+  static Future<void> resetProcessedTasks() async {
+    sharedPreferences ??= await SharedPreferences.getInstance();
+    sharedPreferences!.setStringList(_processedTaskIdsKey, []);
+  }
+
+  static Future<void> schedule() async {
+    var nextRunHour = await getNextRunHour();
+    if (nextRunHour == _runHours[0]) resetProcessedTasks();
+
     var now = DateTime.now();
-    var day = now.hour < 14 ? now.day : now.day + 1;
-    var nextRunTime = DateTime(now.year, now.month, day, 14);
+    var day = now.hour < nextRunHour ? now.day : now.day + 1;
+    var nextRunTime = DateTime(now.year, now.month, day, nextRunHour);
 
     Workmanager().registerOneOffTask(
       _workName,
       _workName,
       initialDelay: nextRunTime.difference(now),
+      existingWorkPolicy: ExistingWorkPolicy.keep,
     );
   }
 }

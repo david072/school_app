@@ -68,11 +68,9 @@ class DatabaseFirestore implements Database {
         .where('user_id', isEqualTo: _requireUser().uid)
         .where('subject_id', isEqualTo: id)
         .get();
-    // Run deletions in parallel (prob not significant but doesn't hurt)
     for (final task in tasks.docs) {
       task.reference.delete();
     }
-    // await Future.wait(futures);
 
     _delete(_subjectsCollection, id);
   }
