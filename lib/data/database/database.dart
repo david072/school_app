@@ -39,6 +39,8 @@ abstract class Database {
   void updateTaskStatus(String id, bool completed);
 
   void deleteTask(String id);
+
+  void deleteAllData();
 }
 
 /// Helper to move all completed tasks to the bottom of the list,

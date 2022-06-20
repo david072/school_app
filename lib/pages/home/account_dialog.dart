@@ -1,8 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app/data/auth.dart';
+import 'package:school_app/data/database/database.dart';
+import 'package:school_app/main.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountDialog extends StatefulWidget {
   const AccountDialog({Key? key}) : super(key: key);
@@ -35,16 +38,31 @@ class _AccountDialogState extends State<AccountDialog> {
                   builder: (_) => const _ChangePasswordDialog(),
                 );
 
-                if (result) {
-                  await FirebaseAuth.instance.signOut();
-                  if (!mounted) return;
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (_) => const LoginPage()));
-                }
+                if (!result) return;
+                await FirebaseAuth.instance.signOut();
+                if (!mounted) return;
+                Navigator.pop(context);
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (_) => const LoginPage()));
               },
             ),
-          )
+          ),
+          const SizedBox(height: 20),
+          TextButton(
+            child: const Text('ACCOUNT LÖSCHEN'),
+            onPressed: () async {
+              bool result = await showDialog(
+                context: context,
+                builder: (_) => const _DeleteAccountDialog(),
+              );
+
+              if (!result) return;
+              if (!mounted) return;
+              Navigator.pop(context);
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const LoginPage()));
+            },
+          ),
         ],
       ),
     );
@@ -84,10 +102,16 @@ class _SensitiveUserActionDialog extends StatefulWidget {
   const _SensitiveUserActionDialog({
     Key? key,
     required this.children,
+    required this.confirmText,
+    required this.title,
+    required this.successText,
     required this.doAction,
   }) : super(key: key);
 
   final List<Widget> children;
+  final String confirmText;
+  final String title;
+  final String successText;
   final Future<String?> Function() doAction;
 
   @override
@@ -122,7 +146,7 @@ class _SensitiveUserActionDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Passwort ändern'),
+      title: Text(widget.title),
       content: Form(
         key: formKey,
         child: Column(
@@ -134,10 +158,7 @@ class _SensitiveUserActionDialogState
               : state == _SensitiveUserActionState.working
                   ? [const CircularProgressIndicator()]
                   : state == _SensitiveUserActionState.done
-                      ? [
-                          const Text(
-                              'Dein Passwort wurde erfolgreich geändert.')
-                        ]
+                      ? [Text(widget.successText)]
                       : [Text('Ein Fehler ist aufgetreten.\n\nFehler: $error')],
         ),
       ),
@@ -149,7 +170,7 @@ class _SensitiveUserActionDialogState
               ),
               TextButton(
                 onPressed: changePassword,
-                child: const Text('ÄNDERN'),
+                child: Text(widget.confirmText),
               ),
             ]
           : state == _SensitiveUserActionState.done ||
@@ -180,6 +201,10 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return _SensitiveUserActionDialog(
+      title: 'Passwort ändern',
+      confirmText: 'ÄNDERN',
+      successText: 'Dein Passwort wurde erfolgreich geändert.',
+      doAction: () => Authentication.updatePassword(oldPassword, password),
       children: [
         PasswordTextFormField(
           labelText: 'Altes Passwort',
@@ -202,7 +227,43 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
           },
         )
       ],
-      doAction: () => Authentication.updatePassword(oldPassword, password),
+    );
+  }
+}
+
+class _DeleteAccountDialog extends StatefulWidget {
+  const _DeleteAccountDialog({Key? key}) : super(key: key);
+
+  @override
+  State<_DeleteAccountDialog> createState() => _DeleteAccountDialogState();
+}
+
+class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
+  String password = "";
+
+  @override
+  Widget build(BuildContext context) {
+    return _SensitiveUserActionDialog(
+      title: 'Account löschen',
+      confirmText: 'LÖSCHEN',
+      successText: 'Dein Account wurde erfolgreich gelöscht.',
+      doAction: () async {
+        // Re-authenticate first
+        var reauthenticateResult =
+            await Authentication.reauthenticate(password);
+        if (reauthenticateResult != null) return reauthenticateResult;
+
+        Database.I.deleteAllData();
+        var sharedPreferences = await SharedPreferences.getInstance();
+        sharedPreferences.remove(noAccountKey);
+
+        return Authentication.deleteUser();
+      },
+      children: [
+        PasswordTextFormField(
+          onChanged: (s) => password = s,
+        ),
+      ],
     );
   }
 }

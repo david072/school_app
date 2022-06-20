@@ -182,6 +182,9 @@ class DatabaseSqlite extends Database {
     database!.delete(_tasksTable, where: 'id = ?', whereArgs: [int.parse(id)]);
   }
 
+  @override
+  void deleteAllData() async => throw Exception("This should not be called!");
+
   /// NOTE: Calls to this function wait for a previous call to finish. This
   /// prevents overriding [database] with a following call to the function.
   /// Each execution waits for the previous one, using the [_openRunning]

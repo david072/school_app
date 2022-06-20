@@ -38,6 +38,21 @@ class Authentication {
     }
   }
 
+  static Future<String?> reauthenticate(String password) async {
+    var user = FirebaseAuth.instance.currentUser;
+    if (user == null) return 'No user';
+
+    try {
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: user.email!, password: password);
+    } on FirebaseAuthException catch (e) {
+      print("reauthenticate error: $e");
+      return e.code;
+    }
+
+    return null;
+  }
+
   static Future<String?> sendPasswordReset(String email) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
@@ -50,16 +65,24 @@ class Authentication {
 
   static Future<String?> updatePassword(
       String oldPassword, String newPassword) async {
-    var user = FirebaseAuth.instance.currentUser;
-    if (user == null) return 'No user';
-
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: user.email!, password: oldPassword);
+      var reauthenticateResult = await reauthenticate(oldPassword);
+      if (reauthenticateResult != null) return reauthenticateResult;
+
       await FirebaseAuth.instance.currentUser!.updatePassword(newPassword);
       return null;
     } on FirebaseAuthException catch (e) {
       print("update password error: $e");
+      return e.code;
+    }
+  }
+
+  static Future<String?> deleteUser() async {
+    try {
+      await FirebaseAuth.instance.currentUser!.delete();
+      return null;
+    } on FirebaseAuthException catch (e) {
+      print("delete user error: $e");
       return e.code;
     }
   }

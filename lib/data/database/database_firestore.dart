@@ -146,6 +146,24 @@ class DatabaseFirestore implements Database {
   @override
   void deleteTask(String id) => _delete(_tasksCollection, id);
 
+  @override
+  void deleteAllData() async {
+    var tasks = await _collection(_tasksCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .get();
+    var subjects = await _collection(_subjectsCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .get();
+
+    for (final task in tasks.docs) {
+      task.reference.delete();
+    }
+
+    for (final subject in subjects.docs) {
+      subject.reference.delete();
+    }
+  }
+
   CollectionReference<Map<String, dynamic>> _collection(String collection) =>
       FirebaseFirestore.instance.collection(collection);
 
