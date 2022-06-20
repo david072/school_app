@@ -180,7 +180,29 @@ DataRow _taskRow(BuildContext context, Task task, void Function() onLongPress,
       ),
       DataCell(Text(task.formatRelativeDueDate(),
           style: Theme.of(context).textTheme.bodyLarge)),
-      DataCell(Text(task.title, style: Theme.of(context).textTheme.bodyLarge)),
+      DataCell(
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: task.title,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              WidgetSpan(
+                  child: task.description.isNotEmpty
+                      ? const SizedBox(width: 10)
+                      : Container()),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: task.description.isNotEmpty
+                    ? Icon(Icons.sticky_note_2_outlined,
+                        color: Theme.of(context).hintColor)
+                    : Container(),
+              )
+            ],
+          ),
+        ),
+      ),
       DataCell(
         RichText(
           text: TextSpan(
