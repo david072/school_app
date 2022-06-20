@@ -1,16 +1,16 @@
-# school_app
+# School App
+An app targeted at students to organize their tasks.
 
-A new Flutter project.
+## Supported devices
+- Android - Tablet, Phone
+- iOS - Tablet, Phone (not available on this repo)
+- *To come: Desktop*
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Features
+- Create subjects with a title, an abbreviation and a color
+- Create tasks that belong to a subject, have a title and a description and a due date and a reminder date
+- Receive reminders in the form of notifications for tasks that are due soon.<br>
+  When the tasks reminder date is today or has passed, the app will remind the user every day to complete the task until the task has been marked as completed.
+- Create an account to sync your tasks across your devices and receive notifications on all of them
+- Alternatively, use the app without an account to have all data stored locally.<br>
+  You can later still migrate your account to a cloud based one. This will not delete any data.
