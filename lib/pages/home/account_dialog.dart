@@ -78,39 +78,45 @@ class _Row extends StatelessWidget {
   }
 }
 
-enum _ChangePasswordState { waiting, working, done, error }
+enum _SensitiveUserActionState { waiting, working, done, error }
 
-class _ChangePasswordDialog extends StatefulWidget {
-  const _ChangePasswordDialog({Key? key}) : super(key: key);
+class _SensitiveUserActionDialog extends StatefulWidget {
+  const _SensitiveUserActionDialog({
+    Key? key,
+    required this.children,
+    required this.doAction,
+  }) : super(key: key);
+
+  final List<Widget> children;
+  final Future<String?> Function() doAction;
 
   @override
-  State<_ChangePasswordDialog> createState() => _ChangePasswordDialogState();
+  State<_SensitiveUserActionDialog> createState() =>
+      _SensitiveUserActionDialogState();
 }
 
-class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
+class _SensitiveUserActionDialogState
+    extends State<_SensitiveUserActionDialog> {
   final GlobalKey formKey = GlobalKey<FormState>();
 
-  String password = "";
-  String oldPassword = "";
-
-  var state = _ChangePasswordState.waiting;
+  var state = _SensitiveUserActionState.waiting;
   String? error;
 
   Future<void> changePassword() async {
     var formState = formKey.currentState! as FormState;
     if (!formState.validate()) return;
 
-    setState(() => state = _ChangePasswordState.working);
+    setState(() => state = _SensitiveUserActionState.working);
 
-    var result = await Authentication.updatePassword(oldPassword, password);
+    var result = await widget.doAction();
     if (result != null) {
-      state = _ChangePasswordState.error;
+      state = _SensitiveUserActionState.error;
       error = result;
       setState(() {});
       return;
     }
 
-    setState(() => state = _ChangePasswordState.done);
+    setState(() => state = _SensitiveUserActionState.done);
   }
 
   @override
@@ -123,32 +129,11 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: state == _ChangePasswordState.waiting
-              ? [
-                  PasswordTextFormField(
-                    labelText: 'Altes Passwort',
-                    onChanged: (s) => oldPassword = s,
-                  ),
-                  PasswordTextFormField(
-                    onChanged: (s) => password = s,
-                  ),
-                  PasswordTextFormField(
-                    labelText: 'Passwort bestätigen',
-                    onChanged: (_) {},
-                    validator: (s) {
-                      if (s == null || s.isEmpty) {
-                        return 'Bitte gib ein Passwort an';
-                      }
-                      if (s != password) {
-                        return 'Passwörter stimmen nicht überein';
-                      }
-                      return null;
-                    },
-                  )
-                ]
-              : state == _ChangePasswordState.working
+          children: state == _SensitiveUserActionState.waiting
+              ? widget.children
+              : state == _SensitiveUserActionState.working
                   ? [const CircularProgressIndicator()]
-                  : state == _ChangePasswordState.done
+                  : state == _SensitiveUserActionState.done
                       ? [
                           const Text(
                               'Dein Passwort wurde erfolgreich geändert.')
@@ -156,7 +141,7 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                       : [Text('Ein Fehler ist aufgetreten.\n\nFehler: $error')],
         ),
       ),
-      actions: state == _ChangePasswordState.waiting
+      actions: state == _SensitiveUserActionState.waiting
           ? [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -167,16 +152,57 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                 child: const Text('ÄNDERN'),
               ),
             ]
-          : state == _ChangePasswordState.done ||
-                  state == _ChangePasswordState.error
+          : state == _SensitiveUserActionState.done ||
+                  state == _SensitiveUserActionState.error
               ? [
                   TextButton(
                     onPressed: () => Navigator.pop(
-                        context, state == _ChangePasswordState.done),
+                        context, state == _SensitiveUserActionState.done),
                     child: const Text('FERTIG'),
                   )
                 ]
               : [],
+    );
+  }
+}
+
+class _ChangePasswordDialog extends StatefulWidget {
+  const _ChangePasswordDialog({Key? key}) : super(key: key);
+
+  @override
+  State<_ChangePasswordDialog> createState() => _ChangePasswordDialogState();
+}
+
+class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
+  String oldPassword = "";
+  String password = "";
+
+  @override
+  Widget build(BuildContext context) {
+    return _SensitiveUserActionDialog(
+      children: [
+        PasswordTextFormField(
+          labelText: 'Altes Passwort',
+          onChanged: (s) => oldPassword = s,
+        ),
+        PasswordTextFormField(
+          onChanged: (s) => password = s,
+        ),
+        PasswordTextFormField(
+          labelText: 'Passwort bestätigen',
+          onChanged: (_) {},
+          validator: (s) {
+            if (s == null || s.isEmpty) {
+              return 'Bitte gib ein Passwort an';
+            }
+            if (s != password) {
+              return 'Passwörter stimmen nicht überein';
+            }
+            return null;
+          },
+        )
+      ],
+      doAction: () => Authentication.updatePassword(oldPassword, password),
     );
   }
 }
