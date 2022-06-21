@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/auth.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
@@ -44,9 +45,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
       if (!mounted) return;
       Database.use(DatabaseFirestore());
-      Navigator.pop(context);
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const HomePage()));
+      Get.back();
+      Get.off(() => const HomePage());
       return;
     }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
 import 'package:school_app/pages/subjects/subject_page.dart';
@@ -78,8 +79,7 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
           Footer(
             displayName: 'Fächer',
             count: subjects.length,
-            onAdd: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const CreateSubjectPage())),
+            onAdd: () => Get.to(() => const CreateSubjectPage()),
           ),
         ],
       ),
@@ -105,10 +105,7 @@ class _SubjectState extends State<_Subject> {
   @override
   Widget build(BuildContext context) {
     return LongPressPopupMenu(
-      onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (_) => SubjectPage(subjectId: widget.subject.id))),
+      onTap: () => Get.to(() => SubjectPage(subjectId: widget.subject.id)),
       enabled: enabled,
       items: const [
         PopupMenuItem(
@@ -121,13 +118,9 @@ class _SubjectState extends State<_Subject> {
         ),
       ],
       functions: [
-        () => Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (_) =>
-                    CreateSubjectPage(subjectToEdit: widget.subject))),
+        () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
         () => showConfirmationDialog(
-          context: context,
+              context: context,
               title: 'Löschen',
               content:
                   'Möchtest du das Fach \'${widget.subject.name}\' wirklich löschen?\n'

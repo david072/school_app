@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/auth.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
@@ -41,8 +42,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (!mounted) return;
       Database.use(DatabaseFirestore());
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const HomePage()));
+      Get.off(() => const HomePage());
       return;
     }
 
@@ -131,12 +131,8 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 20),
                   TextButton(
-                    onPressed: enabled
-                        ? () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const SignUpPage()))
-                        : null,
+                    onPressed:
+                        enabled ? () => Get.to(() => const SignUpPage()) : null,
                     child: const Text('REGISTRIEREN'),
                   ),
                   showContinueWithoutAccountButton
@@ -154,11 +150,8 @@ class _LoginPageState extends State<LoginPage> {
 
                                   if (!mounted) return;
                                   Database.use(DatabaseSqlite());
-                                  Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => const HomePage(
-                                              hasAccount: false)));
+                                  Get.off(
+                                      () => const HomePage(hasAccount: false));
                                 }
                               : null,
                           child: !isContinuingWithoutAccount
@@ -251,7 +244,7 @@ class _PasswordResetDialogState extends State<_PasswordResetDialog> {
       actions: [
         error != null || hasSentEmail
             ? TextButton(
-                onPressed: () => Navigator.pop(context),
+          onPressed: () => Get.back(),
                 child: const Text('OK'),
               )
             : Container(),

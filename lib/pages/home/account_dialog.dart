@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/auth.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/main.dart';
@@ -41,9 +42,8 @@ class _AccountDialogState extends State<AccountDialog> {
                 if (!result) return;
                 await FirebaseAuth.instance.signOut();
                 if (!mounted) return;
-                Navigator.pop(context);
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (_) => const LoginPage()));
+                Get.back();
+                Get.off(() => const LoginPage());
               },
             ),
           ),
@@ -58,9 +58,8 @@ class _AccountDialogState extends State<AccountDialog> {
 
               if (!result) return;
               if (!mounted) return;
-              Navigator.pop(context);
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const LoginPage()));
+              Get.back();
+              Get.off(() => const LoginPage());
             },
           ),
         ],
@@ -165,7 +164,7 @@ class _SensitiveUserActionDialogState
       actions: state == _SensitiveUserActionState.waiting
           ? [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Get.back(),
                 child: const Text('ABBRECHEN'),
               ),
               TextButton(
@@ -177,8 +176,8 @@ class _SensitiveUserActionDialogState
                   state == _SensitiveUserActionState.error
               ? [
                   TextButton(
-                    onPressed: () => Navigator.pop(
-                        context, state == _SensitiveUserActionState.done),
+                    onPressed: () => Get.back(
+                        result: state == _SensitiveUserActionState.done),
                     child: const Text('FERTIG'),
                   )
                 ]

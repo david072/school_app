@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/sizes.dart';
 import 'package:school_app/util.dart';
@@ -51,7 +52,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
           .editSubject(widget.subjectToEdit!.id, name, abbreviation, color);
     }
 
-    Navigator.pop(context);
+    Get.back();
   }
 
   @override

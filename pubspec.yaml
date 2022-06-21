@@ -35,6 +35,7 @@ dependencies:
   shared_preferences: ^2.0.15
   get_it: ^7.2.0
   path: ^1.8.1
+  get: ^4.6.5
 
 dev_dependencies:
   flutter_test:

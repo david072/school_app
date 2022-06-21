@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
@@ -57,11 +58,8 @@ class _SubjectPageState extends State<SubjectPage> {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) =>
-                              CreateSubjectPage(subjectToEdit: subject!))),
+                  onPressed: () =>
+                      Get.to(() => CreateSubjectPage(subjectToEdit: subject!)),
                 ),
                 IconButton(
                   onPressed: () => showConfirmationDialog(
@@ -74,7 +72,7 @@ class _SubjectPageState extends State<SubjectPage> {
                     confirmText: 'Löschen',
                     onConfirm: () {
                       Database.I.deleteSubject(subject!.id);
-                      Navigator.pop(context);
+                      Get.back();
                     },
                   ),
                   icon: const Icon(Icons.delete),

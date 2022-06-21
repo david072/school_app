@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/auth/signup_page.dart';
 import 'package:school_app/pages/home/account_dialog.dart';
@@ -58,13 +59,9 @@ class _HomePageState extends State<HomePage> {
                 if (widget.hasAccount) {
                   await FirebaseAuth.instance.signOut();
                   if (!mounted) return;
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (_) => const LoginPage()));
+                  Get.off(() => const LoginPage());
                 } else {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const SignUpPage(migrate: true)));
+                  Get.to(() => const SignUpPage(migrate: true));
                 }
               },
             ),

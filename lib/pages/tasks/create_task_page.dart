@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
@@ -88,7 +89,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       );
     }
 
-    Navigator.pop(context);
+    Get.back();
   }
 
   @override
@@ -265,7 +266,7 @@ class _ReminderPicker extends StatelessWidget {
                             lastDate: dueDate,
                             onChanged: (date) {
                               var offset = dueDate.difference(date);
-                              Navigator.pop(context);
+                              Get.back();
                               onChanged(offset, ReminderMode.custom);
                             },
                           );
@@ -276,7 +277,7 @@ class _ReminderPicker extends StatelessWidget {
                             Expanded(
                               child: InkWell(
                                 onTap: () {
-                                  Navigator.pop(context);
+                                  Get.back();
                                   onChanged(val.offset, val);
                                 },
                                 child: Padding(
@@ -422,7 +423,7 @@ class _AlertDialogSubject extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.pop(context);
+        Get.back();
         onChanged(subject);
       },
       child: Row(

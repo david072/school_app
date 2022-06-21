@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app/background_worker.dart';
 import 'package:school_app/data/database/database.dart';
@@ -23,10 +24,11 @@ void callbackDispatcher() {
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MaterialApp(
+  runApp(GetMaterialApp(
     debugShowCheckedModeBanner: false,
     title: 'School App',
-    home: Setup(),
+    home: const Setup(),
+    theme: ThemeData.dark(),
   ));
 }
 
@@ -78,22 +80,17 @@ class _SetupState extends State<Setup> {
       // Go to HomePage without login if the user does not have an account
       if (sharedPreferences.getBool(noAccountKey) ?? false) {
         Database.use(DatabaseSqlite());
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (_) => const HomePage(hasAccount: false)));
+        Get.off(const HomePage(hasAccount: false));
         return;
       }
 
       // Go to LoginPage / HomePage depending on whether the user is logged in
       var user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const LoginPage()));
+        Get.off(() => const LoginPage());
       } else {
         Database.use(DatabaseFirestore());
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const HomePage()));
+        Get.off(() => const HomePage());
       }
     } catch (e, stack) {
       setState(() => error = '$e\n\n$stack');
