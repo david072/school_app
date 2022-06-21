@@ -142,7 +142,13 @@ DataRow _taskRow(BuildContext context, Task task, void Function() onLongPress,
     void Function() onSelectChanged) {
   return DataRow(
     color: MaterialStateProperty.resolveWith((states) {
-      if (task.completed) return Colors.grey.shade300;
+      if (task.completed) {
+        if (!Get.isDarkMode) {
+          return Colors.grey.shade300;
+        } else {
+          return Colors.grey.shade800;
+        }
+      }
       return null;
     }),
     cells: [

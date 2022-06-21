@@ -9,8 +9,8 @@ abstract class Database {
   static Database get I => Get.find<Database>();
 
   static void use(Database db) {
-    Get.delete<Database>();
-    Get.put(db);
+    Get.delete<Database>(force: true);
+    Get.put(db, permanent: true);
   }
 
   Stream<List<Subject>> querySubjects();

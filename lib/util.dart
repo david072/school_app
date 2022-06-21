@@ -4,6 +4,8 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:school_app/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Helper for validating user input in login + sign up forms.
 /// (email & password)
@@ -209,5 +211,22 @@ class _PasswordTextFormFieldState extends State<PasswordTextFormField> {
       ),
       obscureText: obscureText,
     );
+  }
+}
+
+extension Value on ThemeMode {
+  int get value {
+    return ThemeMode.values.indexOf(this);
+  }
+}
+
+Future<ThemeMode> getThemeMode() async {
+  var sp = await SharedPreferences.getInstance();
+  var themeValue = sp.getInt(themeModeKey);
+  switch (themeValue) {
+    case null:
+      return ThemeMode.system;
+    default:
+      return ThemeMode.values[themeValue!];
   }
 }

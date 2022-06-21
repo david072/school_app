@@ -11,10 +11,12 @@ import 'package:school_app/data/database/database_sqlite.dart';
 import 'package:school_app/firebase_options.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/home/home_page.dart';
+import 'package:school_app/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 const noAccountKey = 'no-account';
+const themeModeKey = 'application-theme-mode';
 
 void callbackDispatcher() {
   Workmanager().executeTask(
@@ -23,10 +25,13 @@ void callbackDispatcher() {
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const GetMaterialApp(
+  runApp(GetMaterialApp(
     debugShowCheckedModeBanner: false,
     title: 'School App',
-    home: Setup(),
+    home: const Setup(),
+    theme: ThemeData.light(),
+    darkTheme: ThemeData.dark(),
+    themeMode: ThemeMode.light,
   ));
 }
 
@@ -49,6 +54,8 @@ class _SetupState extends State<Setup> {
   /// Initializes app dependencies and decides whether the user should
   /// continue on the [LoginPage] or on the [HomePage].
   Future<void> setup() async {
+    Get.changeThemeMode(await getThemeMode());
+
     bool crashlyticsReady = false;
     try {
       await Workmanager().initialize(callbackDispatcher);
