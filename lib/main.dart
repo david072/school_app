@@ -17,7 +17,8 @@ import 'package:workmanager/workmanager.dart';
 const noAccountKey = 'no-account';
 
 void callbackDispatcher() {
-  Workmanager().executeTask((taskName, inputData) => BackgroundWorker.run());
+  Workmanager().executeTask(
+      (taskName, inputData) => BackgroundWorker.run(inputData!['runHour']));
 }
 
 void main() {

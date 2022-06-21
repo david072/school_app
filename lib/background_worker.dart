@@ -25,7 +25,7 @@ class BackgroundWorker {
 
   static SharedPreferences? sharedPreferences;
 
-  static Future<bool> run() async {
+  static Future<bool> run(int runHour) async {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
     await initializeNotifications();
@@ -68,6 +68,8 @@ class BackgroundWorker {
     // Loop around at 200
     if (notificationId > 200) notificationId = 0;
     sharedPreferences!.setInt(_notificationIdKey, notificationId);
+
+    sharedPreferences!.setInt(_lastRunHourKey, runHour);
 
     // Re-schedule self to have a periodic worker
     schedule();
@@ -180,7 +182,6 @@ class BackgroundWorker {
           _runHours[(_runHours.indexOf(lastRunHour) + 1) % _runHours.length];
     }
 
-    sharedPreferences!.setInt(_lastRunHourKey, nextRunHour);
     return nextRunHour;
   }
 
@@ -202,6 +203,7 @@ class BackgroundWorker {
       _workName,
       initialDelay: nextRunTime.difference(now),
       existingWorkPolicy: ExistingWorkPolicy.keep,
+      inputData: {'runHour': nextRunHour},
     );
   }
 }
