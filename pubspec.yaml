@@ -23,6 +23,9 @@ dependencies:
   sqflite: ^2.0.2+1
   sqlbrite: ^2.2.0
 
+  # GetX
+  get: ^4.6.5
+
   # Background notification worker
   workmanager: ^0.5.0
   flutter_local_notifications: ^9.6.0
@@ -33,9 +36,7 @@ dependencies:
   lit_relative_date_time: ^1.2.0
   intl: ^0.17.0
   shared_preferences: ^2.0.15
-  get_it: ^7.2.0
   path: ^1.8.1
-  get: ^4.6.5
 
 dev_dependencies:
   flutter_test:

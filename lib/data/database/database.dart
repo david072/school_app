@@ -1,15 +1,16 @@
 import 'dart:ui';
 
-import 'package:get_it/get_it.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
 
 abstract class Database {
   /// Short for `instance`
-  static Database get I => GetIt.I.get<Database>();
+  static Database get I => Get.find<Database>();
 
   static void use(Database db) {
-    GetIt.I.registerSingleton<Database>(db);
+    Get.delete<Database>();
+    Get.put(db);
   }
 
   Stream<List<Subject>> querySubjects();

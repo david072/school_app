@@ -4,7 +4,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_it/get_it.dart';
 import 'package:school_app/background_worker.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
@@ -24,11 +23,10 @@ void callbackDispatcher() {
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(GetMaterialApp(
+  runApp(const GetMaterialApp(
     debugShowCheckedModeBanner: false,
     title: 'School App',
-    home: const Setup(),
-    theme: ThemeData.dark(),
+    home: Setup(),
   ));
 }
 
@@ -70,9 +68,6 @@ class _SetupState extends State<Setup> {
       // Initialize BackgroundWorker and schedule if necessary
       await BackgroundWorker.requestNotificationPermissions();
       BackgroundWorker.schedule();
-
-      // Allow reassignment of in GetIt registered singletons
-      GetIt.I.allowReassignment = true;
 
       var sharedPreferences = await SharedPreferences.getInstance();
       if (!mounted) return;
