@@ -98,5 +98,12 @@ class German {
         'delete_task_confirm':
             'Möchtest du die Aufgabe \'@name\' wirklich löschen?',
         'due_date_colon': 'Fälligkeitsdatum:',
+        'no_reminder': 'Keine',
+        'reminder_one_day': 'Einen Tag vorher',
+        'reminder_two_days': 'Zwei Tage vorher',
+        'reminder_three_days': 'Drei Tage vorher',
+        'reminder_four_days': 'Vier Tage vorher',
+        'reminder_one_week': 'Eine Woche vorher',
+        'reminder_two_weeks': 'Zwei Wochen vorher',
       };
 }

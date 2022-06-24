@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import 'package:lit_relative_date_time/controller/relative_date_format.dart';
 import 'package:lit_relative_date_time/model/relative_date_time.dart';
 import 'package:school_app/data/database/database.dart';
@@ -77,19 +78,19 @@ extension E on ReminderMode {
   String get string {
     switch (this) {
       case ReminderMode.none:
-        return 'Keine';
+        return 'no_reminder'.tr;
       case ReminderMode.oneDayBefore:
-        return 'Einen Tag vorher';
+        return 'reminder_one_day'.tr;
       case ReminderMode.twoDaysBefore:
-        return 'Zwei Tage vorher';
+        return 'reminder_two_days'.tr;
       case ReminderMode.threeDaysBefore:
-        return 'Drei Tage vorher';
+        return 'reminder_three_days'.tr;
       case ReminderMode.fourDaysBefore:
-        return 'Vier Tage vorher';
+        return 'reminder_four_days'.tr;
       case ReminderMode.oneWeekBefore:
-        return 'Eine Woche vorher';
+        return 'reminder_one_week'.tr;
       case ReminderMode.twoWeeksBefore:
-        return 'Zwei Wochen vorher';
+        return 'reminder_two_weeks'.tr;
       case ReminderMode.custom:
         return '';
     }
