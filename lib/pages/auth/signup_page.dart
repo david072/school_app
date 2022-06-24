@@ -6,8 +6,8 @@ import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/database/database_sqlite.dart';
 import 'package:school_app/main.dart';
 import 'package:school_app/pages/home/home_page.dart';
-import 'package:school_app/sizes.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/sizes.dart';
+import 'package:school_app/util/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -53,10 +53,7 @@ class _SignUpPageState extends State<SignUpPage> {
     if (failState == FailState.authentication) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content:
-              Text("Login fehlgeschlagen. Bitte versuche es später nochmal."),
-        ),
+        SnackBar(content: Text('signup_failed'.tr)),
       );
     }
 
@@ -67,7 +64,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Registrieren'),
+        title: Text('signup_title'.tr),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -84,7 +81,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     keyboardType: TextInputType.emailAddress,
                     onChanged: (s) => setState(() => email = s),
                     validator: InputValidator.validateEmail,
-                    decoration: buildInputDecoration('Email'),
+                    decoration: buildInputDecoration('email'.tr),
                   ),
                   const SizedBox(height: 30),
                   PasswordTextFormField(
@@ -93,15 +90,15 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   const SizedBox(height: 30),
                   PasswordTextFormField(
-                    labelText: 'Passwort bestätigen',
+                    labelText: 'confirm_password'.tr,
                     enabled: enabled,
                     onChanged: (s) => setState(() => confirmPassword = s),
                     validator: (s) {
                       if (s == null || s.isEmpty) {
-                        return 'Bitte gib ein Passwort an';
+                        return 'password_missing'.tr;
                       }
                       if (s != password) {
-                        return 'Passwörter stimmen nicht überein';
+                        return 'password_not_matching'.tr;
                       }
                       return null;
                     },
@@ -112,7 +109,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     minWidth: double.infinity,
                     color: Theme.of(context).colorScheme.primary,
                     child: enabled
-                        ? const Text('REGISTRIEREN')
+                        ? Text('register_caps'.tr)
                         : const CircularProgressIndicator(),
                   ),
                 ],

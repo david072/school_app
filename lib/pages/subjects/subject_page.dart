@@ -6,7 +6,7 @@ import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/util.dart';
 
 class SubjectPage extends StatefulWidget {
   const SubjectPage({
@@ -64,12 +64,11 @@ class _SubjectPageState extends State<SubjectPage> {
                 IconButton(
                   onPressed: () => showConfirmationDialog(
                     context: context,
-                    title: 'Löschen',
-                    content:
-                        'Möchtest du das Fach \'${subject!.name}\' wirklich löschen?\n'
-                        'Dadurch werden auch alle Aufgaben mit diesem Fach gelöscht!',
-                    cancelText: 'Abbrechen',
-                    confirmText: 'Löschen',
+                    title: 'delete'.tr,
+                    content: 'confirm_delete_subject'
+                        .trParams({'name': subject!.name}),
+                    cancelText: 'cancel_caps'.tr,
+                    confirmText: 'delete_caps'.tr,
                     onConfirm: () {
                       Database.I.deleteSubject(subject!.id);
                       Get.back();

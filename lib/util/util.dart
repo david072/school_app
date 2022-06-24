@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class InputValidator {
   static String? validateEmail(String? email) {
     if (email == null || !EmailValidator.validate(email)) {
-      return 'Bitte gib eine gültige Email-Adresse an';
+      return 'email_address_missing'.tr;
     }
 
     return null;
@@ -20,9 +20,9 @@ class InputValidator {
 
   static String? validatePassword(String? password) {
     if (password == null || password.isEmpty) {
-      return 'Bitte gib ein Passwort an';
+      return 'password_missing'.tr;
     } else if (password.length < 6) {
-      return 'Das Passwort muss mindestens 6 Zeichen lang sein';
+      return 'password_too_short'.tr;
     }
 
     return null;
@@ -30,7 +30,7 @@ class InputValidator {
 
   static String? validateNotEmpty(String? s) {
     if (s == null || s.isEmpty) {
-      return 'Darf nicht leer sein';
+      return 'cannot_be_empty'.tr;
     }
 
     return null;
@@ -61,10 +61,7 @@ Future<void> showPopupMenu(
       Overlay.of(context)?.context.findRenderObject() as RenderBox?;
   if (overlay == null) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-            'Ein unerwarteter Fehler ist aufgetreten (Error: No RenderBox found).'),
-      ),
+      SnackBar(content: Text('unexpected_error_no_renderbox'.tr)),
     );
     return;
   }

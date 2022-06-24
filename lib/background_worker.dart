@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/database/database_sqlite.dart';
 import 'package:school_app/firebase_options.dart';
 import 'package:school_app/main.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -57,8 +58,15 @@ class BackgroundWorker {
               task.reminder.isAtSameMomentAs(now))) {
         sendNotification(
           notificationId++,
-          '${task.title} bald fällig (${task.subject.abbreviation})',
-          'Die Aufgabe \'${task.title}\' (${task.subject.name}) ist ${task.formatRelativeDueDate()} fällig.',
+          'task_notification_title'.trParams({
+            'title': task.title,
+            'subjectAbb': task.subject.abbreviation,
+          }),
+          'task_notification_content'.trParams({
+            'title': task.title,
+            'subjectName': task.subject.name,
+            'relDueDate': task.formatRelativeDueDate(),
+          }),
         );
       }
 
@@ -114,11 +122,10 @@ class BackgroundWorker {
   }
 
   static Future<void> initializeNotifications() async {
-    notificationChannel = const AndroidNotificationChannel(
+    notificationChannel = AndroidNotificationChannel(
       'task_notifications',
-      'Aufgaben erinnerungen',
-      description:
-          'Die App sendet Erinnerungen für nicht abgeschlossene Aufgaben über diesen Kanal.',
+      'notification_channel_name'.tr,
+      description: 'notification_channel_description'.tr,
       importance: Importance.high,
     );
     localNotificationsPlugin = FlutterLocalNotificationsPlugin();

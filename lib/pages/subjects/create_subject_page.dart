@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
-import 'package:school_app/sizes.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/sizes.dart';
+import 'package:school_app/util/util.dart';
 
 import '../../data/subject.dart';
 
@@ -59,9 +59,8 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.subjectToEdit == null
-            ? 'Fach erstellen'
-            : 'Fach bearbeiten'),
+        title:
+            Text(widget.subjectToEdit == null ? 'cs_title'.tr : 'es_title'.tr),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -81,7 +80,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                         child: TextFormField(
                           initialValue: widget.subjectToEdit?.name,
                           enabled: enabled,
-                          decoration: buildInputDecoration('Name'),
+                          decoration: buildInputDecoration('name'.tr),
                           onChanged: (s) => name = s,
                           validator: InputValidator.validateNotEmpty,
                         ),
@@ -92,7 +91,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                         child: TextFormField(
                           initialValue: widget.subjectToEdit?.abbreviation,
                           enabled: enabled,
-                          decoration: buildInputDecoration('Abkürzung'),
+                          decoration: buildInputDecoration('abbreviation'.tr),
                           onChanged: (s) => abbreviation = s,
                           validator: InputValidator.validateNotEmpty,
                         ),
@@ -112,7 +111,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                       padding: const EdgeInsets.only(top: 8, bottom: 8),
                       child: Row(
                         children: [
-                          const Text('Farbe'),
+                          Text('color'.tr),
                           Expanded(
                             child: Align(
                               alignment: Alignment.centerRight,
@@ -137,8 +136,8 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                     color: Theme.of(context).colorScheme.primary,
                     child: enabled
                         ? Text(widget.subjectToEdit == null
-                            ? 'ERSTELLEN'
-                            : 'SPEICHERN')
+                            ? 'create_caps'.tr
+                            : 'save_caps'.tr)
                         : const CircularProgressIndicator(),
                   ),
                 ],
@@ -164,7 +163,7 @@ class _ColorPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Wähle eine Farbe'),
+      title: Text('color_picker_title'.tr),
       content: SingleChildScrollView(
         child: ColorPicker(
           pickerColor: color,

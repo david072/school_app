@@ -8,8 +8,8 @@ import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/home/footer.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
 import 'package:school_app/pages/tasks/view_task_page.dart';
-import 'package:school_app/sizes.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/sizes.dart';
+import 'package:school_app/util/util.dart';
 
 class TaskListWidget extends StatefulWidget {
   const TaskListWidget({
@@ -74,11 +74,11 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                       child: DataTable(
                         columnSpacing: isSmallScreen(context) ? 20 : null,
                         showCheckboxColumn: false,
-                        columns: const [
-                          DataColumn(label: Text('Fertig')),
-                          DataColumn(label: Text('Fällig')),
-                          DataColumn(label: Text('Titel')),
-                          DataColumn(label: Text('Fach')),
+                        columns: [
+                          DataColumn(label: Text('done'.tr)),
+                          DataColumn(label: Text('due'.tr)),
+                          DataColumn(label: Text('title'.tr)),
+                          DataColumn(label: Text('subject'.tr)),
                         ],
                         rows: tasks
                             .map(
@@ -87,14 +87,14 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                                 task,
                                 () => showPopupMenu(
                                   context: context,
-                                  items: const [
+                                  items: [
                                     PopupMenuItem(
                                       value: 0,
-                                      child: Text('Bearbeiten'),
+                                      child: Text('edit'.tr),
                                     ),
                                     PopupMenuItem(
                                       value: 1,
-                                      child: Text('Löschen'),
+                                      child: Text('delete'.tr),
                                     ),
                                   ],
                                   longPressPosition: longPressPosition,
@@ -102,12 +102,12 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                                     () => Get.to(
                                         () => CreateTaskPage(taskToEdit: task)),
                                     () => showConfirmationDialog(
-                                          context: context,
-                                          title: 'Löschen',
-                                          content:
-                                              'Möchtest du die Aufgabe \'${task.title}\' wirklich löschen?',
-                                          cancelText: 'Abbrechen',
-                                          confirmText: 'Löschen',
+                                      context: context,
+                                          title: 'delete'.tr,
+                                          content: 'delete_task_confirm'
+                                              .trParams({'name': task.title}),
+                                          cancelText: 'cancel_caps'.tr,
+                                          confirmText: 'delete_caps'.tr,
                                           onConfirm: () =>
                                               Database.I.deleteTask(task.id),
                                         ),
@@ -127,7 +127,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
           ),
           Footer(
             reverse: widget.isHorizontal ? true : false,
-            displayName: 'Aufgaben',
+            displayName: 'tasks'.tr,
             count: tasks.length,
             onAdd: () => Get.to(
                 () => CreateTaskPage(initialSubject: widget.subjectFilter)),

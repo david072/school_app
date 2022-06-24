@@ -7,8 +7,8 @@ import 'package:school_app/data/database/database_sqlite.dart';
 import 'package:school_app/main.dart';
 import 'package:school_app/pages/auth/signup_page.dart';
 import 'package:school_app/pages/home/home_page.dart';
-import 'package:school_app/sizes.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/sizes.dart';
+import 'package:school_app/util/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
@@ -49,9 +49,8 @@ class _LoginPageState extends State<LoginPage> {
     if (failState == FailState.authentication) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content:
-              Text("Login fehlgeschlagen. Bitte versuche es später nochmal."),
+        SnackBar(
+          content: Text('login_failed'.tr),
         ),
       );
     }
@@ -82,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: Text('login_title'.tr),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -100,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
                     keyboardType: TextInputType.emailAddress,
                     onChanged: (s) => setState(() => email = s),
                     validator: InputValidator.validateEmail,
-                    decoration: buildInputDecoration('Email'),
+                    decoration: buildInputDecoration('email'.tr),
                   ),
                   const SizedBox(height: 30),
                   PasswordTextFormField(
@@ -113,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                     minWidth: double.infinity,
                     color: Theme.of(context).colorScheme.primary,
                     child: enabled || isContinuingWithoutAccount
-                        ? const Text('LOGIN')
+                        ? Text('submit_button'.tr)
                         : const CircularProgressIndicator(),
                   ),
                   Row(
@@ -123,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: resetPassword,
-                            child: const Text('PASSWORT VERGESSEN'),
+                            child: Text('forgot_password_button'.tr),
                           ),
                         ),
                       ),
@@ -133,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                   TextButton(
                     onPressed:
                         enabled ? () => Get.to(() => const SignUpPage()) : null,
-                    child: const Text('REGISTRIEREN'),
+                    child: Text('register_caps'.tr),
                   ),
                   showContinueWithoutAccountButton
                       ? TextButton(
@@ -155,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                                 }
                               : null,
                           child: !isContinuingWithoutAccount
-                              ? const Text('OHNE ACCOUNT FORTFAHREN')
+                              ? Text('continue_without_account'.tr)
                               : const CircularProgressIndicator(),
                         )
                       : Container(),
@@ -201,10 +200,9 @@ class _PasswordResetDialogState extends State<_PasswordResetDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Passwort zurücksetzen'),
+      title: Text('password_reset_title'.tr),
       content: error != null
-          ? Text(
-              'Ein Fehler ist aufgetreten. Bitte versuche es später nochmal.\nFehler: $error')
+          ? Text('error_occured'.trParams({'error': error!}))
           : hasSentEmail
               ? SizedBox(
                   width: MediaQuery.of(context).size.width / 2,
@@ -212,7 +210,7 @@ class _PasswordResetDialogState extends State<_PasswordResetDialog> {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: 'Es wurde eine Email an ',
+                          text: 'password_reset_success_start'.tr,
                           style: Theme.of(context)
                               .textTheme
                               .subtitle1
@@ -223,10 +221,7 @@ class _PasswordResetDialogState extends State<_PasswordResetDialog> {
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         TextSpan(
-                          text: ' gesendet, mit welcher du '
-                              'dein Passwort zurücksetzen kannst. Dann kannst du dich hier mit '
-                              'deinem neuen Passwort anmelden.\n\n'
-                              'Bitte schaue auch in deinen Spam-Ordner.',
+                          text: 'password_reset_success_end'.tr,
                           style: Theme.of(context)
                               .textTheme
                               .subtitle1
@@ -244,8 +239,8 @@ class _PasswordResetDialogState extends State<_PasswordResetDialog> {
       actions: [
         error != null || hasSentEmail
             ? TextButton(
-          onPressed: () => Get.back(),
-                child: const Text('OK'),
+                onPressed: () => Get.back(),
+                child: Text('password_reset_confirm'.tr),
               )
             : Container(),
       ],

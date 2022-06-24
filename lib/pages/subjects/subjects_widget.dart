@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
 import 'package:school_app/pages/subjects/subject_page.dart';
-import 'package:school_app/sizes.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/sizes.dart';
+import 'package:school_app/util/util.dart';
 
 import '../../data/subject.dart';
 import '../home/footer.dart';
@@ -57,18 +57,18 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('Keine Fächer',
+                      Text('no_subjects'.tr,
                           style: Theme.of(context).textTheme.headline5),
                       const SizedBox(height: 10),
                       RichText(
                         text: TextSpan(
                           children: [
                             TextSpan(
-                                text: 'Erstelle Fächer mit dem ',
+                                text: 'cs_start'.tr,
                                 style: Theme.of(context).textTheme.bodyMedium),
                             const WidgetSpan(child: Icon(Icons.add, size: 20)),
                             TextSpan(
-                                text: ' unten rechts.',
+                                text: 'cs_end'.tr,
                                 style: Theme.of(context).textTheme.bodyMedium),
                           ],
                         ),
@@ -77,7 +77,7 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
                   ),
           ),
           Footer(
-            displayName: 'Fächer',
+            displayName: 'subjects'.tr,
             count: subjects.length,
             onAdd: () => Get.to(() => const CreateSubjectPage()),
           ),
@@ -107,26 +107,25 @@ class _SubjectState extends State<_Subject> {
     return LongPressPopupMenu(
       onTap: () => Get.to(() => SubjectPage(subjectId: widget.subject.id)),
       enabled: enabled,
-      items: const [
+      items: [
         PopupMenuItem(
           value: 0,
-          child: Text('Bearbeiten'),
+          child: Text('edit'.tr),
         ),
         PopupMenuItem(
           value: 1,
-          child: Text('Löschen'),
+          child: Text('delete'.tr),
         ),
       ],
       functions: [
         () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
         () => showConfirmationDialog(
-              context: context,
-              title: 'Löschen',
-              content:
-                  'Möchtest du das Fach \'${widget.subject.name}\' wirklich löschen?\n'
-                  'Dadurch werden auch alle Aufgaben mit diesem Fach gelöscht!',
-              cancelText: 'Abbrechen',
-              confirmText: 'Löschen',
+          context: context,
+              title: 'delete'.tr,
+              content: 'confirm_delete_subject'
+                  .trParams({'name': widget.subject.name}),
+              cancelText: 'cancel_caps'.tr,
+              confirmText: 'delete_caps'.tr,
               onConfirm: () => Database.I.deleteSubject(widget.subject.id),
             )
       ],

@@ -5,7 +5,7 @@ import 'package:school_app/data/auth.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/main.dart';
 import 'package:school_app/pages/auth/login_page.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountDialog extends StatefulWidget {
@@ -31,7 +31,7 @@ class _AccountDialogState extends State<AccountDialog> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              child: const Text('PASSWORT ÄNDERN'),
+              child: Text('change_password_caps'.tr),
               onPressed: () async {
                 bool result = await showDialog(
                   context: context,
@@ -49,7 +49,7 @@ class _AccountDialogState extends State<AccountDialog> {
           ),
           const SizedBox(height: 20),
           TextButton(
-            child: const Text('ACCOUNT LÖSCHEN'),
+            child: Text('delete_account_caps'.tr),
             onPressed: () async {
               bool result = await showDialog(
                 context: context,
@@ -158,14 +158,16 @@ class _SensitiveUserActionDialogState
                   ? [const CircularProgressIndicator()]
                   : state == _SensitiveUserActionState.done
                       ? [Text(widget.successText)]
-                      : [Text('Ein Fehler ist aufgetreten.\n\nFehler: $error')],
+                      : [
+                          Text('error_occured'.trParams({'error': error!}))
+                        ],
         ),
       ),
       actions: state == _SensitiveUserActionState.waiting
           ? [
               TextButton(
                 onPressed: () => Get.back(),
-                child: const Text('ABBRECHEN'),
+                child: Text('cancel_caps'.tr),
               ),
               TextButton(
                 onPressed: changePassword,
@@ -178,7 +180,7 @@ class _SensitiveUserActionDialogState
                   TextButton(
                     onPressed: () => Get.back(
                         result: state == _SensitiveUserActionState.done),
-                    child: const Text('FERTIG'),
+                    child: Text('done_caps'.tr),
                   )
                 ]
               : [],
@@ -200,27 +202,27 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return _SensitiveUserActionDialog(
-      title: 'Passwort ändern',
-      confirmText: 'ÄNDERN',
-      successText: 'Dein Passwort wurde erfolgreich geändert.',
+      title: 'change_password'.tr,
+      confirmText: 'change_caps'.tr,
+      successText: 'cp_success_text'.tr,
       doAction: () => Authentication.updatePassword(oldPassword, password),
       children: [
         PasswordTextFormField(
-          labelText: 'Altes Passwort',
+          labelText: 'cp_old_password'.tr,
           onChanged: (s) => oldPassword = s,
         ),
         PasswordTextFormField(
           onChanged: (s) => password = s,
         ),
         PasswordTextFormField(
-          labelText: 'Passwort bestätigen',
+          labelText: 'confirm_password'.tr,
           onChanged: (_) {},
           validator: (s) {
             if (s == null || s.isEmpty) {
-              return 'Bitte gib ein Passwort an';
+              return 'password_missing'.tr;
             }
             if (s != password) {
-              return 'Passwörter stimmen nicht überein';
+              return 'passwords_not_matching'.tr;
             }
             return null;
           },
@@ -243,9 +245,9 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
   @override
   Widget build(BuildContext context) {
     return _SensitiveUserActionDialog(
-      title: 'Account löschen',
-      confirmText: 'LÖSCHEN',
-      successText: 'Dein Account wurde erfolgreich gelöscht.',
+      title: 'delete_account'.tr,
+      confirmText: 'delete_caps'.tr,
+      successText: 'da_success_text'.tr,
       doAction: () async {
         // Re-authenticate first
         var reauthenticateResult =

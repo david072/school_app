@@ -6,8 +6,8 @@ import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/tasks/clickable_row.dart';
-import 'package:school_app/sizes.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/sizes.dart';
+import 'package:school_app/util/util.dart';
 
 class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({
@@ -57,8 +57,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
     bool isValid = true;
     if (subject == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bitte wähle ein Fach aus!')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('select_subject_error'.tr)));
       isValid = false;
     }
     if (!validateForm(formKey)) {
@@ -97,8 +97,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.taskToEdit == null
-            ? 'Aufgabe erstellen'
-            : 'Aufgabe bearbeiten'),
+            ? 'create_task_title'.tr
+            : 'edit_task_title'.tr),
       ),
       body: Center(
         child: SizedBox(
@@ -113,14 +113,14 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   TextFormField(
                     initialValue: widget.taskToEdit?.title,
                     enabled: enabled,
-                    decoration: buildInputDecoration('Titel'),
+                    decoration: buildInputDecoration('title'.tr),
                     onChanged: (s) => title = s,
                     validator: InputValidator.validateNotEmpty,
                   ),
                   const SizedBox(height: 40),
                   _DatePicker(
                     enabled: enabled,
-                    prefix: 'Fälligkeitsdatum',
+                    prefix: 'due_date'.tr,
                     date: dueDate,
                     onChanged: (date) => setState(() => dueDate = date),
                   ),
@@ -146,10 +146,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                     initialValue: widget.taskToEdit?.description,
                     enabled: enabled,
                     onChanged: (s) => description = s,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       alignLabelWithHint: true,
-                      labelText: 'Beschreibung',
-                      border: OutlineInputBorder(),
+                      labelText: 'description'.tr,
+                      border: const OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
@@ -161,8 +161,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                     color: Theme.of(context).colorScheme.primary,
                     child: enabled
                         ? Text(widget.taskToEdit == null
-                            ? 'ERSTELLEN'
-                            : 'SPEICHERN')
+                            ? 'create_caps'.tr
+                            : 'save_caps'.tr)
                         : const CircularProgressIndicator(),
                   ),
                 ],
@@ -250,7 +250,7 @@ class _ReminderPicker extends StatelessWidget {
           ? () => showDialog(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Erinnerung:'),
+                  title: Text('reminder_colon'.tr),
                   content: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +259,7 @@ class _ReminderPicker extends StatelessWidget {
                       children: ReminderMode.values.map((val) {
                         if (val == ReminderMode.custom) {
                           return _DatePicker(
-                            prefix: 'Benutzerdefiniert',
+                            prefix: 'user_defined'.tr,
                             highlightPrefix: mode == val,
                             date: dueDate.subtract(reminderOffset),
                             firstDate: DateTime(DateTime.now().year - 5),
@@ -302,7 +302,7 @@ class _ReminderPicker extends StatelessWidget {
                 ),
               )
           : null,
-      left: const Text('Erinnerung:'),
+      left: Text('reminder_colon'.tr),
       right: Text(
         mode != ReminderMode.custom
             ? mode.string
@@ -369,7 +369,7 @@ class _SubjectPickerState extends State<_SubjectPicker> {
                 ? () => showDialog(
                       context: context,
                       builder: (ctx) => AlertDialog(
-                        title: const Text('Fach auswählen'),
+                        title: Text('select_subject'.tr),
                         content: SingleChildScrollView(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,7 +389,7 @@ class _SubjectPickerState extends State<_SubjectPicker> {
                       ),
                     )
                 : null,
-            left: const Text('Fach:'),
+            left: Text('subject_colon'.tr),
             right: Text(
               widget.selectedSubjectId == null
                   ? 'Fach auswählen'

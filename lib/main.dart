@@ -11,7 +11,8 @@ import 'package:school_app/data/database/database_sqlite.dart';
 import 'package:school_app/firebase_options.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/home/home_page.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/translations/app_translations.dart';
+import 'package:school_app/util/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -32,6 +33,9 @@ void main() {
     theme: ThemeData.light(),
     darkTheme: ThemeData.dark(),
     themeMode: ThemeMode.light,
+    translations: AppTranslations(),
+    locale: Get.deviceLocale,
+    fallbackLocale: const Locale('de', 'DE'),
   ));
 }
 
@@ -111,7 +115,7 @@ class _SetupState extends State<Setup> {
           : const Icon(Icons.error, color: Colors.red),
       const SizedBox(height: 40),
       Text(
-        error == null ? 'Starte...' : 'Fehler!',
+        error == null ? 'starting'.tr : 'error'.tr,
         style: Theme.of(context).textTheme.headline5,
       ),
     ];

@@ -7,7 +7,7 @@ import 'package:school_app/pages/home/account_dialog.dart';
 import 'package:school_app/pages/home/settings_page.dart';
 import 'package:school_app/pages/subjects/subjects_widget.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/util.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: Text('home_title'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -56,10 +56,10 @@ class _HomePageState extends State<HomePage> {
           TextButton.icon(
             onPressed: () => showConfirmationDialog(
               context: context,
-              title: 'Ausloggen',
-              content: 'Möchtest du dich wirklich ausloggen?',
-              cancelText: 'Abbrechen',
-              confirmText: 'Ausloggen',
+              title: 'logout'.tr,
+              content: 'confirm_logout_text'.tr,
+              cancelText: 'cancel_caps'.tr,
+              confirmText: 'logout_caps'.tr,
               onConfirm: () async {
                 if (widget.hasAccount) {
                   await FirebaseAuth.instance.signOut();
@@ -70,7 +70,7 @@ class _HomePageState extends State<HomePage> {
                 }
               },
             ),
-            label: Text(widget.hasAccount ? 'Logout' : 'Account erstellen',
+            label: Text(widget.hasAccount ? 'logout'.tr : 'create_account'.tr,
                 style: const TextStyle(color: Colors.white)),
             icon: Icon(
               widget.hasAccount ? Icons.logout : Icons.login,

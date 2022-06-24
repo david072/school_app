@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/main.dart';
-import 'package:school_app/util.dart';
+import 'package:school_app/util/util.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,11 +18,11 @@ class _SettingsPageState extends State<SettingsPage> {
   String modeString([ThemeMode? m]) {
     switch (m ?? mode) {
       case ThemeMode.system:
-        return 'System';
+        return 'system'.tr;
       case ThemeMode.light:
-        return 'Hell';
+        return 'light'.tr;
       case ThemeMode.dark:
-        return 'Dunkel';
+        return 'dark'.tr;
     }
   }
 
@@ -36,21 +36,21 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Einstellungen'),
+        title: Text('settings_title'.tr),
       ),
       body: SettingsList(
         platform: DevicePlatform.android,
         sections: [
           SettingsSection(
-            title: const Text('Darstellung'),
+            title: Text('appearance'.tr),
             tiles: [
               SettingsTile.navigation(
                 leading: const Icon(Icons.dark_mode_outlined),
-                title: const Text('Theme'),
+                title: Text('theme'.tr),
                 onPressed: (context) => showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('Theme auswählen'),
+                    title: Text('select_theme'.tr),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: ThemeMode.values.map((value) {
