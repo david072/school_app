@@ -34,6 +34,7 @@ class BackgroundWorker {
     var localeString = sharedPreferences!.getString(localeStringKey);
     if (localeString != null) {
       var locale = intl_locale.Locale.parse(localeString);
+      Get.deviceLocale;
       Get.locale = Locale(locale.languageCode, locale.countryCode);
       Get.addTranslations(AppTranslations().keys);
     }
@@ -143,4 +144,3 @@ class BackgroundWorker {
     );
   }
 }
-

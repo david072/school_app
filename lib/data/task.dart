@@ -57,7 +57,7 @@ class Task {
 
   String formatRelativeDueDate() {
     var rdt = RelativeDateTime(dateTime: DateTime.now().date, other: dueDate);
-    return const RelativeDateFormat(Locale('de')).format(rdt);
+    return RelativeDateFormat(Get.locale ?? const Locale('de')).format(rdt);
   }
 
   Duration reminderOffset() => dueDate.difference(reminder);
