@@ -95,8 +95,6 @@ class _SetupState extends State<Setup> with AfterLayoutMixin {
       // Schedule BackgroundWorker if necessary
       BackgroundWorker.schedule();
 
-      if (!mounted) return;
-
       // Go to HomePage without login if the user does not have an account
       if (sharedPreferences.getBool(noAccountKey) ?? false) {
         Database.use(DatabaseSqlite());

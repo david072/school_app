@@ -56,6 +56,7 @@ class German {
         'notification_permissions_request_content':
             'Möchtest du Benachrichtigungen von der App über nicht '
                 'abgeschlossene Aufgaben erhalten?',
+        'notification_action_mark_completed': 'Als erledigt markieren',
         'login_failed':
             'Login fehlgeschlagen. Bitte versuche es später nochmal.',
         'login_title': 'Login',

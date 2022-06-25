@@ -55,6 +55,7 @@ class English {
         'notification_permissions_request_content':
             'Would you like to receive notifications from the app about not '
                 'completed tasks?',
+        'notification_action_mark_completed': 'Mark completed',
         'login_failed': 'Login failed. Please try again later.',
         'login_title': 'Login',
         'submit_button': 'LOGIN',

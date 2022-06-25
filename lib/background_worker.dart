@@ -16,13 +16,27 @@ import 'package:workmanager/workmanager.dart';
 
 class BackgroundWorker {
   static const _workName = 'notification-background-worker';
-  static const _notificationIdKey = 'background-worker-notification-id';
   static const _processedTaskIdsKey = 'background-worker-processed-task-ids';
 
   static const _lastRunHourKey = 'background-worker-last-run-hour';
   static const _runHours = [13, 14, 15, 16, 18];
 
   static SharedPreferences? sharedPreferences;
+
+  static Future<bool> setupDatabase() async {
+    sharedPreferences ??= await SharedPreferences.getInstance();
+
+    var noAccount = sharedPreferences!.getBool(noAccountKey);
+    if (noAccount ?? false) {
+      Database.use(DatabaseSqlite());
+    } else {
+      // DatabaseFirestore requires a user. If there is no user, we can't query
+      if (FirebaseAuth.instance.currentUser == null) return false;
+      Database.use(DatabaseFirestore());
+    }
+
+    return true;
+  }
 
   static Future<bool> run(int runHour) async {
     await Firebase.initializeApp(
@@ -39,16 +53,7 @@ class BackgroundWorker {
       Get.addTranslations(AppTranslations().keys);
     }
 
-    var notificationId = sharedPreferences!.getInt(_notificationIdKey) ?? 0;
-
-    var noAccount = sharedPreferences!.getBool(noAccountKey);
-    if (noAccount ?? false) {
-      Database.use(DatabaseSqlite());
-    } else {
-      // DatabaseFirestore requires a user. If there is no user, we can't query
-      if (FirebaseAuth.instance.currentUser == null) return true;
-      Database.use(DatabaseFirestore());
-    }
+    if (!await setupDatabase()) return true;
 
     var tasks = await Database.I.queryTasksOnce();
     var now = DateTime.now().date;
@@ -63,7 +68,8 @@ class BackgroundWorker {
       if (!task.completed &&
           (task.reminder.isBefore(now) ||
               task.reminder.isAtSameMomentAs(now))) {
-        AppNotifications.createNotification(
+        AppNotifications.createTaskNotification(
+          task.id,
           'task_notification_title'.trParams({
             'title': task.title,
             'subjectAbb': task.subject.abbreviation,
@@ -78,10 +84,6 @@ class BackgroundWorker {
 
       markTaskProcessed(task.id);
     }
-
-    // Loop around at 200
-    if (notificationId > 200) notificationId = 0;
-    sharedPreferences!.setInt(_notificationIdKey, notificationId);
 
     sharedPreferences!.setInt(_lastRunHourKey, runHour);
 
@@ -142,5 +144,10 @@ class BackgroundWorker {
       existingWorkPolicy: ExistingWorkPolicy.keep,
       inputData: {'runHour': nextRunHour},
     );
+  }
+
+  static Future<void> markTaskCompleted(String taskId) async {
+    if (!await setupDatabase()) return;
+    Database.I.updateTaskStatus(taskId, true);
   }
 }
