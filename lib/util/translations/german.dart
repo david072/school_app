@@ -34,6 +34,8 @@ class German {
         'subject': 'Fach',
         'tasks': 'Aufgaben',
         'task': 'Aufgabe',
+        'allow_caps': 'ERLAUBEN',
+        'dont_allow_caps': 'NICHT ERLAUBEN',
         'mark_task_completed': 'Abschließen',
         'mark_task_uncompleted': 'Wieder öffnen',
         'starting': 'Starte...',
@@ -50,6 +52,10 @@ class German {
         'notification_channel_name': 'Aufgaben Erinnerungen',
         'notification_channel_description':
             'Die App sendet Erinnerungen für nicht abgeschlossene Aufgaben über diesen Kanal.',
+        'notification_permissions_request_title': 'Benachrichtigungen',
+        'notification_permissions_request_content':
+            'Möchtest du Benachrichtigungen von der App über nicht '
+                'abgeschlossene Aufgaben erhalten?',
         'login_failed':
             'Login fehlgeschlagen. Bitte versuche es später nochmal.',
         'login_title': 'Login',

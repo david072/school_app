@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:after_layout/after_layout.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -11,6 +14,7 @@ import 'package:school_app/data/database/database_sqlite.dart';
 import 'package:school_app/firebase_options.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/home/home_page.dart';
+import 'package:school_app/util/app_notifications.dart';
 import 'package:school_app/util/translations/app_translations.dart';
 import 'package:school_app/util/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,6 +22,7 @@ import 'package:workmanager/workmanager.dart';
 
 const noAccountKey = 'no-account';
 const themeModeKey = 'application-theme-mode';
+const localeStringKey = 'user-locale-string';
 
 void callbackDispatcher() {
   Workmanager().executeTask(
@@ -26,6 +31,8 @@ void callbackDispatcher() {
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  AppNotifications.initialize();
+
   runApp(GetMaterialApp(
     debugShowCheckedModeBanner: false,
     title: 'School App',
@@ -46,18 +53,24 @@ class Setup extends StatefulWidget {
   State<Setup> createState() => _SetupState();
 }
 
-class _SetupState extends State<Setup> {
+class _SetupState extends State<Setup> with AfterLayoutMixin {
   String? error;
 
   @override
-  void initState() {
-    super.initState();
-    setup();
-  }
+  void afterFirstLayout(BuildContext context) => setup();
 
   /// Initializes app dependencies and decides whether the user should
   /// continue on the [LoginPage] or on the [HomePage].
   Future<void> setup() async {
+    var sharedPreferences = await SharedPreferences.getInstance();
+    // Why can I not access the locale from the background worker????
+    if (Get.deviceLocale != null) {
+      sharedPreferences.setString(
+        localeStringKey,
+        "${Get.deviceLocale!.languageCode}_${Get.deviceLocale!.countryCode}",
+      );
+    }
+
     Get.changeThemeMode(await getThemeMode());
 
     bool crashlyticsReady = false;
@@ -76,11 +89,12 @@ class _SetupState extends State<Setup> {
         crashlyticsReady = true;
       }
 
-      // Initialize BackgroundWorker and schedule if necessary
-      await BackgroundWorker.requestNotificationPermissions();
+      if (!mounted) return;
+      await AppNotifications.requestPermissions(context);
+
+      // Schedule BackgroundWorker if necessary
       BackgroundWorker.schedule();
 
-      var sharedPreferences = await SharedPreferences.getInstance();
       if (!mounted) return;
 
       // Go to HomePage without login if the user does not have an account

@@ -34,6 +34,8 @@ class English {
         'subject': 'Subject',
         'tasks': 'Tasks',
         'task': 'Task',
+        'allow_caps': 'ALLOW',
+        'dont_allow_caps': 'DON\'T ALLOW',
         'mark_task_completed': 'Mark completed',
         'mark_task_uncompleted': 'Open again',
         'starting': 'Starting...',
@@ -49,6 +51,10 @@ class English {
         'notification_channel_name': 'Task reminders',
         'notification_channel_description':
             'The app sends reminders for not completed tasks on this channel.',
+        'notification_permissions_request_title': 'Notifications',
+        'notification_permissions_request_content':
+            'Would you like to receive notifications from the app about not '
+                'completed tasks?',
         'login_failed': 'Login failed. Please try again later.',
         'login_title': 'Login',
         'submit_button': 'LOGIN',

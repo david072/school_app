@@ -1,14 +1,15 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/locale.dart' as intl_locale;
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/database/database_sqlite.dart';
 import 'package:school_app/firebase_options.dart';
 import 'package:school_app/main.dart';
+import 'package:school_app/util/app_notifications.dart';
+import 'package:school_app/util/translations/app_translations.dart';
 import 'package:school_app/util/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
@@ -21,17 +22,22 @@ class BackgroundWorker {
   static const _lastRunHourKey = 'background-worker-last-run-hour';
   static const _runHours = [13, 14, 15, 16, 18];
 
-  static late AndroidNotificationChannel notificationChannel;
-  static late FlutterLocalNotificationsPlugin localNotificationsPlugin;
-
   static SharedPreferences? sharedPreferences;
 
   static Future<bool> run(int runHour) async {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
-    await initializeNotifications();
+    AppNotifications.initialize();
 
     sharedPreferences = await SharedPreferences.getInstance();
+
+    var localeString = sharedPreferences!.getString(localeStringKey);
+    if (localeString != null) {
+      var locale = intl_locale.Locale.parse(localeString);
+      Get.locale = Locale(locale.languageCode, locale.countryCode);
+      Get.addTranslations(AppTranslations().keys);
+    }
+
     var notificationId = sharedPreferences!.getInt(_notificationIdKey) ?? 0;
 
     var noAccount = sharedPreferences!.getBool(noAccountKey);
@@ -56,8 +62,7 @@ class BackgroundWorker {
       if (!task.completed &&
           (task.reminder.isBefore(now) ||
               task.reminder.isAtSameMomentAs(now))) {
-        sendNotification(
-          notificationId++,
+        AppNotifications.createNotification(
           'task_notification_title'.trParams({
             'title': task.title,
             'subjectAbb': task.subject.abbreviation,
@@ -101,82 +106,6 @@ class BackgroundWorker {
     sharedPreferences!.setStringList(_processedTaskIdsKey, list);
   }
 
-  static Future<void> sendNotification(
-      int id, String title, String body) async {
-    await localNotificationsPlugin.show(
-      id,
-      title,
-      body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          notificationChannel.id,
-          notificationChannel.name,
-          channelDescription: notificationChannel.description,
-        ),
-        iOS: const IOSNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-        ),
-      ),
-    );
-  }
-
-  static Future<void> initializeNotifications() async {
-    notificationChannel = AndroidNotificationChannel(
-      'task_notifications',
-      'notification_channel_name'.tr,
-      description: 'notification_channel_description'.tr,
-      importance: Importance.high,
-    );
-    localNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-    var initializationSettingsAndroid =
-        const AndroidInitializationSettings('@mipmap/ic_launcher');
-    var initializationSettingsIOS = const IOSInitializationSettings();
-    var initializationSettingsMacOS = const MacOSInitializationSettings();
-    var initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-      macOS: initializationSettingsMacOS,
-    );
-    localNotificationsPlugin.initialize(initializationSettings);
-
-    if (Platform.isAndroid) {
-      await localNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()!
-          .createNotificationChannel(notificationChannel);
-    }
-  }
-
-  static Future<void> requestNotificationPermissions() async {
-    localNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    var initializationSettingsAndroid =
-        const AndroidInitializationSettings('@mipmap/ic_launcher');
-    var initializationSettingsIOS = const IOSInitializationSettings();
-    var initializationSettings = InitializationSettings(
-        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    localNotificationsPlugin.initialize(initializationSettings);
-
-    if (Platform.isIOS) {
-      await localNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()!
-          .requestPermissions(
-            alert: true,
-            badge: true,
-          );
-    } else if (Platform.isMacOS) {
-      await localNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              MacOSFlutterLocalNotificationsPlugin>()!
-          .requestPermissions(
-            alert: true,
-            badge: true,
-          );
-    }
-  }
-
   static Future<int> getNextRunHour() async {
     sharedPreferences ??= await SharedPreferences.getInstance();
     var lastRunHour = sharedPreferences!.getInt(_lastRunHourKey);
@@ -214,3 +143,4 @@ class BackgroundWorker {
     );
   }
 }
+
