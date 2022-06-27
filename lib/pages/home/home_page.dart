@@ -5,6 +5,7 @@ import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/auth/signup_page.dart';
 import 'package:school_app/pages/home/account_dialog.dart';
 import 'package:school_app/pages/home/settings_page.dart';
+import 'package:school_app/pages/home/trash_bin_page.dart';
 import 'package:school_app/pages/subjects/subjects_widget.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 import 'package:school_app/util/util.dart';
@@ -40,6 +41,10 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text('home_title'.tr),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => Get.to(() => const TrashBinPage()),
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () => Get.to(() => const SettingsPage()),

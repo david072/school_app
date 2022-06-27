@@ -4,12 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/task.dart';
+import 'package:school_app/util/util.dart';
 
 import '../subject.dart';
 
 class DatabaseFirestore implements Database {
   static const _subjectsCollection = 'subjects';
   static const _tasksCollection = 'tasks';
+  static const _deletedTasksCollection = 'deleted_tasks';
 
   @override
   Stream<List<Subject>> querySubjects() async* {
@@ -144,7 +146,28 @@ class DatabaseFirestore implements Database {
   }
 
   @override
-  void deleteTask(String id) => _delete(_tasksCollection, id);
+  void deleteTask(String id) async {
+    var task = await _collection(_tasksCollection).doc(id).get();
+
+    var data = task.data()!;
+    data['deleted_at'] = DateTime.now().date.millisecondsSinceEpoch;
+    _collection(_deletedTasksCollection).add(data);
+    task.reference.delete();
+  }
+
+  @override
+  Stream<List<Task>> queryDeletedTasks() async* {
+    var deletedTasks = _collection(_deletedTasksCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .orderBy('deleted_at', descending: true)
+        .snapshots();
+
+    await for (final tasks in deletedTasks) {
+      yield await Future.wait(tasks.docs.map(
+        (el) => Task.fromDocument(el, isDeleted: true),
+      ));
+    }
+  }
 
   @override
   void deleteAllData() async {

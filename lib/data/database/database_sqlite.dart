@@ -6,12 +6,14 @@ import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
+import 'package:school_app/util/util.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqlbrite/sqlbrite.dart' as b;
 
 class DatabaseSqlite extends Database {
   static const _subjectsTable = 'subjects';
   static const _tasksTable = 'tasks';
+  static const _deletedTasksTable = 'deleted_tasks';
 
   b.BriteDatabase? database;
 
@@ -179,7 +181,34 @@ class DatabaseSqlite extends Database {
   @override
   void deleteTask(String id) async {
     await _open();
+
+    var newId = await database!.rawInsert(
+      'INSERT INTO $_deletedTasksTable'
+      ' SELECT * FROM $_tasksTable WHERE id = ?',
+      [int.parse(id)],
+    );
+    // Add deleted_at
+    database!.update(
+      _deletedTasksTable,
+      {'deleted_at': DateTime.now().date},
+      where: 'id = ?',
+      whereArgs: [newId],
+    );
+
     database!.delete(_tasksTable, where: 'id = ?', whereArgs: [int.parse(id)]);
+  }
+
+  @override
+  Stream<List<Task>> queryDeletedTasks() async* {
+    await _open();
+
+    var query = database!.createQuery(_deletedTasksTable);
+    await for (final func in query) {
+      var row = await func();
+      yield await Future.wait(
+        row.map((e) => Task.fromRow(e, isDeleted: true)),
+      );
+    }
   }
 
   @override
@@ -212,17 +241,37 @@ class DatabaseSqlite extends Database {
             'abbreviation TEXT,'
             'color INTEGER'
             ')');
-        await db.execute('CREATE TABLE $_tasksTable('
-            'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+
+        const tasksTableSql = 'id INTEGER PRIMARY KEY AUTOINCREMENT,'
             'title TEXT,'
             'description TEXT,'
             'due_date INTEGER,'
             'reminder INTEGER,'
             'completed INTEGER,'
-            'subject_id INTEGER'
+            'subject_id INTEGER';
+        await db.execute('CREATE TABLE $_tasksTable($tasksTableSql)');
+
+        await db.execute('CREATE TABLE $_deletedTasksTable('
+            '$tasksTableSql,'
+            'deleted_at INTEGER'
             ')');
       },
-      version: 1,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion == 1 && newVersion == 2) {
+          // Create deleted tasks table
+          await db.execute('CREATE TABLE $_deletedTasksTable('
+              'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+              'title TEXT,'
+              'description TEXT,'
+              'due_date INTEGER,'
+              'reminder INTEGER,'
+              'completed INTEGER,'
+              'subject_id INTEGER'
+              'deleted_at INTEGER'
+              ')');
+        }
+      },
+      version: 2,
     );
 
     database = b.BriteDatabase(db, logger: null);

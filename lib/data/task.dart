@@ -17,6 +17,8 @@ class Task {
   final Subject subject;
   final bool completed;
 
+  final DateTime? deletedAt;
+
   const Task(
     this.id,
     this.title,
@@ -24,19 +26,27 @@ class Task {
     this.dueDate,
     this.reminder,
     this.subject,
-    this.completed,
-  );
+    this.completed, [
+    this.deletedAt,
+  ]);
 
-  static Future<Task> fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
-    return _fromMap(doc.id, doc.data()!, hasBool: true);
+  static Future<Task> fromDocument(DocumentSnapshot<Map<String, dynamic>> doc,
+      {bool isDeleted = false}) {
+    return _fromMap(doc.id, doc.data()!, hasBool: true, isDeleted: isDeleted);
   }
 
-  static Future<Task> fromRow(Map<String, dynamic> row) {
-    return _fromMap(row['id'].toString(), row, hasBool: false);
+  static Future<Task> fromRow(Map<String, dynamic> row,
+      {bool isDeleted = false}) {
+    return _fromMap(
+      row['id'].toString(),
+      row,
+      hasBool: false,
+      isDeleted: isDeleted,
+    );
   }
 
   static Future<Task> _fromMap(String id, Map<String, dynamic> map,
-      {bool hasBool = true}) async {
+      {bool hasBool = true, bool isDeleted = false}) async {
     bool completed;
     if (hasBool) {
       completed = map['completed'];
@@ -44,21 +54,35 @@ class Task {
       completed = map['completed'] as int == 1 ? true : false;
     }
 
+    var dateTime = DateTime.fromMillisecondsSinceEpoch;
+
     return Task(
       id,
       map['title'],
       map['description'],
-      DateTime.fromMillisecondsSinceEpoch(map['due_date']),
-      DateTime.fromMillisecondsSinceEpoch(map['reminder']),
+      dateTime(map['due_date']),
+      dateTime(map['reminder']),
       await Database.I.querySubjectOnce(map['subject_id'].toString()),
       completed,
+      !isDeleted ? null : dateTime(map['deleted_at']),
     );
   }
 
   String formatRelativeDueDate() {
-    var rdt = RelativeDateTime(dateTime: DateTime.now().date, other: dueDate);
-    return RelativeDateFormat(Get.locale ?? const Locale('de')).format(rdt);
+    return _formatRelativeDate(
+      RelativeDateTime(dateTime: DateTime.now().date, other: dueDate),
+    );
   }
+
+  String formatRelativeDeletedAtDate() {
+    assert(deletedAt != null);
+    return _formatRelativeDate(
+      RelativeDateTime(dateTime: deletedAt!, other: DateTime.now().date),
+    );
+  }
+
+  String _formatRelativeDate(RelativeDateTime rdt) =>
+      RelativeDateFormat(Get.locale ?? const Locale('de')).format(rdt);
 
   Duration reminderOffset() => dueDate.difference(reminder);
 }
