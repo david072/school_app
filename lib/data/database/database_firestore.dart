@@ -174,6 +174,16 @@ class DatabaseFirestore implements Database {
   }
 
   @override
+  Future<List<Task>> queryDeletedTasksOnce() async {
+    var query = await _collection(_deletedTasksCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .get();
+    return await Future.wait(
+      query.docs.map((el) => Task.fromDocument(el, isDeleted: true)),
+    );
+  }
+
+  @override
   Stream<Task> queryDeletedTask(String id) async* {
     var query = _collection(_deletedTasksCollection).doc(id).snapshots();
     await for (final task in query) {

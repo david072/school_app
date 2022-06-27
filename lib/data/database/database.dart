@@ -43,6 +43,8 @@ abstract class Database {
 
   Stream<List<Task>> queryDeletedTasks();
 
+  Future<List<Task>> queryDeletedTasksOnce();
+
   Stream<Task> queryDeletedTask(String id);
 
   void permanentlyDeleteTask(String id);

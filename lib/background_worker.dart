@@ -85,6 +85,13 @@ class BackgroundWorker {
       markTaskProcessed(task.id);
     }
 
+    var deletedTasks = await Database.I.queryDeletedTasksOnce();
+    for (final task in deletedTasks) {
+      if (task.deletedAt!.add(const Duration(days: 30)).isBefore(now)) {
+        Database.I.permanentlyDeleteTask(task.id);
+      }
+    }
+
     sharedPreferences!.setInt(_lastRunHourKey, runHour);
 
     // Re-schedule self to have a periodic worker

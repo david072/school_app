@@ -212,6 +212,16 @@ class DatabaseSqlite extends Database {
   }
 
   @override
+  Future<List<Task>> queryDeletedTasksOnce() async {
+    await _open();
+
+    var query = await database!.query(_deletedTasksTable);
+    return await Future.wait(
+      query.map((el) => Task.fromRow(el, isDeleted: true)),
+    );
+  }
+
+  @override
   Stream<Task> queryDeletedTask(String id) async* {
     await _open();
 
