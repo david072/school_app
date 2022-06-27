@@ -41,7 +41,7 @@ class _TrashBinPageState extends State<TrashBinPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TasksList(
-            layout: TasksListLayout.deleted,
+            mode: TasksListMode.deleted,
             tasks: tasks,
           ),
         ],

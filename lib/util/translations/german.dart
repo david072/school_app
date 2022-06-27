@@ -12,6 +12,7 @@ class German {
         'password_not_matching': 'Passwörter stimmen nicht überein',
         'delete': 'Löschen',
         'delete_caps': 'LÖSCHEN',
+        'delete_permanently': 'Entgültig löschen',
         'logout_caps': 'AUSLOGGEN',
         'logout': 'Ausloggen',
         'system': 'System',
@@ -104,6 +105,9 @@ class German {
         'subject_colon': 'Fach:',
         'delete_task_confirm':
             'Möchtest du die Aufgabe \'@name\' wirklich löschen?',
+        'delete_task_permanently_confirm': 'Möchtest du die Aufgabe \'@name\' '
+            'wirklich permanent löschen? Dies kann nicht rückgängig gemacht '
+            'werden.',
         'due_date_colon': 'Fälligkeitsdatum:',
         'no_reminder': 'Keine',
         'reminder_one_day': 'Einen Tag vorher',

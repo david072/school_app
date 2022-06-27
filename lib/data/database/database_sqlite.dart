@@ -212,6 +212,16 @@ class DatabaseSqlite extends Database {
   }
 
   @override
+  void permanentlyDeleteTask(String id) async {
+    await _open();
+    database!.delete(
+      _deletedTasksTable,
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+  }
+
+  @override
   void deleteAllData() async => throw Exception("This should not be called!");
 
   /// NOTE: Calls to this function wait for a previous call to finish. This

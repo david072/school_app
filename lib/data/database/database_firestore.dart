@@ -174,6 +174,9 @@ class DatabaseFirestore implements Database {
   }
 
   @override
+  void permanentlyDeleteTask(String id) => _delete(_deletedTasksCollection, id);
+
+  @override
   void deleteAllData() async {
     var tasks = await _collection(_tasksCollection)
         .where('user_id', isEqualTo: _requireUser().uid)

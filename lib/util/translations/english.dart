@@ -12,6 +12,7 @@ class English {
         'password_not_matching': 'Passwords not matching',
         'delete': 'Delete',
         'delete_caps': 'DELETE',
+        'delete_permanently': 'Delete permanently',
         'logout_caps': 'LOGOUT',
         'logout': 'Logout',
         'system': 'System',
@@ -47,7 +48,7 @@ class English {
             'An unexpected error occurred (Error: No RenderBox found).',
         'task_notification_title': '@title due soon (@subjectAbb)',
         'task_notification_content':
-            'The task \'@title\' (@subjectName) is @relDueDate due.',
+            'The task \'@title\' (@subjectName) is due @relDueDate.',
         'notification_channel_name': 'Task reminders',
         'notification_channel_description':
             'The app sends reminders for not completed tasks on this channel.',
@@ -100,6 +101,9 @@ class English {
         'subject_colon': 'Subject:',
         'delete_task_confirm':
             'Do you really want to delete the task \'@name\'?',
+        'delete_task_permanently_confirm':
+            'Do you really want to permanently delete the task \'@name\'? '
+                'This cannot be undone.',
         'due_date_colon': 'Due date:',
         'no_reminder': 'None',
         'reminder_one_day': 'One day before',

@@ -43,6 +43,8 @@ abstract class Database {
 
   Stream<List<Task>> queryDeletedTasks();
 
+  void permanentlyDeleteTask(String id);
+
   void deleteAllData();
 }
 

@@ -11,17 +11,17 @@ import 'package:school_app/pages/tasks/view_task_page.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
 
-enum TasksListLayout { normal, deleted }
+enum TasksListMode { normal, deleted }
 
 class TasksList extends StatefulWidget {
   const TasksList({
     Key? key,
     required this.tasks,
-    this.layout = TasksListLayout.normal,
+    this.mode = TasksListMode.normal,
   }) : super(key: key);
 
   final List<Task> tasks;
-  final TasksListLayout layout;
+  final TasksListMode mode;
 
   @override
   State<TasksList> createState() => _TasksListState();
@@ -29,6 +29,8 @@ class TasksList extends StatefulWidget {
 
 class _TasksListState extends State<TasksList> {
   late Offset longPressPosition;
+
+  bool get isDeletedMode => widget.mode == TasksListMode.deleted;
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +47,9 @@ class _TasksListState extends State<TasksList> {
                 showCheckboxColumn: false,
                 columns: [
                   DataColumn(
-                      label: Text(widget.layout == TasksListLayout.normal
-                          ? 'done'.tr
-                          : 'Gelöscht am')),
+                      label: Text(!isDeletedMode ? 'done'.tr : 'Gelöscht am')),
                   DataColumn(
-                      label: Text(widget.layout == TasksListLayout.normal
-                          ? 'due'.tr
-                          : 'done'.tr)),
+                      label: Text(!isDeletedMode ? 'due'.tr : 'done'.tr)),
                   DataColumn(label: Text('title'.tr)),
                   DataColumn(label: Text('subject'.tr)),
                 ],
@@ -59,33 +57,49 @@ class _TasksListState extends State<TasksList> {
                     .map(
                       (task) => _taskRow(
                         context,
-                        widget.layout,
+                        widget.mode,
                         task,
                         () => showPopupMenu(
                           context: context,
-                          items: [
-                            PopupMenuItem(
-                              value: 0,
-                              child: Text('edit'.tr),
-                            ),
-                            PopupMenuItem(
-                              value: 1,
-                              child: Text('delete'.tr),
-                            ),
-                          ],
+                          items: !isDeletedMode
+                              ? [
+                                  PopupMenuItem(
+                                    value: 0,
+                                    child: Text('edit'.tr),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 1,
+                                    child: Text('delete'.tr),
+                                  ),
+                                ]
+                              : [
+                                  PopupMenuItem(
+                                    value: 1,
+                                    child: Text('delete_permanently'.tr),
+                                  ),
+                                ],
                           longPressPosition: longPressPosition,
                           functions: [
                             () =>
                                 Get.to(() => CreateTaskPage(taskToEdit: task)),
                             () => showConfirmationDialog(
                                   context: context,
-                                  title: 'delete'.tr,
-                                  content: 'delete_task_confirm'
+                                  title: !isDeletedMode
+                                      ? 'delete'.tr
+                                      : 'delete_permanently'.tr,
+                                  content: (!isDeletedMode
+                                          ? 'delete_task_confirm'
+                                          : 'delete_task_permanently_confirm')
                                       .trParams({'name': task.title}),
                                   cancelText: 'cancel_caps'.tr,
                                   confirmText: 'delete_caps'.tr,
-                                  onConfirm: () =>
-                                      Database.I.deleteTask(task.id),
+                                  onConfirm: () {
+                                    if (!isDeletedMode) {
+                                      Database.I.deleteTask(task.id);
+                                    } else {
+                                      Database.I.permanentlyDeleteTask(task.id);
+                                    }
+                                  },
                                 ),
                           ],
                         ),
@@ -103,7 +117,7 @@ class _TasksListState extends State<TasksList> {
 
   DataRow _taskRow(
     BuildContext context,
-    TasksListLayout layout,
+    TasksListMode layout,
     Task task,
     void Function() onLongPress,
     void Function() onSelectChanged,
@@ -176,7 +190,7 @@ class _TasksListState extends State<TasksList> {
     );
 
     List<DataCell> cells;
-    if (layout == TasksListLayout.normal) {
+    if (layout == TasksListMode.normal) {
       cells = [
         completedCell,
         DataCell(Text(task.formatRelativeDueDate(),
