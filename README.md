@@ -14,3 +14,4 @@ An app targeted at students to organize their tasks.
 - Create an account to sync your tasks across your devices and receive notifications on all of them
 - Alternatively, use the app without an account to have all data stored locally.<br>
   You can later still migrate your account to a cloud based one. This will not delete any data.
+- When a task is deleted, it is moved into a trash bin. The task can be viewed there for another 30 days, before it is permanently deleted. The user can choose to permanently delete the task themselves.
