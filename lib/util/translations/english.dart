@@ -41,6 +41,7 @@ class English {
         'mark_task_uncompleted': 'Open again',
         'starting': 'Starting...',
         'error': 'Error!',
+        'deleted_at': 'Deleted on',
         'email_address_missing': 'Please provide a valid email address',
         'password_too_short': 'The password must be at least 6 characters long',
         'cannot_be_empty': 'Cannot be empty',
@@ -112,5 +113,6 @@ class English {
         'reminder_four_days': 'Four days before',
         'reminder_one_week': 'One week before',
         'reminder_two_weeks': 'Two weeks before',
+        'trash_bin_title': 'Trash bin',
       };
 }

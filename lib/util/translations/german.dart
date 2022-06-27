@@ -41,6 +41,7 @@ class German {
         'mark_task_uncompleted': 'Wieder öffnen',
         'starting': 'Starte...',
         'error': 'Fehler!',
+        'deleted_at': 'Gelöscht am',
         'email_address_missing': 'Bitte gib eine gültige Email-Adresse an',
         'password_too_short':
             'Das Passwort muss mindestens 6 Zeichen lang sein',
@@ -116,5 +117,6 @@ class German {
         'reminder_four_days': 'Vier Tage vorher',
         'reminder_one_week': 'Eine Woche vorher',
         'reminder_two_weeks': 'Zwei Wochen vorher',
+        'trash_bin_title': 'Papierkorb'
       };
 }

@@ -47,7 +47,7 @@ class _TasksListState extends State<TasksList> {
                 showCheckboxColumn: false,
                 columns: [
                   DataColumn(
-                      label: Text(!isDeletedMode ? 'done'.tr : 'Gelöscht am')),
+                      label: Text((!isDeletedMode ? 'done' : 'deleted_at').tr)),
                   DataColumn(
                       label: Text(!isDeletedMode ? 'due'.tr : 'done'.tr)),
                   DataColumn(label: Text('title'.tr)),

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
@@ -35,7 +36,7 @@ class _TrashBinPageState extends State<TrashBinPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Papierkorb'),
+        title: Text('trash_bin_title'.tr),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
