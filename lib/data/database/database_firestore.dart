@@ -70,7 +70,11 @@ class DatabaseFirestore implements Database {
         .where('user_id', isEqualTo: _requireUser().uid)
         .where('subject_id', isEqualTo: id)
         .get();
-    for (final task in tasks.docs) {
+    var deletedTasks = await _collection(_deletedTasksCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('subject_id', isEqualTo: id)
+        .get();
+    for (final task in [...tasks.docs, ...deletedTasks.docs]) {
       task.reference.delete();
     }
 
