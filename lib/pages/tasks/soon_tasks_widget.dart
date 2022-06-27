@@ -103,7 +103,10 @@ class _TasksListState extends State<TasksList> {
                                 ),
                           ],
                         ),
-                        () => Get.to(() => ViewTaskPage(taskId: task.id)),
+                        () => Get.to(() => ViewTaskPage(
+                              taskId: task.id,
+                              isTaskDeleted: isDeletedMode,
+                            )),
                       ),
                     )
                     .toList(),
@@ -117,7 +120,7 @@ class _TasksListState extends State<TasksList> {
 
   DataRow _taskRow(
     BuildContext context,
-    TasksListMode layout,
+    TasksListMode mode,
     Task task,
     void Function() onLongPress,
     void Function() onSelectChanged,
@@ -132,11 +135,13 @@ class _TasksListState extends State<TasksList> {
               width: 20,
               height: 20,
               child: Checkbox(
-                onChanged: (b) {
-                  if (b == null) return;
-                  setState(() => value = b);
-                  Database.I.updateTaskStatus(task.id, b);
-                },
+                onChanged: mode != TasksListMode.normal
+                    ? null
+                    : (b) {
+                        if (b == null) return;
+                        setState(() => value = b);
+                        Database.I.updateTaskStatus(task.id, b);
+                      },
                 value: value,
               ),
             );
@@ -190,7 +195,7 @@ class _TasksListState extends State<TasksList> {
     );
 
     List<DataCell> cells;
-    if (layout == TasksListMode.normal) {
+    if (mode == TasksListMode.normal) {
       cells = [
         completedCell,
         DataCell(Text(task.formatRelativeDueDate(),

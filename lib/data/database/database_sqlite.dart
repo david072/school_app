@@ -212,6 +212,21 @@ class DatabaseSqlite extends Database {
   }
 
   @override
+  Stream<Task> queryDeletedTask(String id) async* {
+    await _open();
+
+    var query = database!.createQuery(
+      _deletedTasksTable,
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+    await for (final func in query) {
+      var row = await func();
+      yield await Task.fromRow(row[0], isDeleted: true);
+    }
+  }
+
+  @override
   void permanentlyDeleteTask(String id) async {
     await _open();
     database!.delete(

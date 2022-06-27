@@ -13,9 +13,11 @@ class ViewTaskPage extends StatefulWidget {
   const ViewTaskPage({
     Key? key,
     required this.taskId,
+    this.isTaskDeleted = false,
   }) : super(key: key);
 
   final String taskId;
+  final bool isTaskDeleted;
 
   @override
   State<ViewTaskPage> createState() => _ViewTaskPageState();
@@ -31,23 +33,31 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
   String reminderString = "";
   bool completed = false;
 
+  bool get isTaskDeleted => widget.isTaskDeleted;
+
   @override
   void initState() {
     super.initState();
-    subscription = Database.I.queryTask(widget.taskId).listen((t) {
-      task = t;
-      titleController.text = task!.title;
-      descriptionController.text = task!.description;
-      completed = task!.completed;
+    if (!isTaskDeleted) {
+      subscription = Database.I.queryTask(widget.taskId).listen(listen);
+    } else {
+      subscription = Database.I.queryDeletedTask(widget.taskId).listen(listen);
+    }
+  }
 
-      var reminderMode = reminderModeFromOffset(task!.reminderOffset());
-      if (reminderMode == ReminderMode.custom) {
-        reminderString = formatDate(task!.reminder);
-      } else {
-        reminderString = reminderMode.string;
-      }
-      setState(() {});
-    });
+  void listen(Task t) {
+    task = t;
+    titleController.text = task!.title;
+    descriptionController.text = task!.description;
+    completed = task!.completed;
+
+    var reminderMode = reminderModeFromOffset(task!.reminderOffset());
+    if (reminderMode == ReminderMode.custom) {
+      reminderString = formatDate(task!.reminder);
+    } else {
+      reminderString = reminderMode.string;
+    }
+    setState(() {});
   }
 
   @override
@@ -63,37 +73,48 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
             appBar: AppBar(
               title: Text('task'.tr),
               actions: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () =>
-                      Get.to(() => CreateTaskPage(taskToEdit: task)),
-                ),
+                !isTaskDeleted
+                    ? IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () =>
+                            Get.to(() => CreateTaskPage(taskToEdit: task)),
+                      )
+                    : Container(),
                 IconButton(
                   onPressed: () => showConfirmationDialog(
                       context: context,
-                      title: 'delete'.tr,
-                      content:
-                          'delete_task_confirm'.trParams({'name': task!.title}),
+                      title:
+                          (!isTaskDeleted ? 'delete' : 'delete_permanently').tr,
+                      content: (!isTaskDeleted
+                              ? 'delete_task_confirm'
+                              : 'delete_task_permanently_confirm')
+                          .trParams({'name': task!.title}),
                       cancelText: 'cancel_caps'.tr,
                       confirmText: 'delete_caps'.tr,
                       onConfirm: () {
-                        Database.I.deleteTask(task!.id);
+                        if (!isTaskDeleted) {
+                          Database.I.deleteTask(task!.id);
+                        } else {
+                          Database.I.permanentlyDeleteTask(task!.id);
+                        }
                         Get.back();
                       }),
                   icon: const Icon(Icons.delete),
                 ),
               ],
             ),
-            floatingActionButton: FloatingActionButton.extended(
-              onPressed: () {
-                setState(() => completed = !completed);
-                Database.I.updateTaskStatus(task!.id, completed);
-              },
-              label: Text(!completed
-                  ? 'mark_task_completed'.tr
-                  : 'mark_task_uncompleted'.tr),
-              icon: Icon(!completed ? Icons.done : Icons.close),
-            ),
+            floatingActionButton: !isTaskDeleted
+                ? FloatingActionButton.extended(
+                    onPressed: () {
+                      setState(() => completed = !completed);
+                      Database.I.updateTaskStatus(task!.id, completed);
+                    },
+                    label: Text(!completed
+                        ? 'mark_task_completed'.tr
+                        : 'mark_task_uncompleted'.tr),
+                    icon: Icon(!completed ? Icons.done : Icons.close),
+                  )
+                : null,
             body: Center(
               child: SizedBox(
                 width: formWidth(context),
