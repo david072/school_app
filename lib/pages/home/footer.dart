@@ -4,14 +4,12 @@ class Footer extends StatelessWidget {
   const Footer({
     Key? key,
     this.reverse = false,
-    required this.displayName,
-    required this.count,
+    required this.text,
     required this.onAdd,
   }) : super(key: key);
 
   final bool reverse;
-  final String displayName;
-  final int count;
+  final String text;
   final void Function() onAdd;
 
   @override
@@ -24,7 +22,7 @@ class Footer extends StatelessWidget {
         children: [
           !reverse
               ? Text(
-                  '$displayName: $count',
+            text,
                   style: Theme.of(context).textTheme.caption,
                 )
               : Container(),
@@ -46,7 +44,7 @@ class Footer extends StatelessWidget {
           !reverse
               ? Container()
               : Text(
-                  '$displayName: $count',
+            text,
                   style: Theme.of(context).textTheme.caption,
                 ),
         ],

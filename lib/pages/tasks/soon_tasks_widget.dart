@@ -277,6 +277,9 @@ class _TaskListWidgetState extends State<TaskListWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var completedTasks = tasks.where((task) => task.completed).length;
+    var taskCount = tasks.length - completedTasks;
+
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -284,8 +287,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
           Expanded(child: TasksList(tasks: tasks)),
           Footer(
             reverse: widget.isHorizontal ? true : false,
-            displayName: 'tasks'.tr,
-            count: tasks.length,
+            text: '${'tasks'.tr}: $taskCount (+ $completedTasks)',
             onAdd: () => Get.to(
                 () => CreateTaskPage(initialSubject: widget.subjectFilter)),
           ),
