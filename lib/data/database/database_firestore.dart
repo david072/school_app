@@ -62,6 +62,12 @@ class DatabaseFirestore implements Database {
     });
   }
 
+  @override
+  void updateSubjectNotes(String id, String notes) {
+    var doc = _collection(_subjectsCollection).doc(id);
+    doc.update({'notes': notes});
+  }
+
   /// Also deletes tasks associated with this subject
   @override
   Future<void> deleteSubject(String id) async {

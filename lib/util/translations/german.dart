@@ -35,6 +35,8 @@ class German {
         'subject': 'Fach',
         'tasks': 'Aufgaben',
         'task': 'Aufgabe',
+        'notes': 'Notizen',
+        'subject_notes': 'Fach Notizen',
         'allow_caps': 'ERLAUBEN',
         'dont_allow_caps': 'NICHT ERLAUBEN',
         'mark_task_completed': 'Abschließen',
@@ -117,6 +119,6 @@ class German {
         'reminder_four_days': 'Vier Tage vorher',
         'reminder_one_week': 'Eine Woche vorher',
         'reminder_two_weeks': 'Zwei Wochen vorher',
-        'trash_bin_title': 'Papierkorb'
+        'trash_bin_title': 'Papierkorb',
       };
 }

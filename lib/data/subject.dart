@@ -8,7 +8,15 @@ class Subject {
   final String abbreviation;
   final Color color;
 
-  const Subject(this.id, this.name, this.abbreviation, this.color);
+  final String notes;
+
+  const Subject(
+    this.id,
+    this.name,
+    this.abbreviation,
+    this.color, [
+    this.notes = "",
+  ]);
 
   static Subject fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
     return _fromMap(doc.id, doc.data()!);
@@ -24,6 +32,7 @@ class Subject {
       map['name'],
       map['abbreviation'],
       Color(map['color']),
+      map['notes'] ?? "",
     );
   }
 }

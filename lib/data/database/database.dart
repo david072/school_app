@@ -23,6 +23,8 @@ abstract class Database {
 
   void editSubject(String id, String name, String abbreviation, Color color);
 
+  void updateSubjectNotes(String id, String notes);
+
   Future<void> deleteSubject(String id);
 
   Stream<List<Task>> queryTasks({DateTime? maxDueDate});

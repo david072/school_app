@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
+import 'package:school_app/pages/subjects/subject_notes_dialog.dart';
 import 'package:school_app/pages/subjects/subject_page.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
@@ -109,17 +110,28 @@ class _SubjectState extends State<_Subject> {
       items: [
         PopupMenuItem(
           value: 0,
-          child: Text('edit'.tr),
+          child: Text('notes'.tr),
         ),
         PopupMenuItem(
           value: 1,
+          child: Text('edit'.tr),
+        ),
+        PopupMenuItem(
+          value: 2,
           child: Text('delete'.tr),
         ),
       ],
       functions: [
+        () => showDialog(
+              context: context,
+              builder: (context) => SubjectNotesDialog(
+                notes: widget.subject.notes,
+                subjectId: widget.subject.id,
+              ),
+            ),
         () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
         () => showConfirmationDialog(
-          context: context,
+              context: context,
               title: 'delete'.tr,
               content: 'confirm_delete_subject'
                   .trParams({'name': widget.subject.name}),

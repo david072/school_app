@@ -35,6 +35,8 @@ class English {
         'subject': 'Subject',
         'tasks': 'Tasks',
         'task': 'Task',
+        'notes': 'Notes',
+        'subject_notes': 'Subject notes',
         'allow_caps': 'ALLOW',
         'dont_allow_caps': 'DON\'T ALLOW',
         'mark_task_completed': 'Mark completed',

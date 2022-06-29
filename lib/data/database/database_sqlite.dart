@@ -80,6 +80,17 @@ class DatabaseSqlite extends Database {
   }
 
   @override
+  void updateSubjectNotes(String id, String notes) async {
+    await _open();
+    database!.update(
+      _subjectsTable,
+      {'notes': notes},
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+  }
+
+  @override
   Future<void> deleteSubject(String id) async {
     await _open();
     var tasks = await database!.query(
@@ -274,7 +285,8 @@ class DatabaseSqlite extends Database {
             'id INTEGER PRIMARY KEY AUTOINCREMENT,'
             'name TEXT,'
             'abbreviation TEXT,'
-            'color INTEGER'
+            'color INTEGER,'
+            'notes TEXT'
             ')');
 
         const tasksTableSql = 'id INTEGER PRIMARY KEY AUTOINCREMENT,'
@@ -292,7 +304,7 @@ class DatabaseSqlite extends Database {
             ')');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion == 1 && newVersion == 2) {
+        if (newVersion >= 1 && newVersion < 2) {
           // Create deleted tasks table
           await db.execute('CREATE TABLE $_deletedTasksTable('
               'id INTEGER PRIMARY KEY AUTOINCREMENT,'
@@ -305,8 +317,12 @@ class DatabaseSqlite extends Database {
               'deleted_at INTEGER'
               ')');
         }
+
+        if (newVersion >= 2 && newVersion < 3) {
+          await db.execute('ALTER TABLE $_subjectsTable ADD notes TEXT');
+        }
       },
-      version: 2,
+      version: 3,
     );
 
     database = b.BriteDatabase(db, logger: null);

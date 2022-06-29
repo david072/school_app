@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
+import 'package:school_app/pages/subjects/subject_notes_dialog.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 import 'package:school_app/util/util.dart';
 
@@ -56,6 +57,16 @@ class _SubjectPageState extends State<SubjectPage> {
               iconTheme: IconThemeData(color: appBarContentColor),
               backgroundColor: subject!.color,
               actions: [
+                IconButton(
+                  icon: const Icon(Icons.notes),
+                  onPressed: () => showDialog(
+                    context: context,
+                    builder: (context) => SubjectNotesDialog(
+                      notes: subject!.notes,
+                      subjectId: subject!.id,
+                    ),
+                  ),
+                ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () =>
