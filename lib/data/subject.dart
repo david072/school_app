@@ -1,12 +1,14 @@
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:school_app/data/database/database.dart';
 
 class Subject {
   final String id;
   final String name;
   final String abbreviation;
   final Color color;
+  final int taskCount;
 
   final String notes;
 
@@ -14,24 +16,29 @@ class Subject {
     this.id,
     this.name,
     this.abbreviation,
-    this.color, [
+    this.color,
+    this.taskCount, [
     this.notes = "",
   ]);
 
-  static Subject fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
+  static Future<Subject> fromDocument(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
     return _fromMap(doc.id, doc.data()!);
   }
 
-  static Subject fromRow(Map<String, dynamic> row) {
+  static Future<Subject> fromRow(Map<String, dynamic> row) {
     return _fromMap(row['id'].toString(), row);
   }
 
-  static Subject _fromMap(String id, Map<String, dynamic> map) {
+  static Future<Subject> _fromMap(String id, Map<String, dynamic> map) async {
+    var taskCount = await Database.I.queryTaskCountForSubject(id);
+
     return Subject(
       id,
       map['name'],
       map['abbreviation'],
       Color(map['color']),
+      taskCount,
       map['notes'] ?? "",
     );
   }

@@ -19,6 +19,8 @@ abstract class Database {
 
   Future<Subject> querySubjectOnce(String id);
 
+  Future<int> queryTaskCountForSubject(String id);
+
   void createSubject(String name, String abbreviation, Color color);
 
   void editSubject(String id, String name, String abbreviation, Color color);
@@ -67,4 +69,10 @@ List<Task> orderByCompleted(List<Task> tasks) {
     }
   }
   return result;
+}
+
+extension MapWaiting<T> on List<T> {
+  Future<List<R>> mapWaiting<R>(Future<R> Function(T) func) async {
+    return await Future.wait(map(func));
+  }
 }

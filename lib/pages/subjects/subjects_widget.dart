@@ -165,10 +165,9 @@ class _SubjectState extends State<_Subject> {
               overflow: TextOverflow.ellipsis,
             ),
             SizedBox(height: isSmallScreen(context) ? 5 : 10),
-            // TODO: Task count
-            // Text('$taskCount Aufgabe${taskCount == 1 ? '' : 'n'}',
-            //     style: Theme.of(context).textTheme.caption),
-            Text('0 Aufgaben', style: Theme.of(context).textTheme.caption),
+            Text(
+                '${widget.subject.taskCount} ${'task'.trPlural('tasks', widget.subject.taskCount)}',
+                style: Theme.of(context).textTheme.caption),
           ],
         ),
       ),

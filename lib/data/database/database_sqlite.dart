@@ -24,11 +24,20 @@ class DatabaseSqlite extends Database {
   Stream<List<Subject>> querySubjects() async* {
     await _open();
 
-    // TODO: Task count
-    var subjects = database!.createQuery(_subjectsTable);
-    await for (final func in subjects) {
-      var rows = await func();
-      yield rows.map(Subject.fromRow).toList();
+    var controller = StreamController<List<Subject>>();
+
+    database!.createQuery(_subjectsTable).listen((event) async {
+      var rows = await event();
+      controller.sink.add(await rows.mapWaiting(Subject.fromRow));
+    });
+
+    database!.createQuery(_tasksTable).listen((event) async {
+      var subjects = await database!.query(_subjectsTable);
+      controller.sink.add(await subjects.mapWaiting(Subject.fromRow));
+    });
+
+    await for (final subjects in controller.stream) {
+      yield subjects;
     }
   }
 
@@ -43,7 +52,7 @@ class DatabaseSqlite extends Database {
     );
     await for (final func in subject) {
       var row = (await func())[0];
-      yield Subject.fromRow(row);
+      yield await Subject.fromRow(row);
     }
   }
 
@@ -56,6 +65,14 @@ class DatabaseSqlite extends Database {
       whereArgs: [int.parse(id)],
     );
     return Subject.fromRow(subject[0]);
+  }
+
+  @override
+  Future<int> queryTaskCountForSubject(String id) async {
+    await _open();
+    var tasks = await database!.query(_tasksTable,
+        where: 'subject_id = ?', whereArgs: [int.parse(id)]);
+    return tasks.length;
   }
 
   @override
@@ -341,7 +358,7 @@ class DatabaseSqlite extends Database {
     Map<int, String> subjectIdsMap = {};
 
     for (final row in subjects) {
-      var subject = Subject.fromRow(row);
+      var subject = await Subject.fromRow(row);
       var id = firestoreDb.createSubject(
         subject.name,
         subject.abbreviation,

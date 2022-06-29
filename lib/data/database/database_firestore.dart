@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,21 +16,40 @@ class DatabaseFirestore implements Database {
 
   @override
   Stream<List<Subject>> querySubjects() async* {
-    // TODO: Query / store task count
-    var subjects = _collection(_subjectsCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
-        .snapshots();
+    var controller = StreamController<List<Subject>>();
 
-    await for (final docs in subjects) {
-      yield docs.docs.map(Subject.fromDocument).toList();
+    // TODO: Query / store task count
+    _collection(_subjectsCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .snapshots()
+        .listen((event) async {
+      controller.sink.add(await event.docs.mapWaiting(Subject.fromDocument));
+    });
+
+    _collection(_tasksCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .snapshots(includeMetadataChanges: false)
+        .listen((event) async {
+      controller.sink.add(await _querySubjectsOnce());
+    });
+
+    await for (final subjects in controller.stream) {
+      yield subjects;
     }
+  }
+
+  Future<List<Subject>> _querySubjectsOnce() async {
+    var subjects = await _collection(_subjectsCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .get();
+    return await subjects.docs.mapWaiting(Subject.fromDocument);
   }
 
   @override
   Stream<Subject> querySubject(String id) async* {
     var doc = _collection(_subjectsCollection).doc(id).snapshots();
     await for (final subject in doc) {
-      yield Subject.fromDocument(subject);
+      yield await Subject.fromDocument(subject);
     }
   }
 
@@ -37,6 +57,15 @@ class DatabaseFirestore implements Database {
   Future<Subject> querySubjectOnce(String id) async {
     var doc = await _collection(_subjectsCollection).doc(id).get();
     return Subject.fromDocument(doc);
+  }
+
+  @override
+  Future<int> queryTaskCountForSubject(String id) async {
+    var tasks = await _collection(_tasksCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('subject_id', isEqualTo: id)
+        .get();
+    return tasks.docs.length;
   }
 
   @override
@@ -102,15 +131,14 @@ class DatabaseFirestore implements Database {
     var query = _tasksQuery(maxDueDate: maxDueDate).snapshots();
 
     await for (final docs in query) {
-      yield orderByCompleted(
-          await Future.wait(docs.docs.map(Task.fromDocument)));
+      yield orderByCompleted(await docs.docs.mapWaiting(Task.fromDocument));
     }
   }
 
   @override
   Future<List<Task>> queryTasksOnce({DateTime? maxDueDate}) async {
     var tasks = await _tasksQuery(maxDueDate: maxDueDate).get();
-    return await Future.wait(tasks.docs.map(Task.fromDocument));
+    return await tasks.docs.mapWaiting(Task.fromDocument);
   }
 
   @override
@@ -173,9 +201,9 @@ class DatabaseFirestore implements Database {
         .snapshots();
 
     await for (final tasks in deletedTasks) {
-      yield await Future.wait(tasks.docs.map(
+      yield await tasks.docs.mapWaiting(
         (el) => Task.fromDocument(el, isDeleted: true),
-      ));
+      );
     }
   }
 
@@ -184,9 +212,8 @@ class DatabaseFirestore implements Database {
     var query = await _collection(_deletedTasksCollection)
         .where('user_id', isEqualTo: _requireUser().uid)
         .get();
-    return await Future.wait(
-      query.docs.map((el) => Task.fromDocument(el, isDeleted: true)),
-    );
+    return await query.docs
+        .mapWaiting((el) => Task.fromDocument(el, isDeleted: true));
   }
 
   @override
