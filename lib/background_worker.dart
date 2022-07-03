@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -92,6 +93,14 @@ class BackgroundWorker {
       }
     }
 
+    // Log run for debugging
+    FirebaseAnalytics.instance.logEvent(
+      name: "background_worker_ran",
+      parameters: {
+        "hour": runHour,
+      },
+    );
+
     sharedPreferences!.setInt(_lastRunHourKey, runHour);
 
     // Re-schedule self to have a periodic worker
@@ -125,7 +134,7 @@ class BackgroundWorker {
       nextRunHour = _runHours[0];
     } else {
       nextRunHour =
-          _runHours[(_runHours.indexOf(lastRunHour) + 1) % _runHours.length];
+      _runHours[(_runHours.indexOf(lastRunHour) + 1) % _runHours.length];
     }
 
     return nextRunHour;
@@ -144,11 +153,11 @@ class BackgroundWorker {
     var day = now.hour < nextRunHour ? now.day : now.day + 1;
     var nextRunTime = DateTime(now.year, now.month, day, nextRunHour);
 
+    Workmanager().cancelByUniqueName(_workName);
     Workmanager().registerOneOffTask(
       _workName,
       _workName,
       initialDelay: nextRunTime.difference(now),
-      existingWorkPolicy: ExistingWorkPolicy.keep,
       inputData: {'runHour': nextRunHour},
     );
   }
