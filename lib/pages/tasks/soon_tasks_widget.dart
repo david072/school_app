@@ -165,8 +165,19 @@ class _TasksListState extends State<TasksList> {
             WidgetSpan(
               alignment: PlaceholderAlignment.middle,
               child: task.description.isNotEmpty
-                  ? Icon(Icons.sticky_note_2_outlined,
-                      color: Theme.of(context).hintColor)
+                  ? IconButton(
+                      constraints: const BoxConstraints(),
+                      padding: EdgeInsets.zero,
+                      icon: Icon(Icons.sticky_note_2_outlined,
+                          color: Theme.of(context).hintColor),
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('description'.tr),
+                          content: Text(task.description),
+                        ),
+                      ),
+                    )
                   : Container(),
             )
           ],
