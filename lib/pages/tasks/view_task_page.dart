@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/tasks/clickable_row.dart';
@@ -133,7 +134,9 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                       ClickableRow(
                         left: Text('due_date_colon'.tr),
                         right: Text(
-                          '${formatDate(task!.dueDate)} (${task!.formatRelativeDueDate()})',
+                          '${DateFormat('EEE').format(task!.dueDate)}, '
+                          '${formatDate(task!.dueDate)} '
+                          '(${task!.formatRelativeDueDate()})',
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ),
