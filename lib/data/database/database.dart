@@ -19,7 +19,7 @@ abstract class Database {
 
   Future<Subject> querySubjectOnce(String id);
 
-  Future<int> queryTaskCountForSubject(String id);
+  Future<List<int>> queryTaskCountForSubject(String id);
 
   void createSubject(String name, String abbreviation, Color color);
 

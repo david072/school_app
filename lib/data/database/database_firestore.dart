@@ -60,12 +60,23 @@ class DatabaseFirestore implements Database {
   }
 
   @override
-  Future<int> queryTaskCountForSubject(String id) async {
+  Future<List<int>> queryTaskCountForSubject(String id) async {
     var tasks = await _collection(_tasksCollection)
         .where('user_id', isEqualTo: _requireUser().uid)
         .where('subject_id', isEqualTo: id)
         .get();
-    return tasks.docs.length;
+
+    var taskCount = 0;
+    var completedTaskCount = 0;
+    for (final doc in tasks.docs) {
+      if (doc.data()['completed']) {
+        completedTaskCount++;
+      } else {
+        taskCount++;
+      }
+    }
+
+    return [taskCount, completedTaskCount];
   }
 
   @override

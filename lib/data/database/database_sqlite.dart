@@ -68,11 +68,22 @@ class DatabaseSqlite extends Database {
   }
 
   @override
-  Future<int> queryTaskCountForSubject(String id) async {
+  Future<List<int>> queryTaskCountForSubject(String id) async {
     await _open();
     var tasks = await database!.query(_tasksTable,
         where: 'subject_id = ?', whereArgs: [int.parse(id)]);
-    return tasks.length;
+
+    var taskCount = 0;
+    var completedTaskCount = 0;
+    for (final row in tasks) {
+      if (row['completed'] == 1) {
+        completedTaskCount++;
+      } else {
+        taskCount++;
+      }
+    }
+
+    return [taskCount, completedTaskCount];
   }
 
   @override

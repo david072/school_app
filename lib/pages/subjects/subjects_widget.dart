@@ -104,6 +104,8 @@ class _SubjectState extends State<_Subject> {
 
   @override
   Widget build(BuildContext context) {
+    print(
+        "subject: ${widget.subject.name}, tasks: ${widget.subject.taskCount}");
     return LongPressPopupMenu(
       onTap: () => Get.to(() => SubjectPage(subjectId: widget.subject.id)),
       enabled: enabled,
@@ -122,23 +124,23 @@ class _SubjectState extends State<_Subject> {
         ),
       ],
       functions: [
-        () => showDialog(
-              context: context,
-              builder: (context) => SubjectNotesDialog(
-                notes: widget.subject.notes,
-                subjectId: widget.subject.id,
-              ),
-            ),
-        () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
-        () => showConfirmationDialog(
-              context: context,
-              title: 'delete'.tr,
-              content: 'confirm_delete_subject'
-                  .trParams({'name': widget.subject.name}),
-              cancelText: 'cancel_caps'.tr,
-              confirmText: 'delete_caps'.tr,
-              onConfirm: () => Database.I.deleteSubject(widget.subject.id),
-            )
+            () => showDialog(
+          context: context,
+          builder: (context) => SubjectNotesDialog(
+            notes: widget.subject.notes,
+            subjectId: widget.subject.id,
+          ),
+        ),
+            () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
+            () => showConfirmationDialog(
+          context: context,
+          title: 'delete'.tr,
+          content: 'confirm_delete_subject'
+              .trParams({'name': widget.subject.name}),
+          cancelText: 'cancel_caps'.tr,
+          confirmText: 'delete_caps'.tr,
+          onConfirm: () => Database.I.deleteSubject(widget.subject.id),
+        )
       ],
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -166,7 +168,9 @@ class _SubjectState extends State<_Subject> {
             ),
             SizedBox(height: isSmallScreen(context) ? 5 : 10),
             Text(
-                '${widget.subject.taskCount} ${'task'.trPlural('tasks', widget.subject.taskCount)}',
+                '${widget.subject.taskCount} '
+                '(+ ${widget.subject.completedTasksCount}) '
+                '${'task'.trPlural('tasks', widget.subject.taskCount)}',
                 style: Theme.of(context).textTheme.caption),
           ],
         ),
