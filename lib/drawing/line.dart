@@ -5,7 +5,7 @@ export 'package:perfect_freehand/src/point.dart';
 
 // TODO: Pressure, edit color
 class Line {
-  late final List<Point> points;
+  late List<Point> points;
   final Color color;
 
   Line({required this.color, List<Point>? points}) {

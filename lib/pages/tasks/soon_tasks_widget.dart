@@ -86,7 +86,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                                 child: Text('Löschen'),
                               ),
                             ],
-                            longPressPosition: longPressPosition,
+                            position: longPressPosition,
                             functions: [
                               () => Navigator.push(
                                     context,

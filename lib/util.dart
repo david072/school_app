@@ -53,7 +53,7 @@ bool validateForm(GlobalKey key) {
 Future<void> showPopupMenu(
     {required BuildContext context,
     required List<PopupMenuEntry<int>> items,
-    required Offset longPressPosition,
+    required Offset position,
     List<void Function()>? functions}) async {
   final RenderBox? overlay =
       Overlay.of(context)?.context.findRenderObject() as RenderBox?;
@@ -71,8 +71,8 @@ Future<void> showPopupMenu(
     context: context,
     items: items,
     position: RelativeRect.fromRect(
-      longPressPosition & const Size(1, 1),
-      Offset.zero & overlay.size,
+      Rect.fromLTWH(position.dx, position.dy, 1, 1),
+      Rect.fromLTWH(0, 0, overlay.size.width, overlay.size.height),
     ),
   );
 
@@ -116,7 +116,7 @@ class _LongPressPopupMenuState extends State<LongPressPopupMenu> {
     await showPopupMenu(
       context: context,
       items: widget.items,
-      longPressPosition: longPressPosition,
+      position: longPressPosition,
       functions: widget.functions,
     );
   }
@@ -219,4 +219,9 @@ Future<bool> isNetworkAvailable() async {
   } catch (_) {
     return false;
   }
+}
+
+/// Maps a number `x` from the range [[`A`, `B`]] to the range [[`a`, `b`]]
+double mapInRange(double x, double A, double B, double a, double b) {
+  return (x - A) * (b - a) / (B - A) + a;
 }
