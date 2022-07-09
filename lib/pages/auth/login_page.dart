@@ -240,7 +240,7 @@ class _PasswordResetDialogState extends State<_PasswordResetDialog> {
         error != null || hasSentEmail
             ? TextButton(
                 onPressed: () => Get.back(),
-                child: Text('password_reset_confirm'.tr),
+                child: Text('confirm'.tr),
               )
             : Container(),
       ],

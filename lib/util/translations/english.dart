@@ -39,6 +39,7 @@ class English {
         'subject_notes': 'Subject notes',
         'allow_caps': 'ALLOW',
         'dont_allow_caps': 'DON\'T ALLOW',
+        'confirm_caps': 'OK',
         'mark_task_completed': 'Mark completed',
         'mark_task_uncompleted': 'Open again',
         'starting': 'Starting...',
@@ -70,7 +71,6 @@ class English {
         'password_reset_success_end': ' with which you can reset your password. '
             'Then, you can login here with your new password. Please also take '
             'a look inside your Spam-folder.',
-        'password_reset_confirm': 'OK',
         'signup_failed': 'Sign up failed. Please try again later.',
         'signup_title': 'Sign Up',
         'account_dialog_title': 'Account',

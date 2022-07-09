@@ -138,7 +138,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
   }
 }
 
-class _ColorPicker extends StatelessWidget {
+class _ColorPicker extends StatefulWidget {
   const _ColorPicker({
     Key? key,
     required this.color,
@@ -149,16 +149,42 @@ class _ColorPicker extends StatelessWidget {
   final void Function(Color) onColorChanged;
 
   @override
+  State<_ColorPicker> createState() => _ColorPickerState();
+}
+
+class _ColorPickerState extends State<_ColorPicker> {
+  late Color pickerColor;
+
+  @override
+  void initState() {
+    super.initState();
+    pickerColor = widget.color;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('color_picker_title'.tr),
       content: SingleChildScrollView(
         child: ColorPicker(
-          pickerColor: color,
-          onColorChanged: onColorChanged,
+          pickerColor: pickerColor,
+          onColorChanged: (color) => setState(() => pickerColor = color),
           enableAlpha: false,
         ),
       ),
+      actions: [
+        TextButton(
+          child: Text('cancel_caps'.tr),
+          onPressed: () => Get.back(),
+        ),
+        TextButton(
+          child: Text('confirm_caps'.tr),
+          onPressed: () {
+            widget.onColorChanged(pickerColor);
+            Get.back();
+          },
+        ),
+      ],
     );
   }
 }

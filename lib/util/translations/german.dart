@@ -39,6 +39,7 @@ class German {
         'subject_notes': 'Fach Notizen',
         'allow_caps': 'ERLAUBEN',
         'dont_allow_caps': 'NICHT ERLAUBEN',
+        'confirm_caps': 'OK',
         'mark_task_completed': 'Abschließen',
         'mark_task_uncompleted': 'Wieder öffnen',
         'starting': 'Starte...',
@@ -73,7 +74,6 @@ class German {
             'dein Passwort zurücksetzen kannst. Dann kannst du dich hier mit '
             'deinem neuen Passwort anmelden.\n\n'
             'Bitte schaue auch in deinen Spam-Ordner.',
-        'password_reset_confirm': 'OK',
         'signup_failed':
             'Registration fehlgeschlagen. Bitte versuche es später nochmal.',
         'signup_title': 'Registrieren',
