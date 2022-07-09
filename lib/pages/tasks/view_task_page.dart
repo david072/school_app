@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/task.dart';
-import 'package:school_app/pages/tasks/clickable_row.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
@@ -163,7 +162,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                         decoration: InputDecoration(
                           alignLabelWithHint: true,
                           labelText: 'description'.tr,
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.multiline,
                         maxLines: null,

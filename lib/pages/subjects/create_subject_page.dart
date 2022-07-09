@@ -99,7 +99,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                     ],
                   ),
                   const SizedBox(height: 40),
-                  InkWell(
+                  ClickableRow(
                     onTap: () => showDialog(
                       context: context,
                       builder: (_) => _ColorPicker(
@@ -107,25 +107,13 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                         onColorChanged: (c) => setState(() => color = c),
                       ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 8),
-                      child: Row(
-                        children: [
-                          Text('color'.tr),
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                    left: Text('color'.tr),
+                    right: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(5),
                       ),
                     ),
                   ),
