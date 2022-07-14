@@ -57,12 +57,14 @@ class ClassTest {
       dateTime(map['due_date']),
       dateTime(map['reminder']),
       await Database.I.querySubjectOnce(map['subject_id'].toString()),
-      decodeTopics(map['topics']),
+      decodeTopicsList(map['topics']),
       !isDeleted ? null : dateTime(map['deleted_at']),
     );
   }
 
-  String encodeTopics() {
+  String encodeTopics() => encodeTopicsList(topics);
+
+  static String encodeTopicsList(List<ClassTestTopic> topics) {
     String result = "";
     for (int i = 0; i < topics.length; i++) {
       final topic = topics[i];
@@ -74,7 +76,7 @@ class ClassTest {
     return result;
   }
 
-  static List<ClassTestTopic> decodeTopics(String encoded) {
+  static List<ClassTestTopic> decodeTopicsList(String encoded) {
     List<ClassTestTopic> result = [];
     var classTestTopics = encoded.split('|');
     for (final topic in classTestTopics) {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:path/path.dart';
+import 'package:school_app/data/class_test.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/subject.dart';
@@ -14,6 +15,7 @@ class DatabaseSqlite extends Database {
   static const _subjectsTable = 'subjects';
   static const _tasksTable = 'tasks';
   static const _deletedTasksTable = 'deleted_tasks';
+  static const _classTestsTable = 'class_tests';
 
   b.BriteDatabase? database;
 
@@ -286,6 +288,68 @@ class DatabaseSqlite extends Database {
   }
 
   @override
+  Stream<List<ClassTest>> queryClassTests({DateTime? maxDueDate}) async* {
+    await _open();
+    var query = database!.createQuery(_classTestsTable);
+    await for (final func in query) {
+      final rows = await func();
+      yield await rows.mapWaiting(ClassTest.fromRow);
+    }
+  }
+
+  @override
+  Future<List<ClassTest>> queryClassTestsOnce() async {
+    await _open();
+    var query = await database!.query(_classTestsTable);
+    return query.mapWaiting(ClassTest.fromRow);
+  }
+
+  @override
+  Stream<ClassTest> queryClassTest(String id) async* {
+    await _open();
+    var query = database!.createQuery(_classTestsTable,
+        where: 'id = ?', whereArgs: [int.parse(id)]);
+    await for (final func in query) {
+      var rows = await func();
+      yield await ClassTest.fromRow(rows[0]);
+    }
+  }
+
+  @override
+  void createClassTest(DateTime dueDate, DateTime reminder, String subjectId,
+      List<ClassTestTopic> topics) async {
+    await _open();
+    database!.insert(_classTestsTable, {
+      'due_date': dueDate.millisecondsSinceEpoch,
+      'reminder': reminder.millisecondsSinceEpoch,
+      'subject_id': subjectId,
+      'topics': ClassTest.encodeTopicsList(topics),
+    });
+  }
+
+  @override
+  void editClassTest(String id, DateTime dueDate, DateTime reminder,
+      String subjectId, List<ClassTestTopic> topics) async {
+    await _open();
+    database!.update(_classTestsTable, {
+      'due_date': dueDate.millisecondsSinceEpoch,
+      'reminder': reminder.millisecondsSinceEpoch,
+      'subject_id': subjectId,
+      'topics': ClassTest.encodeTopicsList(topics),
+    });
+  }
+
+  @override
+  void deleteClassTest(String id) async {
+    await _open();
+    database!.delete(
+      _classTestsTable,
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+  }
+
+  @override
   void deleteAllData() async => throw Exception("This should not be called!");
 
   /// NOTE: Calls to this function wait for a previous call to finish. This
@@ -330,6 +394,14 @@ class DatabaseSqlite extends Database {
             '$tasksTableSql,'
             'deleted_at INTEGER'
             ')');
+
+        await db.execute('CREATE TABLE $_classTestsTable('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+            'due_date INTEGER,'
+            'reminder INTEGER,'
+            'subject_id INTEGER,'
+            'topics STRING,'
+            ')');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (newVersion >= 1 && newVersion < 2) {
@@ -349,8 +421,18 @@ class DatabaseSqlite extends Database {
         if (newVersion >= 2 && newVersion < 3) {
           await db.execute('ALTER TABLE $_subjectsTable ADD notes TEXT');
         }
+
+        if (newVersion >= 4) {
+          await db.execute('CREATE TABLE $_classTestsTable('
+              'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+              'due_date INTEGER,'
+              'reminder INTEGER,'
+              'subject_id INTEGER,'
+              'topics STRING,'
+              ')');
+        }
       },
-      version: 3,
+      version: 4,
     );
 
     database = b.BriteDatabase(db, logger: null);
@@ -387,6 +469,31 @@ class DatabaseSqlite extends Database {
         DateTime.fromMillisecondsSinceEpoch(row['due_date']! as int),
         DateTime.fromMillisecondsSinceEpoch(row['reminder']! as int),
         subjectId,
+      );
+    }
+
+    var deletedTasks = await db.query(_deletedTasksTable);
+    for (final row in deletedTasks) {
+      var subjectId = subjectIdsMap[row['subject_id'] as int]!;
+      firestoreDb.createDeletedTask(
+        row['title']! as String,
+        row['description']! as String,
+        DateTime.fromMillisecondsSinceEpoch(row['due_date']! as int),
+        DateTime.fromMillisecondsSinceEpoch(row['reminder']! as int),
+        subjectId,
+        row['completed'] as int == 1,
+        row['deleted_at']! as int,
+      );
+    }
+
+    var classTests = await db.query(_classTestsTable);
+    for (final row in classTests) {
+      var subjectId = subjectIdsMap[row['subject_id'] as int]!;
+      firestoreDb.createClassTest(
+        DateTime.fromMillisecondsSinceEpoch(row['due_date']! as int),
+        DateTime.fromMillisecondsSinceEpoch(row['reminder']! as int),
+        subjectId,
+        ClassTest.decodeTopicsList(row['topics']! as String),
       );
     }
 

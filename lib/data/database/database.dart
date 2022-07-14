@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:get/get.dart';
+import 'package:school_app/data/class_test.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
 
@@ -13,6 +14,7 @@ abstract class Database {
     Get.put(db, permanent: true);
   }
 
+  // Subjects
   Stream<List<Subject>> querySubjects();
 
   Stream<Subject> querySubject(String id);
@@ -29,6 +31,7 @@ abstract class Database {
 
   Future<void> deleteSubject(String id);
 
+  // Tasks
   Stream<List<Task>> queryTasks({DateTime? maxDueDate});
 
   Future<List<Task>> queryTasksOnce({DateTime? maxDueDate});
@@ -45,6 +48,7 @@ abstract class Database {
 
   void deleteTask(String id);
 
+  // Deleted tasks
   Stream<List<Task>> queryDeletedTasks();
 
   Future<List<Task>> queryDeletedTasksOnce();
@@ -53,6 +57,22 @@ abstract class Database {
 
   void permanentlyDeleteTask(String id);
 
+  // Class tests
+  Stream<List<ClassTest>> queryClassTests({DateTime? maxDueDate});
+
+  Future<List<ClassTest>> queryClassTestsOnce();
+
+  Stream<ClassTest> queryClassTest(String id);
+
+  void createClassTest(DateTime dueDate, DateTime reminder, String subjectId,
+      List<ClassTestTopic> topics);
+
+  void editClassTest(String id, DateTime dueDate, DateTime reminder,
+      String subjectId, List<ClassTestTopic> topics);
+
+  void deleteClassTest(String id);
+
+  // Miscellaneous
   void deleteAllData();
 }
 
