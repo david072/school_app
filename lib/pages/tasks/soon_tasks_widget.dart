@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
+import 'package:school_app/pages/class_tests/create_class_test_page.dart';
 import 'package:school_app/pages/home/footer.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
 import 'package:school_app/pages/tasks/view_task_page.dart';
@@ -78,7 +79,7 @@ class _TasksListState extends State<TasksList> {
                                     child: Text('delete_permanently'.tr),
                                   ),
                                 ],
-                          longPressPosition: longPressPosition,
+                          position: longPressPosition,
                           functions: [
                             () =>
                                 Get.to(() => CreateTaskPage(taskToEdit: task)),
@@ -299,8 +300,27 @@ class _TaskListWidgetState extends State<TaskListWidget> {
           Footer(
             reverse: widget.isHorizontal ? true : false,
             text: '${'tasks'.tr}: $taskCount (+ $completedTasks)',
-            onAdd: () => Get.to(
-                () => CreateTaskPage(initialSubject: widget.subjectFilter)),
+            popupItems: [
+              PopupMenuItem(
+                value: 0,
+                child: Text('task'.tr),
+              ),
+              const PopupMenuItem(
+                value: 1,
+                child: Text('Class test'),
+              ),
+            ],
+            onPopupItemSelected: (i) {
+              switch (i) {
+                case 0:
+                  Get.to(() =>
+                      CreateTaskPage(initialSubject: widget.subjectFilter));
+                  break;
+                case 1:
+                  Get.to(() => const CreateClassTestPage());
+                  break;
+              }
+            },
           ),
         ],
       ),

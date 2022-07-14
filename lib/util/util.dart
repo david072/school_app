@@ -55,7 +55,7 @@ bool validateForm(GlobalKey key) {
 Future<void> showPopupMenu(
     {required BuildContext context,
     required List<PopupMenuEntry<int>> items,
-    required Offset longPressPosition,
+    required Offset position,
     List<void Function()>? functions}) async {
   final RenderBox? overlay =
       Overlay.of(context)?.context.findRenderObject() as RenderBox?;
@@ -70,7 +70,7 @@ Future<void> showPopupMenu(
     context: context,
     items: items,
     position: RelativeRect.fromRect(
-      longPressPosition & const Size(1, 1),
+      position & const Size(1, 1),
       Offset.zero & overlay.size,
     ),
   );
@@ -115,7 +115,7 @@ class _LongPressPopupMenuState extends State<LongPressPopupMenu> {
     await showPopupMenu(
       context: context,
       items: widget.items,
-      longPressPosition: longPressPosition,
+      position: longPressPosition,
       functions: widget.functions,
     );
   }

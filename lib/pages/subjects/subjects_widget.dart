@@ -79,7 +79,7 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
           ),
           Footer(
             text: 'subjects'.tr,
-            onAdd: () => Get.to(() => const CreateSubjectPage()),
+            onClick: () => Get.to(() => const CreateSubjectPage()),
           ),
         ],
       ),
