@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lit_relative_date_time/model/relative_date_time.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
-import 'package:school_app/util/util.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
+import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 
 class ClassTestTopic {
   String topic;
@@ -16,17 +18,22 @@ class ClassTestTopic {
   }
 }
 
-class ClassTest {
+class ClassTest extends AbstractTask {
+  @override
   final String id;
+  @override
   final DateTime dueDate;
+  @override
   final DateTime reminder;
+  @override
   final Subject subject;
 
   final List<ClassTestTopic> topics;
 
+  @override
   final DateTime? deletedAt;
 
-  ClassTest(
+  const ClassTest(
     this.id,
     this.dueDate,
     this.reminder,
@@ -89,13 +96,27 @@ class ClassTest {
     return result;
   }
 
-  String formatRelativeDueDate() {
-    return formatRelativeDate(
-      RelativeDateTime(dateTime: DateTime.now().date, other: dueDate),
-    );
-  }
+  @override
+  String deleteDialogContent() => 'delete_class_test_confirm'.tr;
 
-  Duration reminderOffset() => dueDate.difference(reminder);
+  @override
+  DataCell getCompletedCell(TasksListMode mode) =>
+      const DataCell(Icon(Icons.description));
+
+  @override
+  DataCell getTitleCell(BuildContext context) => DataCell(Text(
+        'TODO',
+        style: Theme.of(context).textTheme.bodyLarge,
+      ));
+
+  @override
+  Color? tableRowBackgroundColor() {
+    if (!Get.isDarkMode) {
+      return Colors.grey.shade200;
+    } else {
+      return Colors.grey.shade900;
+    }
+  }
 }
 
 // "<topic>:<res>|<topic>:<res>|<topic>:<res>|<topic>:<res>|<topic>:<res>"

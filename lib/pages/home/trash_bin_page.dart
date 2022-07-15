@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
-import 'package:school_app/data/task.dart';
+import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 
 class TrashBinPage extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:school_app/data/class_test.dart';
+import 'package:school_app/data/tasks/class_test.dart';
 import 'package:school_app/util/util.dart';
 
 class ClassTestTopicEditor extends StatefulWidget {

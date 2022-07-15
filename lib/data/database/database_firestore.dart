@@ -3,9 +3,9 @@ import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:school_app/data/class_test.dart';
 import 'package:school_app/data/database/database.dart';
-import 'package:school_app/data/task.dart';
+import 'package:school_app/data/tasks/class_test.dart';
+import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/util/util.dart';
 
 import '../subject.dart';

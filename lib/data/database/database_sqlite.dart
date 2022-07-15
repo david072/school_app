@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:path/path.dart';
-import 'package:school_app/data/class_test.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/subject.dart';
-import 'package:school_app/data/task.dart';
+import 'package:school_app/data/tasks/class_test.dart';
+import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/util/util.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqlbrite/sqlbrite.dart' as b;

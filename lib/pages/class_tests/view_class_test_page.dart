@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:school_app/data/class_test.dart';
 import 'package:school_app/data/database/database.dart';
+import 'package:school_app/data/tasks/class_test.dart';
 import 'package:school_app/pages/class_tests/class_test_topic_editor.dart';
 import 'package:school_app/pages/class_tests/create_class_test_page.dart';
 import 'package:school_app/util/sizes.dart';
@@ -57,8 +57,8 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
                   icon: const Icon(Icons.delete),
                   onPressed: () => showConfirmationDialog(
                     context: context,
-                    title: 'delete'.tr,
-                    content: 'delete_class_test_confirm'.tr,
+                    title: classTest!.deleteDialogTitle(),
+                    content: classTest!.deleteDialogContent(),
                     confirmText: 'delete_caps'.tr,
                     cancelText: 'cancel_caps'.tr,
                     onConfirm: () {

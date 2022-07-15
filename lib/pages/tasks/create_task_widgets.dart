@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
-import 'package:school_app/data/task.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
 import 'package:school_app/util/util.dart';
 
 class DatePicker extends StatelessWidget {

@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:school_app/data/class_test.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
-import 'package:school_app/data/task.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
+import 'package:school_app/data/tasks/class_test.dart';
+import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/pages/class_tests/create_class_test_page.dart';
 import 'package:school_app/pages/class_tests/view_class_test_page.dart';
 import 'package:school_app/pages/home/footer.dart';
@@ -23,7 +24,7 @@ class TasksList extends StatefulWidget {
     this.mode = TasksListMode.normal,
   }) : super(key: key);
 
-  final List items;
+  final List<AbstractTask> items;
   final TasksListMode mode;
 
   @override
@@ -93,36 +94,22 @@ class _TasksListState extends State<TasksList> {
                                 throw 'task has invalid type';
                               }
                             },
-                            () {
-                              String content;
-                              if (task is Task) {
-                                content = (!isDeletedMode
-                                        ? 'delete_task_confirm'
-                                        : 'delete_task_permanently_confirm')
-                                    .trParams({'name': task.title});
-                              } else if (task is ClassTest) {
-                                content = 'delete_class_test_confirm'.tr;
-                              } else {
-                                throw 'task has invalid type';
-                              }
-
-                              showConfirmationDialog(
-                                context: context,
-                                title: !isDeletedMode
-                                    ? 'delete'.tr
-                                    : 'delete_permanently'.tr,
-                                content: content,
-                                cancelText: 'cancel_caps'.tr,
-                                confirmText: 'delete_caps'.tr,
-                                onConfirm: () {
-                                  if (!isDeletedMode) {
-                                    Database.I.deleteTask(task.id);
-                                  } else {
-                                    Database.I.permanentlyDeleteTask(task.id);
-                                  }
-                                },
-                              );
-                            },
+                            () => showConfirmationDialog(
+                                  context: context,
+                                  title: !isDeletedMode
+                                      ? 'delete'.tr
+                                      : 'delete_permanently'.tr,
+                                  content: task.deleteDialogContent(),
+                                  cancelText: 'cancel_caps'.tr,
+                                  confirmText: 'delete_caps'.tr,
+                                  onConfirm: () {
+                                    if (!isDeletedMode) {
+                                      Database.I.deleteTask(task.id);
+                                    } else {
+                                      Database.I.permanentlyDeleteTask(task.id);
+                                    }
+                                  },
+                                ),
                           ],
                         ),
                         () {
@@ -151,89 +138,14 @@ class _TasksListState extends State<TasksList> {
   DataRow _taskRow(
     BuildContext context,
     TasksListMode mode,
-    dynamic task,
+    AbstractTask task,
     void Function() onLongPress,
     void Function() onSelectChanged,
   ) {
-    DataCell completedCell;
-    DataCell titleCell;
-    Subject subject;
-    String relativeDueDate;
-
-    if (task is Task) {
-      subject = task.subject;
-      relativeDueDate = task.formatRelativeDueDate();
-
-      completedCell = DataCell(
-        Builder(
-          builder: (_) {
-            // (HACK) to make the UI element update instantly
-            var value = task.completed;
-            return StatefulBuilder(
-              builder: (context, setState) => SizedBox(
-                width: 20,
-                height: 20,
-                child: Checkbox(
-                  onChanged: mode != TasksListMode.normal
-                      ? null
-                      : (b) {
-                          if (b == null) return;
-                          setState(() => value = b);
-                          Database.I.updateTaskStatus(task.id, b);
-                        },
-                  value: value,
-                ),
-              ),
-            );
-          },
-        ),
-      );
-
-      titleCell = DataCell(
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: task.title,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              WidgetSpan(
-                  child: task.description.isNotEmpty
-                      ? const SizedBox(width: 10)
-                      : Container()),
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: task.description.isNotEmpty
-                    ? IconButton(
-                        constraints: const BoxConstraints(),
-                        padding: EdgeInsets.zero,
-                        icon: Icon(Icons.sticky_note_2_outlined,
-                            color: Theme.of(context).hintColor),
-                        onPressed: () => showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('description'.tr),
-                            content: Text(task.description),
-                          ),
-                        ),
-                      )
-                    : Container(),
-              )
-            ],
-          ),
-        ),
-      );
-    } else if (task is ClassTest) {
-      subject = task.subject;
-      relativeDueDate = task.formatRelativeDueDate();
-      completedCell = const DataCell(Icon(Icons.description));
-      titleCell = DataCell(Text(
-        'TODO',
-        style: Theme.of(context).textTheme.bodyLarge,
-      ));
-    } else {
-      throw 'task argument has invalid type';
-    }
+    DataCell completedCell = task.getCompletedCell(mode);
+    DataCell titleCell = task.getTitleCell(context);
+    Subject subject = task.subject;
+    String relativeDueDate = task.formatRelativeDueDate();
 
     var subjectCell = DataCell(
       RichText(
@@ -266,7 +178,6 @@ class _TasksListState extends State<TasksList> {
         subjectCell,
       ];
     } else {
-      assert(task is Task, 'Deleted class tests not supported yet.');
       cells = [
         DataCell(Text(
             '${formatDate((task as Task).deletedAt!)} '
@@ -279,24 +190,8 @@ class _TasksListState extends State<TasksList> {
     }
 
     return DataRow(
-      color: MaterialStateProperty.resolveWith((states) {
-        if (task is ClassTest) {
-          if (!Get.isDarkMode) {
-            return Colors.grey.shade200;
-          } else {
-            return Colors.grey.shade900;
-          }
-        }
-
-        if (task.completed) {
-          if (!Get.isDarkMode) {
-            return Colors.grey.shade300;
-          } else {
-            return Colors.grey.shade800;
-          }
-        }
-        return null;
-      }),
+      color: MaterialStateProperty.resolveWith(
+          (states) => task.tableRowBackgroundColor()),
       cells: cells,
       onLongPress: onLongPress,
       onSelectChanged: (_) => onSelectChanged(),
@@ -321,7 +216,7 @@ class TaskListWidget extends StatefulWidget {
 }
 
 class _TaskListWidgetState extends State<TaskListWidget> {
-  List items = [];
+  List<AbstractTask> items = [];
   late StreamSubscription tasksSubscription;
   late StreamSubscription classTestsSubscription;
 

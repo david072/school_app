@@ -1,9 +1,9 @@
 import 'dart:ui';
 
 import 'package:get/get.dart';
-import 'package:school_app/data/class_test.dart';
 import 'package:school_app/data/subject.dart';
-import 'package:school_app/data/task.dart';
+import 'package:school_app/data/tasks/class_test.dart';
+import 'package:school_app/data/tasks/task.dart';
 
 abstract class Database {
   /// Short for `instance`

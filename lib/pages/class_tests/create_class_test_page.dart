@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:school_app/data/class_test.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
-import 'package:school_app/data/task.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
+import 'package:school_app/data/tasks/class_test.dart';
 import 'package:school_app/pages/class_tests/class_test_topic_editor.dart';
 import 'package:school_app/pages/tasks/create_task_widgets.dart';
 import 'package:school_app/util/sizes.dart';
