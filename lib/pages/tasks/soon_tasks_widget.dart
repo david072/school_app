@@ -83,27 +83,46 @@ class _TasksListState extends State<TasksList> {
                                 ],
                           position: longPressPosition,
                           functions: [
-                            () =>
-                                Get.to(() => CreateTaskPage(taskToEdit: task)),
-                            () => showConfirmationDialog(
-                                  context: context,
-                                  title: !isDeletedMode
-                                      ? 'delete'.tr
-                                      : 'delete_permanently'.tr,
-                                  content: (!isDeletedMode
-                                          ? 'delete_task_confirm'
-                                          : 'delete_task_permanently_confirm')
-                                      .trParams({'name': task.title}),
-                                  cancelText: 'cancel_caps'.tr,
-                                  confirmText: 'delete_caps'.tr,
-                                  onConfirm: () {
-                                    if (!isDeletedMode) {
-                                      Database.I.deleteTask(task.id);
-                                    } else {
-                                      Database.I.permanentlyDeleteTask(task.id);
-                                    }
-                                  },
-                                ),
+                            () {
+                              if (task is Task) {
+                                Get.to(() => CreateTaskPage(taskToEdit: task));
+                              } else if (task is ClassTest) {
+                                Get.to(() =>
+                                    CreateClassTestPage(classTestToEdit: task));
+                              } else {
+                                throw 'task has invalid type';
+                              }
+                            },
+                            () {
+                              String content;
+                              if (task is Task) {
+                                content = (!isDeletedMode
+                                        ? 'delete_task_confirm'
+                                        : 'delete_task_permanently_confirm')
+                                    .trParams({'name': task.title});
+                              } else if (task is ClassTest) {
+                                content = 'delete_class_test_confirm'.tr;
+                              } else {
+                                throw 'task has invalid type';
+                              }
+
+                              showConfirmationDialog(
+                                context: context,
+                                title: !isDeletedMode
+                                    ? 'delete'.tr
+                                    : 'delete_permanently'.tr,
+                                content: content,
+                                cancelText: 'cancel_caps'.tr,
+                                confirmText: 'delete_caps'.tr,
+                                onConfirm: () {
+                                  if (!isDeletedMode) {
+                                    Database.I.deleteTask(task.id);
+                                  } else {
+                                    Database.I.permanentlyDeleteTask(task.id);
+                                  }
+                                },
+                              );
+                            },
                           ],
                         ),
                         () {
@@ -261,7 +280,13 @@ class _TasksListState extends State<TasksList> {
 
     return DataRow(
       color: MaterialStateProperty.resolveWith((states) {
-        if (task is ClassTest) return Colors.grey.shade900;
+        if (task is ClassTest) {
+          if (!Get.isDarkMode) {
+            return Colors.grey.shade200;
+          } else {
+            return Colors.grey.shade900;
+          }
+        }
 
         if (task.completed) {
           if (!Get.isDarkMode) {
