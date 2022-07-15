@@ -4,6 +4,8 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:lit_relative_date_time/controller/relative_date_format.dart';
+import 'package:lit_relative_date_time/model/relative_date_time.dart';
 import 'package:school_app/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -265,3 +267,6 @@ class ClickableRow extends StatelessWidget {
         : child;
   }
 }
+
+String formatRelativeDate(RelativeDateTime rdt) =>
+    RelativeDateFormat(Get.locale ?? const Locale('de')).format(rdt);

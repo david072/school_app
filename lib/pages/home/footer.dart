@@ -13,7 +13,7 @@ class Footer extends StatefulWidget {
   final bool reverse;
   final List<PopupMenuItem>? popupItems;
   final void Function(dynamic)? onPopupItemSelected;
-  final String text;
+  final Widget text;
   final void Function()? onClick;
 
   @override
@@ -32,9 +32,9 @@ class _FooterState extends State<Footer> {
         mainAxisSize: MainAxisSize.max,
         children: [
           !widget.reverse
-              ? Text(
-                  widget.text,
-                  style: Theme.of(context).textTheme.caption,
+              ? DefaultTextStyle(
+                  style: Theme.of(context).textTheme.caption!,
+                  child: widget.text,
                 )
               : Container(),
           Expanded(
@@ -96,9 +96,9 @@ class _FooterState extends State<Footer> {
           ),
           !widget.reverse
               ? Container()
-              : Text(
-                  widget.text,
-                  style: Theme.of(context).textTheme.caption,
+              : DefaultTextStyle(
+                  style: Theme.of(context).textTheme.caption!,
+                  child: widget.text,
                 ),
         ],
       ),

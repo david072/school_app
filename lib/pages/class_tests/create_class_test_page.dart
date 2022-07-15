@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/class_test.dart';
+import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/tasks/create_task_widgets.dart';
@@ -44,10 +45,14 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
       return;
     }
 
-    print(topics);
-    print("TODO: create class test");
+    Database.I.createClassTest(
+      dueDate,
+      dueDate.subtract(reminderOffset),
+      subject!.id,
+      topics,
+    );
 
-    setState(() => enabled = true);
+    Get.back();
   }
 
   @override

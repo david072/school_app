@@ -1,8 +1,5 @@
-import 'dart:ui';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:lit_relative_date_time/controller/relative_date_format.dart';
 import 'package:lit_relative_date_time/model/relative_date_time.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
@@ -69,20 +66,17 @@ class Task {
   }
 
   String formatRelativeDueDate() {
-    return _formatRelativeDate(
+    return formatRelativeDate(
       RelativeDateTime(dateTime: DateTime.now().date, other: dueDate),
     );
   }
 
   String formatRelativeDeletedAtDate() {
     assert(deletedAt != null);
-    return _formatRelativeDate(
+    return formatRelativeDate(
       RelativeDateTime(dateTime: deletedAt!, other: DateTime.now().date),
     );
   }
-
-  String _formatRelativeDate(RelativeDateTime rdt) =>
-      RelativeDateFormat(Get.locale ?? const Locale('de')).format(rdt);
 
   Duration reminderOffset() => dueDate.difference(reminder);
 }

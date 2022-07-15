@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lit_relative_date_time/model/relative_date_time.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
+import 'package:school_app/util/util.dart';
 
 class ClassTestTopic {
   String topic;
@@ -85,6 +87,12 @@ class ClassTest {
     }
 
     return result;
+  }
+
+  String formatRelativeDueDate() {
+    return formatRelativeDate(
+      RelativeDateTime(dateTime: DateTime.now().date, other: dueDate),
+    );
   }
 }
 

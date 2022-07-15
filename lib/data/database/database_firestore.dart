@@ -255,8 +255,6 @@ class DatabaseFirestore implements Database {
   @override
   void permanentlyDeleteTask(String id) => _delete(_deletedTasksCollection, id);
 
-  // "<topic>:<res>|<topic>:<res>|<topic>:<res>|<topic>:<res>|<topic>:<res>"
-
   @override
   Stream<List<ClassTest>> queryClassTests({DateTime? maxDueDate}) async* {
     var query =

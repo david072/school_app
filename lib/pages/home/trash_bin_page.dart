@@ -43,7 +43,7 @@ class _TrashBinPageState extends State<TrashBinPage> {
         children: [
           TasksList(
             mode: TasksListMode.deleted,
-            tasks: tasks,
+            items: tasks,
           ),
         ],
       ),
