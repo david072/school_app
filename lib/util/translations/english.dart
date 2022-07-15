@@ -107,6 +107,8 @@ class English {
         'delete_task_permanently_confirm':
             'Do you really want to permanently delete the task \'@name\'? '
                 'This cannot be undone.',
+        'delete_class_test_confirm':
+            'Do you really want to delete this class test?',
         'due_date_colon': 'Due date:',
         'no_reminder': 'None',
         'reminder_one_day': 'One day before',

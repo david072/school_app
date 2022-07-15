@@ -7,6 +7,7 @@ import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
 import 'package:school_app/pages/class_tests/create_class_test_page.dart';
+import 'package:school_app/pages/class_tests/view_class_test_page.dart';
 import 'package:school_app/pages/home/footer.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
 import 'package:school_app/pages/tasks/view_task_page.dart';
@@ -105,10 +106,18 @@ class _TasksListState extends State<TasksList> {
                                 ),
                           ],
                         ),
-                        () => Get.to(() => ViewTaskPage(
-                              taskId: task.id,
-                              isTaskDeleted: isDeletedMode,
-                            )),
+                        () {
+                          if (task is Task) {
+                            Get.to(() => ViewTaskPage(
+                                  taskId: task.id,
+                                  isTaskDeleted: isDeletedMode,
+                                ));
+                          } else if (task is ClassTest) {
+                            Get.to(() => ViewClassTestPage(
+                                  testId: task.id,
+                                ));
+                          }
+                        },
                       ),
                     )
                     .toList(),
@@ -336,6 +345,8 @@ class _TaskListWidgetState extends State<TaskListWidget> {
         items.insert(i, newItems.first);
         newItems.removeAt(0);
       }
+
+      if (newItems.isEmpty) break;
     }
 
     if (newItems.isNotEmpty) items.addAll(newItems);
@@ -365,6 +376,8 @@ class _TaskListWidgetState extends State<TaskListWidget> {
         items.insert(++i, newItems.first);
         newItems.removeAt(0);
       }
+
+      if (newItems.isEmpty) break;
     }
 
     if (newItems.isNotEmpty) items.addAll(newItems);

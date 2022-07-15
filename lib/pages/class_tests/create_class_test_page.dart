@@ -4,6 +4,7 @@ import 'package:school_app/data/class_test.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/task.dart';
+import 'package:school_app/pages/class_tests/class_test_topic_editor.dart';
 import 'package:school_app/pages/tasks/create_task_widgets.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
@@ -95,10 +96,7 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
                     onChanged: (s) => setState(() => subject = s),
                   ),
                   const SizedBox(height: 40),
-                  _ClassTopicEditor(
-                    topics: topics,
-                    onChanged: (ts) => setState(() => topics = ts),
-                  ),
+                  ClassTestTopicEditor(topics: topics),
                   const SizedBox(height: 40),
                   MaterialButton(
                     onPressed: enabled ? createClassTest : null,
@@ -111,174 +109,6 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ClassTopicEditor extends StatefulWidget {
-  const _ClassTopicEditor({
-    Key? key,
-    required this.topics,
-    required this.onChanged,
-  }) : super(key: key);
-
-  final List<ClassTestTopic> topics;
-  final void Function(List<ClassTestTopic>) onChanged;
-
-  @override
-  State<_ClassTopicEditor> createState() => _ClassTopicEditorState();
-}
-
-class _ClassTopicEditorState extends State<_ClassTopicEditor> {
-  final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextButton(
-          onPressed: () {
-            setState(() =>
-                widget.topics.add(ClassTestTopic(topic: "", resources: "")));
-            listKey.currentState!.insertItem(widget.topics.length - 1,
-                duration: const Duration(milliseconds: 100));
-          },
-          child: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                    text: 'Add', style: Theme.of(context).textTheme.bodyText1),
-                const WidgetSpan(child: SizedBox(width: 5)),
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.middle,
-                  child: Icon(Icons.add,
-                      color: Theme.of(context).textTheme.bodyText1!.color),
-                ),
-              ],
-            ),
-          ),
-        ),
-        AnimatedList(
-          key: listKey,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          initialItemCount: widget.topics.length,
-          itemBuilder: (context, i, animation) => FadeTransition(
-            opacity: animation.drive(Tween(begin: 0, end: 1)),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: IconButton(
-                              icon: const Icon(Icons.delete),
-                              constraints: const BoxConstraints(),
-                              padding: EdgeInsets.zero,
-                              onPressed: () {
-                                final removedTopic = widget.topics.removeAt(i);
-                                listKey.currentState!.removeItem(
-                                  i,
-                                  (context, animation) =>
-                                      _animateOutCard(removedTopic, animation),
-                                  duration: const Duration(milliseconds: 100),
-                                );
-                                setState(() {});
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Divider(),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: TextField(
-                            controller: TextEditingController(
-                                text: widget.topics[i].topic),
-                            onChanged: (s) => widget.topics[i].topic = s,
-                            maxLines: null,
-                            decoration: buildInputDecoration("Topic"),
-                          ),
-                        ),
-                        const VerticalDivider(),
-                        Flexible(
-                          child: TextField(
-                            controller: TextEditingController(
-                                text: widget.topics[i].resources),
-                            onChanged: (s) => widget.topics[i].resources = s,
-                            maxLines: null,
-                            decoration: buildInputDecoration("Resources"),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _animateOutCard(ClassTestTopic topic, Animation animation) {
-    return FadeTransition(
-      opacity: animation.drive(Tween(begin: 0, end: 1)),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: const [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Icon(Icons.delete),
-                    ),
-                  ),
-                ],
-              ),
-              const Divider(),
-              Row(
-                children: [
-                  Flexible(
-                    child: TextField(
-                      controller: TextEditingController(text: topic.topic),
-                      enabled: false,
-                      maxLines: null,
-                      decoration: buildInputDecoration("Topic"),
-                    ),
-                  ),
-                  const VerticalDivider(),
-                  Flexible(
-                    child: TextField(
-                      controller: TextEditingController(text: topic.resources),
-                      enabled: false,
-                      maxLines: null,
-                      decoration: buildInputDecoration("Resources"),
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ),
         ),
       ),

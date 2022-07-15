@@ -111,6 +111,8 @@ class German {
         'delete_task_permanently_confirm': 'Möchtest du die Aufgabe \'@name\' '
             'wirklich permanent löschen? Dies kann nicht rückgängig gemacht '
             'werden.',
+        'delete_class_test_confirm':
+            'Do you really want to delete this class test?',
         'due_date_colon': 'Fälligkeitsdatum:',
         'no_reminder': 'Keine',
         'reminder_one_day': 'Einen Tag vorher',
