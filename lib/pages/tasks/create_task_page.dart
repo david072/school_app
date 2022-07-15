@@ -43,7 +43,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     dueDate = widget.taskToEdit?.dueDate ?? DateTime.now().date;
     subject = widget.taskToEdit?.subject ?? widget.initialSubject;
     reminderOffset = widget.taskToEdit != null
-        ? widget.taskToEdit!.dueDate.difference(widget.taskToEdit!.reminder)
+        ? widget.taskToEdit!.reminderOffset()
         : Duration.zero;
     reminderMode = widget.taskToEdit != null
         ? reminderModeFromOffset(reminderOffset)

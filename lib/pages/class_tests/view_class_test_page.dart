@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:school_app/data/class_test.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/pages/class_tests/class_test_topic_editor.dart';
+import 'package:school_app/pages/class_tests/create_class_test_page.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
 
@@ -29,13 +30,9 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
   @override
   void initState() {
     super.initState();
-    subscription = Database.I.queryClassTest(widget.testId).listen(listen);
-  }
-
-  void listen(ClassTest test) {
-    classTest = test;
-
-    setState(() {});
+    subscription = Database.I
+        .queryClassTest(widget.testId)
+        .listen((ct) => setState(() => classTest = ct));
   }
 
   @override
@@ -53,7 +50,8 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  onPressed: () {},
+                  onPressed: () => Get.to(
+                      () => CreateClassTestPage(classTestToEdit: classTest)),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),

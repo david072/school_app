@@ -10,7 +10,12 @@ import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
 
 class CreateClassTestPage extends StatefulWidget {
-  const CreateClassTestPage({Key? key}) : super(key: key);
+  const CreateClassTestPage({
+    Key? key,
+    this.classTestToEdit,
+  }) : super(key: key);
+
+  final ClassTest? classTestToEdit;
 
   @override
   State<CreateClassTestPage> createState() => _CreateClassTestPageState();
@@ -21,12 +26,28 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
 
   bool enabled = true;
 
-  DateTime dueDate = DateTime.now();
-  Subject? subject;
-  List<ClassTestTopic> topics = [ClassTestTopic(topic: '', resources: '')];
+  late DateTime dueDate = DateTime.now();
+  late Subject? subject;
+  late List<ClassTestTopic> topics = [ClassTestTopic(topic: '', resources: '')];
 
-  ReminderMode reminderMode = ReminderMode.none;
-  Duration reminderOffset = Duration.zero;
+  late ReminderMode reminderMode = ReminderMode.none;
+  late Duration reminderOffset = Duration.zero;
+
+  bool get isEditMode => widget.classTestToEdit != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    dueDate = widget.classTestToEdit?.dueDate ?? DateTime.now();
+    subject = widget.classTestToEdit?.subject;
+    topics = widget.classTestToEdit?.topics ??
+        [ClassTestTopic(topic: '', resources: '')];
+    reminderOffset =
+        isEditMode ? widget.classTestToEdit!.reminderOffset() : Duration.zero;
+    reminderMode =
+        isEditMode ? reminderModeFromOffset(reminderOffset) : ReminderMode.none;
+  }
 
   Future<void> createClassTest() async {
     setState(() => enabled = false);
@@ -46,12 +67,22 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
       return;
     }
 
-    Database.I.createClassTest(
-      dueDate,
-      dueDate.subtract(reminderOffset),
-      subject!.id,
-      topics,
-    );
+    if (!isEditMode) {
+      Database.I.createClassTest(
+        dueDate,
+        dueDate.subtract(reminderOffset),
+        subject!.id,
+        topics,
+      );
+    } else {
+      Database.I.editClassTest(
+        widget.classTestToEdit!.id,
+        dueDate,
+        dueDate.subtract(reminderOffset),
+        subject!.id,
+        topics,
+      );
+    }
 
     Get.back();
   }
@@ -60,7 +91,7 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Class Test'),
+        title: Text(!isEditMode ? 'Create Class Test' : 'Edit Class Test'),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -103,7 +134,7 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
                     minWidth: double.infinity,
                     color: Theme.of(context).colorScheme.primary,
                     child: enabled
-                        ? Text('create_caps'.tr)
+                        ? Text(!isEditMode ? 'create_caps'.tr : 'save_caps'.tr)
                         : const CircularProgressIndicator(),
                   ),
                 ],

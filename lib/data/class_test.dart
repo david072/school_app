@@ -94,6 +94,8 @@ class ClassTest {
       RelativeDateTime(dateTime: DateTime.now().date, other: dueDate),
     );
   }
+
+  Duration reminderOffset() => dueDate.difference(reminder);
 }
 
 // "<topic>:<res>|<topic>:<res>|<topic>:<res>|<topic>:<res>|<topic>:<res>"
