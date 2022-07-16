@@ -5,7 +5,8 @@ import 'package:path/path.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/subject.dart';
-import 'package:school_app/data/task.dart';
+import 'package:school_app/data/tasks/class_test.dart';
+import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/util/util.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqlbrite/sqlbrite.dart' as b;
@@ -14,6 +15,8 @@ class DatabaseSqlite extends Database {
   static const _subjectsTable = 'subjects';
   static const _tasksTable = 'tasks';
   static const _deletedTasksTable = 'deleted_tasks';
+  static const _classTestsTable = 'class_tests';
+  static const _deletedClassTestsTable = 'deleted_class_tests';
 
   b.BriteDatabase? database;
 
@@ -229,7 +232,7 @@ class DatabaseSqlite extends Database {
     // Add deleted_at
     database!.update(
       _deletedTasksTable,
-      {'deleted_at': DateTime.now().date},
+      {'deleted_at': DateTime.now().date.millisecondsSinceEpoch},
       where: 'id = ?',
       whereArgs: [newId],
     );
@@ -286,6 +289,125 @@ class DatabaseSqlite extends Database {
   }
 
   @override
+  Stream<List<ClassTest>> queryClassTests({DateTime? maxDueDate}) async* {
+    await _open();
+    var query = database!.createQuery(_classTestsTable);
+    await for (final func in query) {
+      final rows = await func();
+      yield await rows.mapWaiting(ClassTest.fromRow);
+    }
+  }
+
+  @override
+  Future<List<ClassTest>> queryClassTestsOnce() async {
+    await _open();
+    var query = await database!.query(_classTestsTable);
+    return query.mapWaiting(ClassTest.fromRow);
+  }
+
+  @override
+  Stream<ClassTest> queryClassTest(String id) async* {
+    await _open();
+    var query = database!.createQuery(_classTestsTable,
+        where: 'id = ?', whereArgs: [int.parse(id)]);
+    await for (final func in query) {
+      var rows = await func();
+      yield await ClassTest.fromRow(rows[0]);
+    }
+  }
+
+  @override
+  void createClassTest(DateTime dueDate, DateTime reminder, String subjectId,
+      List<ClassTestTopic> topics, String type) async {
+    await _open();
+    database!.insert(_classTestsTable, {
+      'due_date': dueDate.millisecondsSinceEpoch,
+      'reminder': reminder.millisecondsSinceEpoch,
+      'subject_id': subjectId,
+      'topics': ClassTest.encodeTopicsList(topics),
+      'type': type,
+    });
+  }
+
+  @override
+  void editClassTest(String id, DateTime dueDate, DateTime reminder,
+      String subjectId, List<ClassTestTopic> topics, String type) async {
+    await _open();
+    database!.update(_classTestsTable, {
+      'due_date': dueDate.millisecondsSinceEpoch,
+      'reminder': reminder.millisecondsSinceEpoch,
+      'subject_id': subjectId,
+      'topics': ClassTest.encodeTopicsList(topics),
+      'type': type,
+    });
+  }
+
+  @override
+  void deleteClassTest(String id) async {
+    await _open();
+    var row = await database!.query(
+      _classTestsTable,
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+
+    database!.insert(_deletedClassTestsTable, {
+      ...row[0],
+      'deleted_at': DateTime.now().date.millisecondsSinceEpoch,
+    });
+
+    database!.delete(
+      _classTestsTable,
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+  }
+
+  @override
+  Stream<List<ClassTest>> queryDeletedClassTests() async* {
+    await _open();
+
+    var query = database!.createQuery(_deletedClassTestsTable);
+    await for (final func in query) {
+      var rows = await func();
+      yield await rows.mapWaiting((r) => ClassTest.fromRow(r, isDeleted: true));
+    }
+  }
+
+  @override
+  Future<List<ClassTest>> queryDeletedClassTestsOnce() async {
+    await _open();
+
+    var query = await database!.query(_deletedClassTestsTable);
+    return query.mapWaiting((r) => ClassTest.fromRow(r, isDeleted: true));
+  }
+
+  @override
+  Stream<ClassTest> queryDeletedClassTest(String id) async* {
+    await _open();
+
+    var query = database!.createQuery(
+      _deletedClassTestsTable,
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+    await for (final func in query) {
+      var rows = await func();
+      yield await ClassTest.fromRow(rows[0], isDeleted: true);
+    }
+  }
+
+  @override
+  void permanentlyDeleteClassTest(String id) async {
+    await _open();
+    database!.delete(
+      _deletedClassTestsTable,
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+  }
+
+  @override
   void deleteAllData() async => throw Exception("This should not be called!");
 
   /// NOTE: Calls to this function wait for a previous call to finish. This
@@ -309,6 +431,7 @@ class DatabaseSqlite extends Database {
     var db = await sqflite.openDatabase(
       await _databasePath(),
       onCreate: (db, version) async {
+        // Subjects table
         await db.execute('CREATE TABLE $_subjectsTable('
             'id INTEGER PRIMARY KEY AUTOINCREMENT,'
             'name TEXT,'
@@ -317,6 +440,7 @@ class DatabaseSqlite extends Database {
             'notes TEXT'
             ')');
 
+        // Tasks table and deleted tasks table
         const tasksTableSql = 'id INTEGER PRIMARY KEY AUTOINCREMENT,'
             'title TEXT,'
             'description TEXT,'
@@ -325,9 +449,22 @@ class DatabaseSqlite extends Database {
             'completed INTEGER,'
             'subject_id INTEGER';
         await db.execute('CREATE TABLE $_tasksTable($tasksTableSql)');
-
         await db.execute('CREATE TABLE $_deletedTasksTable('
             '$tasksTableSql,'
+            'deleted_at INTEGER'
+            ')');
+
+        // Class tests table and deleted class tests table
+        const classTestsTableSql = 'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+            'due_date INTEGER,'
+            'reminder INTEGER,'
+            'subject_id INTEGER,'
+            'topics STRING,'
+            'type STRING';
+        await db.execute(
+            'CREATE TABLE $_deletedClassTestsTable($classTestsTableSql)');
+        await db.execute('CREATE TABLE $_deletedClassTestsTable('
+            '$classTestsTableSql,'
             'deleted_at INTEGER'
             ')');
       },
@@ -349,8 +486,19 @@ class DatabaseSqlite extends Database {
         if (newVersion >= 2 && newVersion < 3) {
           await db.execute('ALTER TABLE $_subjectsTable ADD notes TEXT');
         }
+
+        if (newVersion >= 4) {
+          await db.execute('CREATE TABLE $_classTestsTable('
+              'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+              'due_date INTEGER,'
+              'reminder INTEGER,'
+              'subject_id INTEGER,'
+              'topics STRING,'
+              'type STRING'
+              ')');
+        }
       },
-      version: 3,
+      version: 4,
     );
 
     database = b.BriteDatabase(db, logger: null);
@@ -387,6 +535,45 @@ class DatabaseSqlite extends Database {
         DateTime.fromMillisecondsSinceEpoch(row['due_date']! as int),
         DateTime.fromMillisecondsSinceEpoch(row['reminder']! as int),
         subjectId,
+      );
+    }
+
+    var deletedTasks = await db.query(_deletedTasksTable);
+    for (final row in deletedTasks) {
+      var subjectId = subjectIdsMap[row['subject_id'] as int]!;
+      firestoreDb.createDeletedTask(
+        row['title']! as String,
+        row['description']! as String,
+        DateTime.fromMillisecondsSinceEpoch(row['due_date']! as int),
+        DateTime.fromMillisecondsSinceEpoch(row['reminder']! as int),
+        subjectId,
+        row['completed'] as int == 1,
+        row['deleted_at']! as int,
+      );
+    }
+
+    var classTests = await db.query(_classTestsTable);
+    for (final row in classTests) {
+      var subjectId = subjectIdsMap[row['subject_id'] as int]!;
+      firestoreDb.createClassTest(
+        DateTime.fromMillisecondsSinceEpoch(row['due_date']! as int),
+        DateTime.fromMillisecondsSinceEpoch(row['reminder']! as int),
+        subjectId,
+        ClassTest.decodeTopicsList(row['topics']! as String),
+        row['type']! as String,
+      );
+    }
+
+    var deletedClassTests = await db.query(_deletedClassTestsTable);
+    for (final row in deletedClassTests) {
+      var subjectId = subjectIdsMap[row['subject_id'] as int]!;
+      firestoreDb.createDeletedClassTest(
+        DateTime.fromMillisecondsSinceEpoch(row['due_date']! as int),
+        DateTime.fromMillisecondsSinceEpoch(row['reminder']! as int),
+        subjectId,
+        ClassTest.decodeTopicsList(row['topics']! as String),
+        row['type']! as String,
+        DateTime.fromMillisecondsSinceEpoch(row['deleted_at']! as int),
       );
     }
 

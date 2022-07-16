@@ -4,7 +4,8 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:school_app/data/database/database.dart';
-import 'package:school_app/data/task.dart';
+import 'package:school_app/data/tasks/class_test.dart';
+import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/util/util.dart';
 
 import '../subject.dart';
@@ -13,6 +14,8 @@ class DatabaseFirestore implements Database {
   static const _subjectsCollection = 'subjects';
   static const _tasksCollection = 'tasks';
   static const _deletedTasksCollection = 'deleted_tasks';
+  static const _classTestsCollection = 'class_tests';
+  static const _deletedClassTestsCollection = 'deleted_class_tests';
 
   @override
   Stream<List<Subject>> querySubjects() async* {
@@ -127,9 +130,10 @@ class DatabaseFirestore implements Database {
     _delete(_subjectsCollection, id);
   }
 
-  Query<Map<String, dynamic>> _tasksQuery({DateTime? maxDueDate}) {
-    var query = _collection(_tasksCollection)
-        .where('user_id', isEqualTo: _requireUser().uid);
+  Query<Map<String, dynamic>> _tasksQuery(String collection,
+      {DateTime? maxDueDate}) {
+    var query =
+        _collection(collection).where('user_id', isEqualTo: _requireUser().uid);
     if (maxDueDate != null) {
       query = query.where('due_date',
           isLessThan: maxDueDate.millisecondsSinceEpoch);
@@ -139,7 +143,8 @@ class DatabaseFirestore implements Database {
 
   @override
   Stream<List<Task>> queryTasks({DateTime? maxDueDate}) async* {
-    var query = _tasksQuery(maxDueDate: maxDueDate).snapshots();
+    var query =
+        _tasksQuery(_tasksCollection, maxDueDate: maxDueDate).snapshots();
 
     await for (final docs in query) {
       yield orderByCompleted(await docs.docs.mapWaiting(Task.fromDocument));
@@ -148,7 +153,8 @@ class DatabaseFirestore implements Database {
 
   @override
   Future<List<Task>> queryTasksOnce({DateTime? maxDueDate}) async {
-    var tasks = await _tasksQuery(maxDueDate: maxDueDate).get();
+    var tasks =
+        await _tasksQuery(_tasksCollection, maxDueDate: maxDueDate).get();
     return await tasks.docs.mapWaiting(Task.fromDocument);
   }
 
@@ -184,7 +190,6 @@ class DatabaseFirestore implements Database {
       'due_date': dueDate.millisecondsSinceEpoch,
       'reminder': reminder.millisecondsSinceEpoch,
       'subject_id': subjectId,
-      'user_id': _requireUser().uid,
     });
   }
 
@@ -235,25 +240,151 @@ class DatabaseFirestore implements Database {
     }
   }
 
+  void createDeletedTask(String title, String description, DateTime dueDate,
+      DateTime reminder, String subjectId, bool completed, int deletedAt) {
+    _collection(_deletedTasksCollection).add({
+      'title': title,
+      'description': description,
+      'due_date': dueDate.millisecondsSinceEpoch,
+      'reminder': reminder.millisecondsSinceEpoch,
+      'subject_id': subjectId,
+      'completed': completed,
+      'deleted_at': deletedAt,
+    });
+  }
+
   @override
   void permanentlyDeleteTask(String id) => _delete(_deletedTasksCollection, id);
 
   @override
-  void deleteAllData() async {
-    var tasks = await _collection(_tasksCollection)
+  Stream<List<ClassTest>> queryClassTests({DateTime? maxDueDate}) async* {
+    var query =
+        _tasksQuery(_classTestsCollection, maxDueDate: maxDueDate).snapshots();
+    await for (final docs in query) {
+      yield await docs.docs.mapWaiting(ClassTest.fromDocument);
+    }
+  }
+
+  @override
+  Future<List<ClassTest>> queryClassTestsOnce() async {
+    var query = await _collection(_classTestsCollection)
         .where('user_id', isEqualTo: _requireUser().uid)
         .get();
-    var subjects = await _collection(_subjectsCollection)
+    return await query.docs.mapWaiting(ClassTest.fromDocument);
+  }
+
+  @override
+  Stream<ClassTest> queryClassTest(String id) async* {
+    var query = _collection(_classTestsCollection).doc(id).snapshots();
+    await for (final doc in query) {
+      yield await ClassTest.fromDocument(doc);
+    }
+  }
+
+  @override
+  void createClassTest(DateTime dueDate, DateTime reminder, String subjectId,
+      List<ClassTestTopic> topics, String type) {
+    _collection(_classTestsCollection).add({
+      'due_date': dueDate.millisecondsSinceEpoch,
+      'reminder': reminder.millisecondsSinceEpoch,
+      'subject_id': subjectId,
+      'topics': ClassTest.encodeTopicsList(topics),
+      'type': type,
+      'user_id': _requireUser().uid,
+    });
+  }
+
+  @override
+  void editClassTest(String id, DateTime dueDate, DateTime reminder,
+      String subjectId, List<ClassTestTopic> topics, String type) {
+    var doc = _collection(_classTestsCollection).doc(id);
+    doc.update({
+      'due_date': dueDate.millisecondsSinceEpoch,
+      'reminder': reminder.millisecondsSinceEpoch,
+      'subject_id': subjectId,
+      'topics': ClassTest.encodeTopicsList(topics),
+      'type': type,
+    });
+  }
+
+  @override
+  void deleteClassTest(String id) async {
+    var classTest = await _collection(_classTestsCollection).doc(id).get();
+
+    var data = classTest.data()!;
+    data['deleted_at'] = DateTime.now().date.millisecondsSinceEpoch;
+    _collection(_deletedClassTestsCollection).add(data);
+    classTest.reference.delete();
+  }
+
+  @override
+  Stream<List<ClassTest>> queryDeletedClassTests() async* {
+    var stream = _collection(_deletedClassTestsCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .orderBy('deleted_at', descending: true)
+        .snapshots();
+
+    await for (final docs in stream) {
+      yield await docs.docs
+          .mapWaiting((d) => ClassTest.fromDocument(d, isDeleted: true));
+    }
+  }
+
+  @override
+  Future<List<ClassTest>> queryDeletedClassTestsOnce() async {
+    var snapshot = await _collection(_deletedClassTestsCollection)
         .where('user_id', isEqualTo: _requireUser().uid)
         .get();
+    return snapshot.docs
+        .mapWaiting((d) => ClassTest.fromDocument(d, isDeleted: true));
+  }
 
-    for (final task in tasks.docs) {
-      task.reference.delete();
+  @override
+  Stream<ClassTest> queryDeletedClassTest(String id) async* {
+    var stream = _collection(_deletedClassTestsCollection).doc(id).snapshots();
+    await for (final doc in stream) {
+      yield await ClassTest.fromDocument(doc, isDeleted: true);
     }
+  }
 
-    for (final subject in subjects.docs) {
-      subject.reference.delete();
-    }
+  void createDeletedClassTest(
+      DateTime dueDate,
+      DateTime reminder,
+      String subjectId,
+      List<ClassTestTopic> topics,
+      String type,
+      DateTime deletedAt) {
+    _collection(_deletedClassTestsCollection).add({
+      'due_date': dueDate.millisecondsSinceEpoch,
+      'reminder': reminder.millisecondsSinceEpoch,
+      'subject_id': subjectId,
+      'topics': ClassTest.encodeTopicsList(topics),
+      'type': type,
+      'deleted_at': deletedAt.millisecondsSinceEpoch,
+      'user_id': _requireUser().uid,
+    });
+  }
+
+  @override
+  void permanentlyDeleteClassTest(String id) =>
+      _delete(_deletedClassTestsCollection, id);
+
+  @override
+  void deleteAllData() {
+    _deleteAllFromCollection(_tasksCollection);
+    _deleteAllFromCollection(_classTestsCollection);
+    _deleteAllFromCollection(_subjectsCollection);
+  }
+
+  void _deleteAllFromCollection(String collection) {
+    _collection(collection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .get()
+        .then((value) {
+      for (final doc in value.docs) {
+        doc.reference.delete();
+      }
+    });
   }
 
   CollectionReference<Map<String, dynamic>> _collection(String collection) =>

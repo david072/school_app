@@ -39,10 +39,14 @@ class English {
         'subject_notes': 'Subject notes',
         'allow_caps': 'ALLOW',
         'dont_allow_caps': 'DON\'T ALLOW',
+        'confirm_caps': 'OK',
         'mark_task_completed': 'Mark completed',
         'mark_task_uncompleted': 'Open again',
         'starting': 'Starting...',
         'error': 'Error!',
+        'add': 'Add',
+        'topic': 'Topic',
+        'resources': 'Resources',
         'deleted_at': 'Deleted on',
         'email_address_missing': 'Please provide a valid email address',
         'password_too_short': 'The password must be at least 6 characters long',
@@ -52,6 +56,9 @@ class English {
         'task_notification_title': '@title due soon (@subjectAbb)',
         'task_notification_content':
             'The task \'@title\' (@subjectName) is due @relDueDate.',
+        'class_test_notification_title': '@type due soon (@subjectAbb)',
+        'class_test_notification_content':
+            'The @type (@subjectName) is due @relDueDate.',
         'notification_channel_name': 'Task reminders',
         'notification_channel_description':
             'The app sends reminders for not completed tasks on this channel.',
@@ -70,7 +77,6 @@ class English {
         'password_reset_success_end': ' with which you can reset your password. '
             'Then, you can login here with your new password. Please also take '
             'a look inside your Spam-folder.',
-        'password_reset_confirm': 'OK',
         'signup_failed': 'Sign up failed. Please try again later.',
         'signup_title': 'Sign Up',
         'account_dialog_title': 'Account',
@@ -107,6 +113,11 @@ class English {
         'delete_task_permanently_confirm':
             'Do you really want to permanently delete the task \'@name\'? '
                 'This cannot be undone.',
+        'delete_class_test_confirm':
+            'Do you really want to delete this class test?',
+        'delete_class_test_permanently_confirm':
+            'Do you really want to permanently delete this class test? '
+                'This cannot be undone.',
         'due_date_colon': 'Due date:',
         'no_reminder': 'None',
         'reminder_one_day': 'One day before',
@@ -115,6 +126,13 @@ class English {
         'reminder_four_days': 'Four days before',
         'reminder_one_week': 'One week before',
         'reminder_two_weeks': 'Two weeks before',
-        'trash_bin_title': 'Trash bin',
+        'trash_bin_title': 'Trash Bin',
+        'missing_topics_error': 'Please provide at least 1 topic!',
+        'create_class_test_title': 'Create Class Test',
+        'edit_class_test_title': 'Edit Class Test',
+        'class_test': 'Class Test',
+        'class_tests': 'Class Tests',
+        'vocab_test': 'Vocabulary Test',
+        'type': 'Type',
       };
 }

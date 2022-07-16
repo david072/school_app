@@ -78,8 +78,8 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
                   ),
           ),
           Footer(
-            text: 'subjects'.tr,
-            onAdd: () => Get.to(() => const CreateSubjectPage()),
+            text: Text('subjects'.tr),
+            onClick: () => Get.to(() => const CreateSubjectPage()),
           ),
         ],
       ),
@@ -104,8 +104,6 @@ class _SubjectState extends State<_Subject> {
 
   @override
   Widget build(BuildContext context) {
-    print(
-        "subject: ${widget.subject.name}, tasks: ${widget.subject.taskCount}");
     return LongPressPopupMenu(
       onTap: () => Get.to(() => SubjectPage(subjectId: widget.subject.id)),
       enabled: enabled,

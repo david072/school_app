@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 
-class Footer extends StatelessWidget {
+class Footer extends StatefulWidget {
   const Footer({
     Key? key,
     this.reverse = false,
+    this.popupItems,
+    this.onPopupItemSelected,
     required this.text,
-    required this.onAdd,
+    this.onClick,
   }) : super(key: key);
 
   final bool reverse;
-  final String text;
-  final void Function() onAdd;
+  final List<PopupMenuItem>? popupItems;
+  final void Function(dynamic)? onPopupItemSelected;
+  final Widget text;
+  final void Function()? onClick;
+
+  @override
+  State<Footer> createState() => _FooterState();
+}
+
+class _FooterState extends State<Footer> {
+  bool isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -20,32 +31,74 @@ class Footer extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
-          !reverse
-              ? Text(
-            text,
-                  style: Theme.of(context).textTheme.caption,
+          !widget.reverse
+              ? DefaultTextStyle(
+                  style: Theme.of(context).textTheme.caption!,
+                  child: widget.text,
                 )
               : Container(),
           Expanded(
             child: Align(
-              alignment:
-                  !reverse ? Alignment.centerRight : Alignment.centerLeft,
+              alignment: !widget.reverse
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
               child: Material(
                 color: Colors.transparent,
-                child: IconButton(
-                  onPressed: onAdd,
-                  icon: const Icon(Icons.add),
-                  constraints: const BoxConstraints(),
-                  padding: const EdgeInsets.all(5),
+                child: AnimatedRotation(
+                  turns: !isExpanded ? 0 : 0.126,
+                  duration: const Duration(milliseconds: 200),
+                  child: IconButton(
+                    onPressed: widget.popupItems == null
+                        ? widget.onClick!
+                        : () async {
+                            setState(() => isExpanded = true);
+
+                            final renderBox =
+                                context.findRenderObject()! as RenderBox;
+                            final overlay = Overlay.of(context)!
+                                .context
+                                .findRenderObject()! as RenderBox;
+
+                            final offset =
+                                Offset(0, -renderBox.size.height - 30);
+                            final position = RelativeRect.fromRect(
+                              Rect.fromPoints(
+                                renderBox.localToGlobal(offset,
+                                    ancestor: overlay),
+                                renderBox.localToGlobal(
+                                    renderBox.size.bottomRight(Offset.zero) -
+                                        offset,
+                                    ancestor: overlay),
+                              ),
+                              Offset.zero & overlay.size,
+                            );
+
+                            final result = await showMenu(
+                              position: position,
+                              context: context,
+                              items: widget.popupItems!,
+                            );
+                            if (result == null) {
+                              setState(() => isExpanded = false);
+                              return;
+                            }
+
+                            widget.onPopupItemSelected!(result);
+                            setState(() => isExpanded = false);
+                          },
+                    icon: const Icon(Icons.add),
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(5),
+                  ),
                 ),
               ),
             ),
           ),
-          !reverse
+          !widget.reverse
               ? Container()
-              : Text(
-            text,
-                  style: Theme.of(context).textTheme.caption,
+              : DefaultTextStyle(
+                  style: Theme.of(context).textTheme.caption!,
+                  child: widget.text,
                 ),
         ],
       ),

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:school_app/data/database/database.dart';
-import 'package:school_app/data/task.dart';
-import 'package:school_app/pages/tasks/clickable_row.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
+import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
@@ -84,12 +84,8 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                 IconButton(
                   onPressed: () => showConfirmationDialog(
                       context: context,
-                      title:
-                          (!isTaskDeleted ? 'delete' : 'delete_permanently').tr,
-                      content: (!isTaskDeleted
-                              ? 'delete_task_confirm'
-                              : 'delete_task_permanently_confirm')
-                          .trParams({'name': task!.title}),
+                      title: task!.deleteDialogTitle(),
+                      content: task!.deleteDialogContent(),
                       cancelText: 'cancel_caps'.tr,
                       confirmText: 'delete_caps'.tr,
                       onConfirm: () {
@@ -163,7 +159,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                         decoration: InputDecoration(
                           alignLabelWithHint: true,
                           labelText: 'description'.tr,
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.multiline,
                         maxLines: null,

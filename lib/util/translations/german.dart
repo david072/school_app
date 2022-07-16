@@ -39,10 +39,14 @@ class German {
         'subject_notes': 'Fach Notizen',
         'allow_caps': 'ERLAUBEN',
         'dont_allow_caps': 'NICHT ERLAUBEN',
+        'confirm_caps': 'OK',
         'mark_task_completed': 'Abschließen',
         'mark_task_uncompleted': 'Wieder öffnen',
         'starting': 'Starte...',
         'error': 'Fehler!',
+        'add': 'Hinzufügen',
+        'topic': 'Thema',
+        'resources': 'Material',
         'deleted_at': 'Gelöscht am',
         'email_address_missing': 'Bitte gib eine gültige Email-Adresse an',
         'password_too_short':
@@ -53,6 +57,9 @@ class German {
         'task_notification_title': '@title bald fällig (@subjectAbb)',
         'task_notification_content':
             'Die Aufgabe \'@title\' (@subjectName) ist @relDueDate fällig.',
+        'class_test_notification_title': '@type bald fällig (@subjectAbb)',
+        'class_test_notification_content':
+            'Die @type (@subjectName) ist @relDueDate fällig.',
         'notification_channel_name': 'Aufgaben Erinnerungen',
         'notification_channel_description':
             'Die App sendet Erinnerungen für nicht abgeschlossene Aufgaben über diesen Kanal.',
@@ -73,7 +80,6 @@ class German {
             'dein Passwort zurücksetzen kannst. Dann kannst du dich hier mit '
             'deinem neuen Passwort anmelden.\n\n'
             'Bitte schaue auch in deinen Spam-Ordner.',
-        'password_reset_confirm': 'OK',
         'signup_failed':
             'Registration fehlgeschlagen. Bitte versuche es später nochmal.',
         'signup_title': 'Registrieren',
@@ -111,6 +117,11 @@ class German {
         'delete_task_permanently_confirm': 'Möchtest du die Aufgabe \'@name\' '
             'wirklich permanent löschen? Dies kann nicht rückgängig gemacht '
             'werden.',
+        'delete_class_test_confirm':
+            'Möchtest du diese Klassenarbeit wirklich löschen?',
+        'delete_class_test_permanently_confirm':
+            'Möchtest du diese Klassenarbeit wirklich löschen? Dies kann nicht'
+                'rückgängig gemacht werden.',
         'due_date_colon': 'Fälligkeitsdatum:',
         'no_reminder': 'Keine',
         'reminder_one_day': 'Einen Tag vorher',
@@ -120,5 +131,12 @@ class German {
         'reminder_one_week': 'Eine Woche vorher',
         'reminder_two_weeks': 'Zwei Wochen vorher',
         'trash_bin_title': 'Papierkorb',
+        'missing_topics_error': 'Bitte gib mindestens ein Thema an!',
+        'create_class_test_title': 'Klassenarbeit erstellen',
+        'edit_class_test_title': 'Klassenarbeit bearbeiten',
+        'class_test': 'Klassenarbeit',
+        'class_tests': 'Klassenarbeiten',
+        'vocab_test': 'Vokabeltest',
+        'type': 'Typ',
       };
 }
