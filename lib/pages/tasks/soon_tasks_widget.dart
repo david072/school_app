@@ -211,93 +211,20 @@ class TaskListWidget extends StatefulWidget {
 
 class _TaskListWidgetState extends State<TaskListWidget> {
   List<AbstractTask> items = [];
-  late StreamSubscription tasksSubscription;
-  late StreamSubscription classTestsSubscription;
+  late StreamSubscription subscription;
 
   late Offset longPressPosition;
 
   @override
   void initState() {
     super.initState();
-    tasksSubscription = Database.I
-        .queryTasks(
-      maxDueDate: widget.maxDateTime,
-    )
-        .listen((data) {
-      data.where((item) =>
-          widget.subjectFilter != null &&
-          item.subject.id == widget.subjectFilter!.id);
-      setState(() => updateTasks(data));
-    });
-
-    classTestsSubscription = Database.I
-        .queryClassTests(maxDueDate: widget.maxDateTime)
-        .listen((data) {
-      data.removeWhere((item) =>
-          widget.subjectFilter != null &&
-          item.subject.id == widget.subjectFilter!.id);
-      setState(() => updateClassTests(data));
-    });
-  }
-
-  void updateClassTests(List<ClassTest> newItems) {
-    items.removeWhere((item) => item is ClassTest);
-    if (newItems.isEmpty) return;
-
-    if (items.isEmpty) {
-      items.addAll(newItems);
-      return;
-    }
-
-    for (int i = 0; i < items.length; i++) {
-      final item = items[i];
-      if (item is! Task) throw 'Invalid type in items list';
-
-      DateTime newClassTestDueDate = newItems.first.dueDate;
-      if (newClassTestDueDate.isBefore(item.dueDate) ||
-          newClassTestDueDate.isAtSameMomentAs(item.dueDate)) {
-        items.insert(i, newItems.first);
-        newItems.removeAt(0);
-      }
-
-      if (newItems.isEmpty) break;
-    }
-
-    if (newItems.isNotEmpty) items.addAll(newItems);
-  }
-
-  void updateTasks(List<Task> newItems) {
-    items.removeWhere((item) => item is Task);
-    if (newItems.isEmpty) return;
-
-    if (items.isEmpty) {
-      items.addAll(newItems);
-      return;
-    }
-
-    for (int i = 0; i < items.length; i++) {
-      final item = items[i];
-      if (item is! ClassTest) throw 'Invalid type in items list';
-
-      DateTime newTaskDueDate = newItems.first.dueDate;
-      if (newTaskDueDate.isBefore(item.dueDate)) {
-        items.insert(i, newItems.first);
-        newItems.removeAt(0);
-      } else if (newTaskDueDate.isAtSameMomentAs(item.dueDate)) {
-        items.insert(++i, newItems.first);
-        newItems.removeAt(0);
-      }
-
-      if (newItems.isEmpty) break;
-    }
-
-    if (newItems.isNotEmpty) items.addAll(newItems);
+    subscription = Database.queryTasksAndClassTests()
+        .listen((tasks) => setState(() => items = tasks));
   }
 
   @override
   void dispose() {
-    tasksSubscription.cancel();
-    classTestsSubscription.cancel();
+    subscription.cancel();
     super.dispose();
   }
 

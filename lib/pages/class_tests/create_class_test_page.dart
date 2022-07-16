@@ -44,7 +44,7 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
   void initState() {
     super.initState();
 
-    dueDate = widget.classTestToEdit?.dueDate ?? DateTime.now();
+    dueDate = widget.classTestToEdit?.dueDate ?? DateTime.now().date;
     subject = widget.classTestToEdit?.subject;
     topics = widget.classTestToEdit?.topics ??
         [ClassTestTopic(topic: '', resources: '')];
