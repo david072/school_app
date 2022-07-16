@@ -134,5 +134,7 @@ class English {
         'class_tests': 'Class Tests',
         'vocab_test': 'Vocabulary Test',
         'type': 'Type',
+        'completed': 'Completed',
+        'not_completed': 'Not completed',
       };
 }

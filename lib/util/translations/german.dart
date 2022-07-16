@@ -138,5 +138,7 @@ class German {
         'class_tests': 'Klassenarbeiten',
         'vocab_test': 'Vokabeltest',
         'type': 'Typ',
+        'completed': 'Abgeschlossen',
+        'not_completed': 'Nicht abgeschlossen',
       };
 }

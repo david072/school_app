@@ -100,18 +100,35 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                 ),
               ],
             ),
-            floatingActionButton: !isTaskDeleted
-                ? FloatingActionButton.extended(
-                    onPressed: () {
+            floatingActionButton: FloatingActionButton.extended(
+              onPressed: !isTaskDeleted
+                  ? () {
                       setState(() => completed = !completed);
                       Database.I.updateTaskStatus(task!.id, completed);
-                    },
-                    label: Text(!completed
+                    }
+                  : null,
+              label: Text(
+                // When the task is deleted, show the completion status.
+                // Otherwise, show what the button will do
+                !completed
+                    ? !isTaskDeleted
                         ? 'mark_task_completed'.tr
-                        : 'mark_task_uncompleted'.tr),
-                    icon: Icon(!completed ? Icons.done : Icons.close),
-                  )
-                : null,
+                        : 'not_completed'.tr
+                    : !isTaskDeleted
+                        ? 'mark_task_uncompleted'.tr
+                        : 'completed'.tr,
+              ),
+              icon: Icon(
+                // Same as above ^
+                !completed
+                    ? !isTaskDeleted
+                        ? Icons.done
+                        : Icons.close
+                    : !isTaskDeleted
+                        ? Icons.close
+                        : Icons.done,
+              ),
+            ),
             body: Center(
               child: SizedBox(
                 width: formWidth(context),
