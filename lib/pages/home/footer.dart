@@ -21,6 +21,8 @@ class Footer extends StatefulWidget {
 }
 
 class _FooterState extends State<Footer> {
+  final iconButtonKey = GlobalKey();
+
   bool isExpanded = false;
 
   @override
@@ -48,44 +50,10 @@ class _FooterState extends State<Footer> {
                   turns: !isExpanded ? 0 : 0.126,
                   duration: const Duration(milliseconds: 200),
                   child: IconButton(
+                    key: iconButtonKey,
                     onPressed: widget.popupItems == null
                         ? widget.onClick!
-                        : () async {
-                            setState(() => isExpanded = true);
-
-                            final renderBox =
-                                context.findRenderObject()! as RenderBox;
-                            final overlay = Overlay.of(context)!
-                                .context
-                                .findRenderObject()! as RenderBox;
-
-                            final offset =
-                                Offset(0, -renderBox.size.height - 30);
-                            final position = RelativeRect.fromRect(
-                              Rect.fromPoints(
-                                renderBox.localToGlobal(offset,
-                                    ancestor: overlay),
-                                renderBox.localToGlobal(
-                                    renderBox.size.bottomRight(Offset.zero) -
-                                        offset,
-                                    ancestor: overlay),
-                              ),
-                              Offset.zero & overlay.size,
-                            );
-
-                            final result = await showMenu(
-                              position: position,
-                              context: context,
-                              items: widget.popupItems!,
-                            );
-                            if (result == null) {
-                              setState(() => isExpanded = false);
-                              return;
-                            }
-
-                            widget.onPopupItemSelected!(result);
-                            setState(() => isExpanded = false);
-                          },
+                        : showPopupMenu,
                     icon: const Icon(Icons.add),
                     constraints: const BoxConstraints(),
                     padding: const EdgeInsets.all(5),
@@ -103,5 +71,44 @@ class _FooterState extends State<Footer> {
         ],
       ),
     );
+  }
+
+  Future<void> showPopupMenu() async {
+    setState(() => isExpanded = true);
+
+    final renderBox =
+        iconButtonKey.currentContext!.findRenderObject() as RenderBox;
+    final overlay =
+        Overlay.of(context)!.context.findRenderObject()! as RenderBox;
+
+    // Offset popup menu up by 90 units (and set at correct X pos)
+    final offset = Offset(
+      renderBox.localToGlobal(renderBox.size.topRight(Offset.zero)).dx,
+      -renderBox.size.height - 90,
+    );
+    // Points: top right & bottom left
+    final position = RelativeRect.fromRect(
+      // Outer rect
+      Rect.fromPoints(
+        renderBox.localToGlobal(offset, ancestor: overlay),
+        renderBox.localToGlobal(renderBox.size.bottomLeft(Offset.zero) - offset,
+            ancestor: overlay),
+      ),
+      // Inner rect
+      Offset.zero & overlay.size,
+    );
+
+    final result = await showMenu(
+      position: position,
+      context: context,
+      items: widget.popupItems!,
+    );
+    if (result == null) {
+      setState(() => isExpanded = false);
+      return;
+    }
+
+    widget.onPopupItemSelected!(result);
+    setState(() => isExpanded = false);
   }
 }

@@ -71,7 +71,7 @@ class DatabaseFirestore implements Database {
     var taskCount = 0;
     var completedTaskCount = 0;
     for (final doc in tasks.docs) {
-      if (doc.data()['completed']) {
+      if (doc.data()['completed'] == 1) {
         completedTaskCount++;
       } else {
         taskCount++;
