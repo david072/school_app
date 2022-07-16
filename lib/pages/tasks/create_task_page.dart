@@ -70,22 +70,25 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     }
 
     if (widget.taskToEdit == null) {
-      Database.I.createTask(
+      Database.I.createTask(Task(
+        '',
         title,
         description,
         dueDate,
         dueDate.subtract(reminderOffset),
-        subject!.id,
-      );
+        subject!,
+        false,
+      ));
     } else {
-      Database.I.editTask(
+      Database.I.editTask(Task(
         widget.taskToEdit!.id,
         title,
         description,
         dueDate,
         dueDate.subtract(reminderOffset),
-        subject!.id,
-      );
+        subject!,
+        widget.taskToEdit!.completed,
+      ));
     }
 
     Get.back();
@@ -173,4 +176,3 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     );
   }
 }
-

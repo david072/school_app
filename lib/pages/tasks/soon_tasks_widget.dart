@@ -15,17 +15,15 @@ import 'package:school_app/pages/tasks/view_task_page.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
 
-enum TasksListMode { normal, deleted }
-
 class TasksList extends StatefulWidget {
   const TasksList({
     Key? key,
     required this.items,
-    this.mode = TasksListMode.normal,
+    this.isDeletedMode = false,
   }) : super(key: key);
 
   final List<AbstractTask> items;
-  final TasksListMode mode;
+  final bool isDeletedMode;
 
   @override
   State<TasksList> createState() => _TasksListState();
@@ -34,7 +32,7 @@ class TasksList extends StatefulWidget {
 class _TasksListState extends State<TasksList> {
   late Offset longPressPosition;
 
-  bool get isDeletedMode => widget.mode == TasksListMode.deleted;
+  bool get isDeletedMode => widget.isDeletedMode;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +59,6 @@ class _TasksListState extends State<TasksList> {
                     .map(
                       (task) => _taskRow(
                         context,
-                        widget.mode,
                         task,
                         () => showPopupMenu(
                           context: context,
@@ -132,12 +129,11 @@ class _TasksListState extends State<TasksList> {
 
   DataRow _taskRow(
     BuildContext context,
-    TasksListMode mode,
     AbstractTask task,
     void Function() onLongPress,
     void Function() onSelectChanged,
   ) {
-    DataCell completedCell = task.getCompletedCell(mode);
+    DataCell completedCell = task.getCompletedCell();
     DataCell titleCell = task.getTitleCell(context);
     Subject subject = task.subject;
     String relativeDueDate = task.formatRelativeDueDate();
@@ -164,7 +160,7 @@ class _TasksListState extends State<TasksList> {
 
     List<DataCell> cells;
 
-    if (mode == TasksListMode.normal) {
+    if (task.deletedAt == null) {
       cells = [
         completedCell,
         DataCell(Text(relativeDueDate,

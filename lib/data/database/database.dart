@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:get/get.dart';
 import 'package:school_app/data/subject.dart';
@@ -25,9 +24,9 @@ abstract class Database {
 
   Future<List<int>> queryTaskCountForSubject(String id);
 
-  void createSubject(String name, String abbreviation, Color color);
+  void createSubject(Subject subject);
 
-  void editSubject(String id, String name, String abbreviation, Color color);
+  void editSubject(Subject data);
 
   void updateSubjectNotes(String id, String notes);
 
@@ -40,11 +39,9 @@ abstract class Database {
 
   Stream<Task> queryTask(String taskId);
 
-  void createTask(String title, String description, DateTime dueDate,
-      DateTime reminder, String subjectId);
+  void createTask(Task task);
 
-  void editTask(String id, String title, String description, DateTime dueDate,
-      DateTime reminder, String subjectId);
+  void editTask(Task data);
 
   void updateTaskStatus(String id, bool completed);
 
@@ -66,11 +63,9 @@ abstract class Database {
 
   Stream<ClassTest> queryClassTest(String id);
 
-  void createClassTest(DateTime dueDate, DateTime reminder, String subjectId,
-      List<ClassTestTopic> topics, String type);
+  void createClassTest(ClassTest classTest);
 
-  void editClassTest(String id, DateTime dueDate, DateTime reminder,
-      String subjectId, List<ClassTestTopic> topics, String type);
+  void editClassTest(ClassTest data);
 
   void deleteClassTest(String id);
 

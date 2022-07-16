@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lit_relative_date_time/model/relative_date_time.dart';
 import 'package:school_app/data/subject.dart';
-import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 import 'package:school_app/util/util.dart';
 
 abstract class AbstractTask {
@@ -20,7 +19,7 @@ abstract class AbstractTask {
 
   Color? tableRowBackgroundColor();
 
-  DataCell getCompletedCell(TasksListMode mode);
+  DataCell getCompletedCell();
 
   DataCell getTitleCell(BuildContext context);
 
@@ -49,11 +48,13 @@ abstract class AbstractTask {
   String formatRelativeDeletedAtDate() {
     assert(deletedAt != null);
     return formatRelativeDate(
-      RelativeDateTime(dateTime: deletedAt!, other: DateTime.now().date),
+      RelativeDateTime(dateTime: DateTime.now().date, other: deletedAt!),
     );
   }
 
   Duration reminderOffset() => dueDate.difference(reminder);
+
+  Map<String, dynamic> data();
 }
 
 enum ReminderMode {

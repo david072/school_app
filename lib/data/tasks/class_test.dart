@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/tasks/abstract_task.dart';
-import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 import 'package:school_app/util/util.dart';
 
 class ClassTestTopic {
@@ -40,38 +39,35 @@ class ClassTest extends AbstractTask {
     this.dueDate,
     this.reminder,
     this.subject,
-    this.topics, [
+    this.topics,
+    this.type, [
     this.deletedAt,
-    this.type = '',
   ]);
 
   static Future<ClassTest> fromDocument(
-      DocumentSnapshot<Map<String, dynamic>> doc,
-      {bool isDeleted = false}) {
-    return _fromMap(doc.id, doc.data()!, isDeleted: isDeleted);
+      DocumentSnapshot<Map<String, dynamic>> doc) {
+    return _fromMap(doc.id, doc.data()!);
   }
 
   static Future<ClassTest> fromRow(Map<String, dynamic> row,
-      {bool isDeleted = false}) {
-    return _fromMap(
-      row['id'].toString(),
-      row,
-      isDeleted: isDeleted,
-    );
+      {String? subjectId}) {
+    return _fromMap(row['id'].toString(), row, subjectId: subjectId);
   }
 
   static Future<ClassTest> _fromMap(String id, Map<String, dynamic> map,
-      {bool isDeleted = false}) async {
+      {String? subjectId}) async {
     var dateTime = DateTime.fromMillisecondsSinceEpoch;
 
     return ClassTest(
       id,
       dateTime(map['due_date']),
       dateTime(map['reminder']),
-      await Database.I.querySubjectOnce(map['subject_id'].toString()),
+      subjectId == null
+          ? await Database.I.querySubjectOnce(map['subject_id'].toString())
+          : Subject(subjectId, '', '', Colors.black, 0, 0),
       decodeTopicsList(map['topics']),
-      !isDeleted ? null : dateTime(map['deleted_at']),
       map['type'],
+      map.containsKey('deleted_at') ? dateTime(map['deleted_at']) : null,
     );
   }
 
@@ -101,7 +97,8 @@ class ClassTest extends AbstractTask {
   }
 
   @override
-  String deleteDialogContent() => (deletedAt != null
+  String deleteDialogContent() =>
+      (deletedAt != null
           ? 'delete_class_test_permanently_confirm'
           : 'delete_class_test_confirm')
       .tr;
@@ -134,8 +131,7 @@ class ClassTest extends AbstractTask {
   }
 
   @override
-  DataCell getCompletedCell(TasksListMode mode) =>
-      const DataCell(Icon(Icons.description));
+  DataCell getCompletedCell() => const DataCell(Icon(Icons.description));
 
   @override
   DataCell getTitleCell(BuildContext context) => DataCell(Text(
@@ -151,6 +147,15 @@ class ClassTest extends AbstractTask {
       return Colors.grey.shade900;
     }
   }
+
+  @override
+  Map<String, dynamic> data() => {
+        'type': type,
+        'due_date': dueDate.millisecondsSinceEpoch,
+        'reminder': reminder.millisecondsSinceEpoch,
+        'subject_id': subject.id,
+        'topics': ClassTest.encodeTopicsList(topics),
+      };
 }
 
 // "<topic>:<res>|<topic>:<res>|<topic>:<res>|<topic>:<res>|<topic>:<res>"

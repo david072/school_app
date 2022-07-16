@@ -46,10 +46,10 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
     }
 
     if (widget.subjectToEdit == null) {
-      Database.I.createSubject(name, abbreviation, color);
+      Database.I.createSubject(Subject.data(name, abbreviation, color));
     } else {
-      Database.I
-          .editSubject(widget.subjectToEdit!.id, name, abbreviation, color);
+      Database.I.editSubject(
+          Subject.data(name, abbreviation, color, widget.subjectToEdit!.id));
     }
 
     Get.back();

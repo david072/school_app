@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,14 +22,14 @@ class DatabaseFirestore implements Database {
 
     // TODO: Query / store task count
     _collection(_subjectsCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .snapshots()
         .listen((event) async {
       controller.sink.add(await event.docs.mapWaiting(Subject.fromDocument));
     });
 
     _collection(_tasksCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .snapshots(includeMetadataChanges: false)
         .listen((event) async {
       controller.sink.add(await _querySubjectsOnce());
@@ -43,7 +42,7 @@ class DatabaseFirestore implements Database {
 
   Future<List<Subject>> _querySubjectsOnce() async {
     var subjects = await _collection(_subjectsCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .get();
     return await subjects.docs.mapWaiting(Subject.fromDocument);
   }
@@ -65,7 +64,7 @@ class DatabaseFirestore implements Database {
   @override
   Future<List<int>> queryTaskCountForSubject(String id) async {
     var tasks = await _collection(_tasksCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .where('subject_id', isEqualTo: id)
         .get();
 
@@ -83,25 +82,21 @@ class DatabaseFirestore implements Database {
   }
 
   @override
-  String createSubject(String name, String abbreviation, Color color) {
+  String createSubject(Subject subject) {
     var newSubject = _collection(_subjectsCollection).doc();
     newSubject.set({
-      'name': name,
-      'abbreviation': abbreviation,
-      'color': color.value,
-      'user_id': _requireUser().uid,
+      ...subject.data(),
+      'user_id': _requireUserUID(),
     });
     return newSubject.id;
   }
 
   @override
-  void editSubject(String id, String name, String abbreviation, Color color) {
-    var doc = _collection(_subjectsCollection).doc(id);
+  void editSubject(Subject data) {
+    var doc = _collection(_subjectsCollection).doc(data.id);
     doc.update({
-      'name': name,
-      'abbreviation': abbreviation,
-      'color': color.value,
-      'user_id': _requireUser().uid,
+      ...data.data(),
+      'user_id': _requireUserUID(),
     });
   }
 
@@ -116,11 +111,11 @@ class DatabaseFirestore implements Database {
   Future<void> deleteSubject(String id) async {
     // Delete tasks associated with this subject id
     var tasks = await _collection(_tasksCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .where('subject_id', isEqualTo: id)
         .get();
     var deletedTasks = await _collection(_deletedTasksCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .where('subject_id', isEqualTo: id)
         .get();
     for (final task in [...tasks.docs, ...deletedTasks.docs]) {
@@ -133,7 +128,7 @@ class DatabaseFirestore implements Database {
   Query<Map<String, dynamic>> _tasksQuery(String collection,
       {DateTime? maxDueDate}) {
     var query =
-        _collection(collection).where('user_id', isEqualTo: _requireUser().uid);
+        _collection(collection).where('user_id', isEqualTo: _requireUserUID());
     if (maxDueDate != null) {
       query = query.where('due_date',
           isLessThan: maxDueDate.millisecondsSinceEpoch);
@@ -167,30 +162,17 @@ class DatabaseFirestore implements Database {
   }
 
   @override
-  void createTask(String title, String description, DateTime dueDate,
-      DateTime reminder, String subjectId) {
+  void createTask(Task task) {
     _collection(_tasksCollection).add({
-      'title': title,
-      'description': description,
-      'due_date': dueDate.millisecondsSinceEpoch,
-      'reminder': reminder.millisecondsSinceEpoch,
-      'subject_id': subjectId,
-      'completed': false,
-      'user_id': _requireUser().uid,
+      ...task.data(),
+      'user_id': _requireUserUID(),
     });
   }
 
   @override
-  void editTask(String id, String title, String description, DateTime dueDate,
-      DateTime reminder, String subjectId) {
-    var doc = _collection(_tasksCollection).doc(id);
-    doc.update({
-      'title': title,
-      'description': description,
-      'due_date': dueDate.millisecondsSinceEpoch,
-      'reminder': reminder.millisecondsSinceEpoch,
-      'subject_id': subjectId,
-    });
+  void editTask(Task data) {
+    var doc = _collection(_tasksCollection).doc(data.id);
+    doc.update(data.data());
   }
 
   @override
@@ -212,44 +194,36 @@ class DatabaseFirestore implements Database {
   @override
   Stream<List<Task>> queryDeletedTasks() async* {
     var deletedTasks = _collection(_deletedTasksCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .orderBy('deleted_at', descending: true)
         .snapshots();
 
     await for (final tasks in deletedTasks) {
-      yield await tasks.docs.mapWaiting(
-        (el) => Task.fromDocument(el, isDeleted: true),
-      );
+      yield await tasks.docs.mapWaiting(Task.fromDocument);
     }
   }
 
   @override
   Future<List<Task>> queryDeletedTasksOnce() async {
     var query = await _collection(_deletedTasksCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .get();
-    return await query.docs
-        .mapWaiting((el) => Task.fromDocument(el, isDeleted: true));
+    return await query.docs.mapWaiting(Task.fromDocument);
   }
 
   @override
   Stream<Task> queryDeletedTask(String id) async* {
     var query = _collection(_deletedTasksCollection).doc(id).snapshots();
     await for (final task in query) {
-      yield await Task.fromDocument(task, isDeleted: true);
+      yield await Task.fromDocument(task);
     }
   }
 
-  void createDeletedTask(String title, String description, DateTime dueDate,
-      DateTime reminder, String subjectId, bool completed, int deletedAt) {
+  void createDeletedTask(Task task) {
     _collection(_deletedTasksCollection).add({
-      'title': title,
-      'description': description,
-      'due_date': dueDate.millisecondsSinceEpoch,
-      'reminder': reminder.millisecondsSinceEpoch,
-      'subject_id': subjectId,
-      'completed': completed,
-      'deleted_at': deletedAt,
+      ...task.data(),
+      'deleted_at': task.deletedAt!.millisecondsSinceEpoch,
+      'user_id': _requireUserUID(),
     });
   }
 
@@ -268,7 +242,7 @@ class DatabaseFirestore implements Database {
   @override
   Future<List<ClassTest>> queryClassTestsOnce() async {
     var query = await _collection(_classTestsCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .get();
     return await query.docs.mapWaiting(ClassTest.fromDocument);
   }
@@ -282,29 +256,17 @@ class DatabaseFirestore implements Database {
   }
 
   @override
-  void createClassTest(DateTime dueDate, DateTime reminder, String subjectId,
-      List<ClassTestTopic> topics, String type) {
+  void createClassTest(ClassTest classTest) {
     _collection(_classTestsCollection).add({
-      'due_date': dueDate.millisecondsSinceEpoch,
-      'reminder': reminder.millisecondsSinceEpoch,
-      'subject_id': subjectId,
-      'topics': ClassTest.encodeTopicsList(topics),
-      'type': type,
-      'user_id': _requireUser().uid,
+      ...classTest.data(),
+      'user_id': _requireUserUID(),
     });
   }
 
   @override
-  void editClassTest(String id, DateTime dueDate, DateTime reminder,
-      String subjectId, List<ClassTestTopic> topics, String type) {
-    var doc = _collection(_classTestsCollection).doc(id);
-    doc.update({
-      'due_date': dueDate.millisecondsSinceEpoch,
-      'reminder': reminder.millisecondsSinceEpoch,
-      'subject_id': subjectId,
-      'topics': ClassTest.encodeTopicsList(topics),
-      'type': type,
-    });
+  void editClassTest(ClassTest data) {
+    var doc = _collection(_classTestsCollection).doc(data.id);
+    doc.update(data.data());
   }
 
   @override
@@ -320,48 +282,36 @@ class DatabaseFirestore implements Database {
   @override
   Stream<List<ClassTest>> queryDeletedClassTests() async* {
     var stream = _collection(_deletedClassTestsCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .orderBy('deleted_at', descending: true)
         .snapshots();
 
     await for (final docs in stream) {
-      yield await docs.docs
-          .mapWaiting((d) => ClassTest.fromDocument(d, isDeleted: true));
+      yield await docs.docs.mapWaiting(ClassTest.fromDocument);
     }
   }
 
   @override
   Future<List<ClassTest>> queryDeletedClassTestsOnce() async {
     var snapshot = await _collection(_deletedClassTestsCollection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .get();
-    return snapshot.docs
-        .mapWaiting((d) => ClassTest.fromDocument(d, isDeleted: true));
+    return snapshot.docs.mapWaiting(ClassTest.fromDocument);
   }
 
   @override
   Stream<ClassTest> queryDeletedClassTest(String id) async* {
     var stream = _collection(_deletedClassTestsCollection).doc(id).snapshots();
     await for (final doc in stream) {
-      yield await ClassTest.fromDocument(doc, isDeleted: true);
+      yield await ClassTest.fromDocument(doc);
     }
   }
 
-  void createDeletedClassTest(
-      DateTime dueDate,
-      DateTime reminder,
-      String subjectId,
-      List<ClassTestTopic> topics,
-      String type,
-      DateTime deletedAt) {
+  void createDeletedClassTest(ClassTest classTest) {
     _collection(_deletedClassTestsCollection).add({
-      'due_date': dueDate.millisecondsSinceEpoch,
-      'reminder': reminder.millisecondsSinceEpoch,
-      'subject_id': subjectId,
-      'topics': ClassTest.encodeTopicsList(topics),
-      'type': type,
-      'deleted_at': deletedAt.millisecondsSinceEpoch,
-      'user_id': _requireUser().uid,
+      ...classTest.data(),
+      'deleted_at': classTest.deletedAt!.millisecondsSinceEpoch,
+      'user_id': _requireUserUID(),
     });
   }
 
@@ -378,7 +328,7 @@ class DatabaseFirestore implements Database {
 
   void _deleteAllFromCollection(String collection) {
     _collection(collection)
-        .where('user_id', isEqualTo: _requireUser().uid)
+        .where('user_id', isEqualTo: _requireUserUID())
         .get()
         .then((value) {
       for (final doc in value.docs) {
@@ -395,9 +345,9 @@ class DatabaseFirestore implements Database {
     doc.delete();
   }
 
-  User _requireUser() {
+  String _requireUserUID() {
     var user = FirebaseAuth.instance.currentUser;
     assert(user != null, 'User required for operation!');
-    return user!;
+    return user!.uid;
   }
 }

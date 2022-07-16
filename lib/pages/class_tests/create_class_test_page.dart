@@ -101,21 +101,23 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
     }
 
     if (!isEditMode) {
-      Database.I.createClassTest(
+      Database.I.createClassTest(ClassTest(
+        '',
         dueDate,
         dueDate.subtract(reminderOffset),
-        subject!.id,
+        subject!,
         validTopics,
         typeController.text.trim(),
-      );
+      ));
     } else {
-      Database.I.editClassTest(
-          widget.classTestToEdit!.id,
-          dueDate,
-          dueDate.subtract(reminderOffset),
-          subject!.id,
-          validTopics,
-          typeController.text.trim());
+      Database.I.editClassTest(ClassTest(
+        widget.classTestToEdit!.id,
+        dueDate,
+        dueDate.subtract(reminderOffset),
+        subject!,
+        validTopics,
+        typeController.text.trim(),
+      ));
     }
 
     Get.back();

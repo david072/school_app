@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/tasks/abstract_task.dart';
-import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 import 'package:school_app/util/util.dart';
 
 class Task extends AbstractTask {
@@ -34,28 +33,22 @@ class Task extends AbstractTask {
     this.deletedAt,
   ]);
 
-  static Future<Task> fromDocument(DocumentSnapshot<Map<String, dynamic>> doc,
-      {bool isDeleted = false}) {
-    return _fromMap(doc.id, doc.data()!, hasBool: true, isDeleted: isDeleted);
+  static Future<Task> fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
+    return _fromMap(doc.id, doc.data()!);
   }
 
-  static Future<Task> fromRow(Map<String, dynamic> row,
-      {bool isDeleted = false}) {
-    return _fromMap(
-      row['id'].toString(),
-      row,
-      hasBool: false,
-      isDeleted: isDeleted,
-    );
+  static Future<Task> fromRow(Map<String, dynamic> row, {String? subjectId}) {
+    return _fromMap(row['id'].toString(), row, subjectId: subjectId);
   }
 
   static Future<Task> _fromMap(String id, Map<String, dynamic> map,
-      {bool hasBool = true, bool isDeleted = false}) async {
+      {String? subjectId}) async {
     bool completed;
-    if (hasBool) {
-      completed = map['completed'];
+    var value = map['completed'];
+    if (value is bool) {
+      completed = value;
     } else {
-      completed = map['completed'] as int == 1 ? true : false;
+      completed = (value as int) == 1;
     }
 
     var dateTime = DateTime.fromMillisecondsSinceEpoch;
@@ -66,20 +59,23 @@ class Task extends AbstractTask {
       map['description'],
       dateTime(map['due_date']),
       dateTime(map['reminder']),
-      await Database.I.querySubjectOnce(map['subject_id'].toString()),
+      subjectId == null
+          ? await Database.I.querySubjectOnce(map['subject_id'].toString())
+          : Subject(subjectId, '', '', Colors.black, 0, 0),
       completed,
-      !isDeleted ? null : dateTime(map['deleted_at']),
+      map.containsKey('deleted_at') ? dateTime(map['deleted_at']) : null,
     );
   }
 
   @override
-  String deleteDialogContent() => (deletedAt != null
+  String deleteDialogContent() =>
+      (deletedAt != null
           ? 'delete_task_permanently_confirm'
           : 'delete_task_confirm')
       .trParams({'name': title});
 
   @override
-  DataCell getCompletedCell(TasksListMode mode) => DataCell(
+  DataCell getCompletedCell() => DataCell(
         Builder(
           builder: (_) {
             // (HACK) to make the UI element update instantly
@@ -89,7 +85,7 @@ class Task extends AbstractTask {
                 width: 20,
                 height: 20,
                 child: Checkbox(
-                  onChanged: mode != TasksListMode.normal
+                  onChanged: deletedAt != null
                       ? null
                       : (b) {
                           if (b == null) return;
@@ -178,4 +174,14 @@ class Task extends AbstractTask {
       Database.I.permanentlyDeleteTask(id);
     }
   }
+
+  @override
+  Map<String, dynamic> data() => {
+        'title': title,
+        'description': description,
+        'due_date': dueDate.millisecondsSinceEpoch,
+        'reminder': reminder.millisecondsSinceEpoch,
+        'subject_id': subject.id,
+        'completed': completed ? 1 : 0,
+      };
 }
