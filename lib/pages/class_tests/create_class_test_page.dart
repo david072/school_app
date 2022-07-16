@@ -1,4 +1,6 @@
+import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
@@ -24,6 +26,9 @@ class CreateClassTestPage extends StatefulWidget {
 class _CreateClassTestPageState extends State<CreateClassTestPage> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
+  final typeController = TextEditingController();
+  final typeKey = GlobalKey<_ClassTestTypeFieldState>();
+
   bool enabled = true;
 
   late DateTime dueDate = DateTime.now();
@@ -47,6 +52,10 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
         isEditMode ? widget.classTestToEdit!.reminderOffset() : Duration.zero;
     reminderMode =
         isEditMode ? reminderModeFromOffset(reminderOffset) : ReminderMode.none;
+
+    if (isEditMode) {
+      typeController.text = widget.classTestToEdit!.type;
+    }
   }
 
   Future<void> createClassTest() async {
@@ -61,6 +70,30 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
     if (!validateForm(formKey)) {
       isValid = false;
     }
+    if (typeController.text.trim().isEmpty) {
+      isValid = false;
+      if (typeKey.currentState != null) {
+        typeKey.currentState!.errorText = 'Please provide a type!';
+      }
+    } else {
+      if (typeKey.currentState != null) {
+        typeKey.currentState!.errorText = null;
+      }
+    }
+
+    // Trim strings and remove empty ones
+    var validTopics = topics
+        .map((topic) => ClassTestTopic(
+              topic: topic.topic.trim(),
+              resources: topic.resources.trim(),
+            ))
+        .where((topic) => topic.topic.isNotEmpty && topic.resources.isNotEmpty)
+        .toList();
+    if (validTopics.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please provide topics!')));
+      isValid = false;
+    }
 
     if (!isValid) {
       setState(() => enabled = true);
@@ -72,16 +105,17 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
         dueDate,
         dueDate.subtract(reminderOffset),
         subject!.id,
-        topics,
+        validTopics,
+        typeController.text.trim(),
       );
     } else {
       Database.I.editClassTest(
-        widget.classTestToEdit!.id,
-        dueDate,
-        dueDate.subtract(reminderOffset),
-        subject!.id,
-        topics,
-      );
+          widget.classTestToEdit!.id,
+          dueDate,
+          dueDate.subtract(reminderOffset),
+          subject!.id,
+          validTopics,
+          typeController.text.trim());
     }
 
     Get.back();
@@ -103,6 +137,11 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  _ClassTestTypeField(
+                    key: typeKey,
+                    controller: typeController,
+                  ),
+                  const SizedBox(height: 40),
                   DatePicker(
                     enabled: enabled,
                     prefix: 'due_date'.tr,
@@ -143,6 +182,130 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ClassTestTypeField extends StatefulWidget {
+  const _ClassTestTypeField({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  final TextEditingController controller;
+
+  @override
+  State<_ClassTestTypeField> createState() => _ClassTestTypeFieldState();
+}
+
+class _ClassTestTypeFieldState extends State<_ClassTestTypeField>
+    with AfterLayoutMixin {
+  static final List<String> typeSuggestions = [
+    'Class Test',
+    'Vocabulary Test',
+  ];
+
+  final suggestionsController = SuggestionsBoxController();
+
+  String? errorText;
+
+  // There seems to be a bug in the flutter_typeahead library,
+  // where [SuggestionBoxController.isOpened()] errors because some member
+  // variable has not been initialized yet. Calling it after the first
+  // layout fixes it.
+  bool isFirstLayout = true;
+
+  final typeFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    typeFocusNode.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    typeFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  void afterFirstLayout(BuildContext context) =>
+      setState(() => isFirstLayout = false);
+
+  @override
+  Widget build(BuildContext context) {
+    return TypeAheadField(
+      textFieldConfiguration: TextFieldConfiguration(
+        decoration: InputDecoration(
+          errorText: errorText,
+          alignLabelWithHint: true,
+          labelText: 'Type',
+          suffixIcon: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              widget.controller.text.isNotEmpty
+                  ? IconButton(
+                      constraints: const BoxConstraints(),
+                      padding: EdgeInsets.zero,
+                      icon: const Icon(Icons.close),
+                      onPressed: () =>
+                          setState(() => widget.controller.text = ''),
+                    )
+                  : const SizedBox(),
+              IconButton(
+                icon: AnimatedRotation(
+                  duration: const Duration(milliseconds: 200),
+                  turns: isFirstLayout
+                      ? 0
+                      : suggestionsController.isOpened()
+                          ? 0.504
+                          : 0,
+                  child: const Icon(Icons.arrow_drop_down),
+                ),
+                onPressed: () => setState(() => suggestionsController.toggle()),
+              ),
+            ],
+          ),
+        ),
+        onChanged: (_) => setState(() => errorText = null),
+        controller: widget.controller,
+        focusNode: typeFocusNode,
+      ),
+      suggestionsCallback: (pattern) {
+        if (pattern.isEmpty) return typeSuggestions;
+
+        // Fuzzy(?) insertion search
+        // Checks that all characters from the pattern are in
+        // the string in the order they appear in the pattern
+        List<String> result = [];
+
+        for (final suggestion in typeSuggestions) {
+          int patternIndex = 0;
+          for (final char in suggestion.toLowerCase().characters) {
+            if (char != pattern[patternIndex]) continue;
+            patternIndex++;
+            if (patternIndex >= pattern.length) break;
+          }
+
+          if (patternIndex >= pattern.length) {
+            result.add(suggestion);
+          }
+        }
+
+        return result;
+      },
+      suggestionsBoxController: suggestionsController,
+      hideOnEmpty: true,
+      hideOnError: true,
+      itemBuilder: (context, suggestion) => ListTile(
+        title: Text(suggestion! as String),
+      ),
+      onSuggestionSelected: (suggestion) => setState(() {
+        widget.controller.text = suggestion as String? ?? '';
+        errorText = null;
+      }),
     );
   }
 }

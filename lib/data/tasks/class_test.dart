@@ -29,6 +29,7 @@ class ClassTest extends AbstractTask {
   final Subject subject;
 
   final List<ClassTestTopic> topics;
+  final String type;
 
   @override
   final DateTime? deletedAt;
@@ -40,6 +41,7 @@ class ClassTest extends AbstractTask {
     this.subject,
     this.topics, [
     this.deletedAt,
+    this.type = '',
   ]);
 
   static Future<ClassTest> fromDocument(
@@ -68,6 +70,7 @@ class ClassTest extends AbstractTask {
       await Database.I.querySubjectOnce(map['subject_id'].toString()),
       decodeTopicsList(map['topics']),
       !isDeleted ? null : dateTime(map['deleted_at']),
+      map['type'],
     );
   }
 
@@ -100,12 +103,15 @@ class ClassTest extends AbstractTask {
   String deleteDialogContent() => 'delete_class_test_confirm'.tr;
 
   @override
+  void delete() => Database.I.deleteClassTest(id);
+
+  @override
   DataCell getCompletedCell(TasksListMode mode) =>
       const DataCell(Icon(Icons.description));
 
   @override
   DataCell getTitleCell(BuildContext context) => DataCell(Text(
-        'TODO',
+        type,
         style: Theme.of(context).textTheme.bodyLarge,
       ));
 

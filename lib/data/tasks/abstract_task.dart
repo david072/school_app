@@ -29,6 +29,8 @@ abstract class AbstractTask {
 
   String deleteDialogContent();
 
+  void delete();
+
   String formatRelativeDueDate() => formatRelativeDate(
         RelativeDateTime(dateTime: DateTime.now().date, other: dueDate),
       );

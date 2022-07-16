@@ -148,4 +148,13 @@ class Task extends AbstractTask {
       return Colors.grey.shade800;
     }
   }
+
+  @override
+  void delete() {
+    if (deletedAt == null) {
+      Database.I.deleteTask(id);
+    } else {
+      Database.I.permanentlyDeleteTask(id);
+    }
+  }
 }

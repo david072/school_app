@@ -27,12 +27,18 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
 
   ClassTest? classTest;
 
+  final typeController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
-    subscription = Database.I
-        .queryClassTest(widget.testId)
-        .listen((ct) => setState(() => classTest = ct));
+    subscription = Database.I.queryClassTest(widget.testId).listen(listen);
+  }
+
+  void listen(ClassTest ct) {
+    classTest = ct;
+    typeController.text = ct.type;
+    setState(() {});
   }
 
   @override
@@ -62,7 +68,7 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
                     confirmText: 'delete_caps'.tr,
                     cancelText: 'cancel_caps'.tr,
                     onConfirm: () {
-                      Database.I.deleteClassTest(classTest!.id);
+                      classTest!.delete();
                       Get.back();
                     },
                   ),
@@ -77,6 +83,12 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      TextField(
+                        enabled: false,
+                        decoration: buildInputDecoration('Type'),
+                        controller: typeController,
+                      ),
+                      const SizedBox(height: 40),
                       ClickableRow(
                         left: Text('due_date_colon'.tr),
                         right: Text(

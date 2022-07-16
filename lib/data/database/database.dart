@@ -65,10 +65,10 @@ abstract class Database {
   Stream<ClassTest> queryClassTest(String id);
 
   void createClassTest(DateTime dueDate, DateTime reminder, String subjectId,
-      List<ClassTestTopic> topics);
+      List<ClassTestTopic> topics, String type);
 
   void editClassTest(String id, DateTime dueDate, DateTime reminder,
-      String subjectId, List<ClassTestTopic> topics);
+      String subjectId, List<ClassTestTopic> topics, String type);
 
   void deleteClassTest(String id);
 

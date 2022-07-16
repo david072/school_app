@@ -282,25 +282,27 @@ class DatabaseFirestore implements Database {
 
   @override
   void createClassTest(DateTime dueDate, DateTime reminder, String subjectId,
-      List<ClassTestTopic> topics) {
+      List<ClassTestTopic> topics, String type) {
     _collection(_classTestsCollection).add({
       'due_date': dueDate.millisecondsSinceEpoch,
       'reminder': reminder.millisecondsSinceEpoch,
       'subject_id': subjectId,
       'topics': ClassTest.encodeTopicsList(topics),
+      'type': type,
       'user_id': _requireUser().uid,
     });
   }
 
   @override
   void editClassTest(String id, DateTime dueDate, DateTime reminder,
-      String subjectId, List<ClassTestTopic> topics) {
+      String subjectId, List<ClassTestTopic> topics, String type) {
     var doc = _collection(_classTestsCollection).doc(id);
     doc.update({
       'due_date': dueDate.millisecondsSinceEpoch,
       'reminder': reminder.millisecondsSinceEpoch,
       'subject_id': subjectId,
       'topics': ClassTest.encodeTopicsList(topics),
+      'type': type,
     });
   }
 

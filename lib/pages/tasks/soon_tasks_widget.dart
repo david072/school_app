@@ -102,13 +102,7 @@ class _TasksListState extends State<TasksList> {
                                   content: task.deleteDialogContent(),
                                   cancelText: 'cancel_caps'.tr,
                                   confirmText: 'delete_caps'.tr,
-                                  onConfirm: () {
-                                    if (!isDeletedMode) {
-                                      Database.I.deleteTask(task.id);
-                                    } else {
-                                      Database.I.permanentlyDeleteTask(task.id);
-                                    }
-                                  },
+                                  onConfirm: () => task.delete(),
                                 ),
                           ],
                         ),
@@ -233,7 +227,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
       data.where((item) =>
           widget.subjectFilter != null &&
           item.subject.id == widget.subjectFilter!.id);
-      updateTasks(data);
+      setState(() => updateTasks(data));
     });
 
     classTestsSubscription = Database.I
@@ -242,13 +236,13 @@ class _TaskListWidgetState extends State<TaskListWidget> {
       data.removeWhere((item) =>
           widget.subjectFilter != null &&
           item.subject.id == widget.subjectFilter!.id);
-      updateClassTests(data);
+      setState(() => updateClassTests(data));
     });
   }
 
   void updateClassTests(List<ClassTest> newItems) {
-    if (newItems.isEmpty) return;
     items.removeWhere((item) => item is ClassTest);
+    if (newItems.isEmpty) return;
 
     if (items.isEmpty) {
       items.addAll(newItems);
@@ -270,17 +264,14 @@ class _TaskListWidgetState extends State<TaskListWidget> {
     }
 
     if (newItems.isNotEmpty) items.addAll(newItems);
-
-    setState(() {});
   }
 
   void updateTasks(List<Task> newItems) {
-    if (newItems.isEmpty) return;
     items.removeWhere((item) => item is Task);
+    if (newItems.isEmpty) return;
 
     if (items.isEmpty) {
       items.addAll(newItems);
-      setState(() {});
       return;
     }
 
@@ -301,8 +292,6 @@ class _TaskListWidgetState extends State<TaskListWidget> {
     }
 
     if (newItems.isNotEmpty) items.addAll(newItems);
-
-    setState(() {});
   }
 
   @override

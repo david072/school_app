@@ -317,25 +317,27 @@ class DatabaseSqlite extends Database {
 
   @override
   void createClassTest(DateTime dueDate, DateTime reminder, String subjectId,
-      List<ClassTestTopic> topics) async {
+      List<ClassTestTopic> topics, String type) async {
     await _open();
     database!.insert(_classTestsTable, {
       'due_date': dueDate.millisecondsSinceEpoch,
       'reminder': reminder.millisecondsSinceEpoch,
       'subject_id': subjectId,
       'topics': ClassTest.encodeTopicsList(topics),
+      'type': type,
     });
   }
 
   @override
   void editClassTest(String id, DateTime dueDate, DateTime reminder,
-      String subjectId, List<ClassTestTopic> topics) async {
+      String subjectId, List<ClassTestTopic> topics, String type) async {
     await _open();
     database!.update(_classTestsTable, {
       'due_date': dueDate.millisecondsSinceEpoch,
       'reminder': reminder.millisecondsSinceEpoch,
       'subject_id': subjectId,
       'topics': ClassTest.encodeTopicsList(topics),
+      'type': type,
     });
   }
 
@@ -401,6 +403,7 @@ class DatabaseSqlite extends Database {
             'reminder INTEGER,'
             'subject_id INTEGER,'
             'topics STRING,'
+            'type STRING'
             ')');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
@@ -429,6 +432,7 @@ class DatabaseSqlite extends Database {
               'reminder INTEGER,'
               'subject_id INTEGER,'
               'topics STRING,'
+              'type STRING'
               ')');
         }
       },
@@ -494,6 +498,7 @@ class DatabaseSqlite extends Database {
         DateTime.fromMillisecondsSinceEpoch(row['reminder']! as int),
         subjectId,
         ClassTest.decodeTopicsList(row['topics']! as String),
+        row['type']! as String,
       );
     }
 
