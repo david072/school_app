@@ -347,6 +347,24 @@ class DatabaseFirestore implements Database {
     }
   }
 
+  void createDeletedClassTest(
+      DateTime dueDate,
+      DateTime reminder,
+      String subjectId,
+      List<ClassTestTopic> topics,
+      String type,
+      DateTime deletedAt) {
+    _collection(_deletedClassTestsCollection).add({
+      'due_date': dueDate.millisecondsSinceEpoch,
+      'reminder': reminder.millisecondsSinceEpoch,
+      'subject_id': subjectId,
+      'topics': ClassTest.encodeTopicsList(topics),
+      'type': type,
+      'deleted_at': deletedAt.millisecondsSinceEpoch,
+      'user_id': _requireUser().uid,
+    });
+  }
+
   @override
   void permanentlyDeleteClassTest(String id) =>
       _delete(_deletedClassTestsCollection, id);

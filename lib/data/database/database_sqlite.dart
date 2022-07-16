@@ -564,6 +564,19 @@ class DatabaseSqlite extends Database {
       );
     }
 
+    var deletedClassTests = await db.query(_deletedClassTestsTable);
+    for (final row in deletedClassTests) {
+      var subjectId = subjectIdsMap[row['subject_id'] as int]!;
+      firestoreDb.createDeletedClassTest(
+        DateTime.fromMillisecondsSinceEpoch(row['due_date']! as int),
+        DateTime.fromMillisecondsSinceEpoch(row['reminder']! as int),
+        subjectId,
+        ClassTest.decodeTopicsList(row['topics']! as String),
+        row['type']! as String,
+        DateTime.fromMillisecondsSinceEpoch(row['deleted_at']! as int),
+      );
+    }
+
     sqflite.deleteDatabase(await _databasePath());
   }
 
