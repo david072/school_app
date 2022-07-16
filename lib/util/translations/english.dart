@@ -44,6 +44,9 @@ class English {
         'mark_task_uncompleted': 'Open again',
         'starting': 'Starting...',
         'error': 'Error!',
+        'add': 'Add',
+        'topic': 'Topic',
+        'resources': 'Resources',
         'deleted_at': 'Deleted on',
         'email_address_missing': 'Please provide a valid email address',
         'password_too_short': 'The password must be at least 6 characters long',
@@ -124,5 +127,12 @@ class English {
         'reminder_one_week': 'One week before',
         'reminder_two_weeks': 'Two weeks before',
         'trash_bin_title': 'Trash Bin',
+        'missing_topics_error': 'Please provide at least 1 topic!',
+        'create_class_test_title': 'Create Class Test',
+        'edit_class_test_title': 'Edit Class Test',
+        'class_test': 'Class Test',
+        'class_tests': 'Class Tests',
+        'vocab_test': 'Vocabulary Test',
+        'type': 'Type',
       };
 }

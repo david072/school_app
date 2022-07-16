@@ -73,7 +73,7 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
     if (typeController.text.trim().isEmpty) {
       isValid = false;
       if (typeKey.currentState != null) {
-        typeKey.currentState!.errorText = 'Please provide a type!';
+        typeKey.currentState!.errorText = 'cannot_be_empty'.tr;
       }
     } else {
       if (typeKey.currentState != null) {
@@ -90,8 +90,8 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
         .where((topic) => topic.topic.isNotEmpty && topic.resources.isNotEmpty)
         .toList();
     if (validTopics.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please provide topics!')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('missing_topics_error'.tr)));
       isValid = false;
     }
 
@@ -125,7 +125,8 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(!isEditMode ? 'Create Class Test' : 'Edit Class Test'),
+        title: Text(
+            !isEditMode ? 'create_class_test_title' : 'edit_class_test_title'),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -201,8 +202,8 @@ class _ClassTestTypeField extends StatefulWidget {
 class _ClassTestTypeFieldState extends State<_ClassTestTypeField>
     with AfterLayoutMixin {
   static final List<String> typeSuggestions = [
-    'Class Test',
-    'Vocabulary Test',
+    'class_test'.tr,
+    'vocab_test'.tr,
   ];
 
   final suggestionsController = SuggestionsBoxController();
@@ -240,7 +241,7 @@ class _ClassTestTypeFieldState extends State<_ClassTestTypeField>
         decoration: InputDecoration(
           errorText: errorText,
           alignLabelWithHint: true,
-          labelText: 'Type',
+          labelText: 'type'.tr,
           suffixIcon: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:school_app/data/tasks/class_test.dart';
 import 'package:school_app/util/util.dart';
 
@@ -40,14 +41,16 @@ class _ClassTestTopicEditorState extends State<ClassTestTopicEditor> {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                          text: 'Add',
-                          style: Theme.of(context).textTheme.bodyText1),
+                        text: 'add'.tr,
+                        style: Theme.of(context).textTheme.bodyText1,
+                      ),
                       const WidgetSpan(child: SizedBox(width: 5)),
                       WidgetSpan(
                         alignment: PlaceholderAlignment.middle,
-                        child: Icon(Icons.add,
-                            color:
-                                Theme.of(context).textTheme.bodyText1!.color),
+                        child: Icon(
+                          Icons.add,
+                          color: Theme.of(context).textTheme.bodyText1!.color,
+                        ),
                       ),
                     ],
                   ),
@@ -106,7 +109,7 @@ class _ClassTestTopicEditorState extends State<ClassTestTopicEditor> {
                                 text: widget.topics[i].topic),
                             onChanged: (s) => widget.topics[i].topic = s,
                             maxLines: null,
-                            decoration: buildInputDecoration("Topic"),
+                            decoration: buildInputDecoration('topic'.tr),
                           ),
                         ),
                         const VerticalDivider(),
@@ -117,7 +120,7 @@ class _ClassTestTopicEditorState extends State<ClassTestTopicEditor> {
                                 text: widget.topics[i].resources),
                             onChanged: (s) => widget.topics[i].resources = s,
                             maxLines: null,
-                            decoration: buildInputDecoration("Resources"),
+                            decoration: buildInputDecoration('resources'.tr),
                           ),
                         ),
                       ],
@@ -160,7 +163,7 @@ class _ClassTestTopicEditorState extends State<ClassTestTopicEditor> {
                       controller: TextEditingController(text: topic.topic),
                       enabled: false,
                       maxLines: null,
-                      decoration: buildInputDecoration("Topic"),
+                      decoration: buildInputDecoration('topic'.tr),
                     ),
                   ),
                   const VerticalDivider(),
@@ -169,7 +172,7 @@ class _ClassTestTopicEditorState extends State<ClassTestTopicEditor> {
                       controller: TextEditingController(text: topic.resources),
                       enabled: false,
                       maxLines: null,
-                      decoration: buildInputDecoration("Resources"),
+                      decoration: buildInputDecoration('resources'.tr),
                     ),
                   ),
                 ],

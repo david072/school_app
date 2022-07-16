@@ -246,7 +246,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
             text: IntrinsicHeight(
               child: Row(
                 children: [
-                  Text('Class tests: $classTestCount'),
+                  Text('${'class_tests'.tr}: $classTestCount'),
                   const VerticalDivider(thickness: 2),
                   Text('${'tasks'.tr}: $taskCount (+ $completedTasks)'),
                 ],
@@ -257,9 +257,9 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                 value: 0,
                 child: Text('task'.tr),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 1,
-                child: Text('Class test'),
+                child: Text('class_test'.tr),
               ),
             ],
             onPopupItemSelected: (i) {

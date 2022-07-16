@@ -44,6 +44,9 @@ class German {
         'mark_task_uncompleted': 'Wieder öffnen',
         'starting': 'Starte...',
         'error': 'Fehler!',
+        'add': 'Hinzufügen',
+        'topic': 'Thema',
+        'resources': 'Material',
         'deleted_at': 'Gelöscht am',
         'email_address_missing': 'Bitte gib eine gültige Email-Adresse an',
         'password_too_short':
@@ -128,5 +131,12 @@ class German {
         'reminder_one_week': 'Eine Woche vorher',
         'reminder_two_weeks': 'Zwei Wochen vorher',
         'trash_bin_title': 'Papierkorb',
+        'missing_topics_error': 'Bitte gib mindestens ein Thema an!',
+        'create_class_test_title': 'Klassenarbeit erstellen',
+        'edit_class_test_title': 'Klassenarbeit bearbeiten',
+        'class_test': 'Klassenarbeit',
+        'class_tests': 'Klassenarbeiten',
+        'vocab_test': 'Vokabeltest',
+        'type': 'Typ',
       };
 }

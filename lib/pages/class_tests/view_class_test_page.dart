@@ -59,7 +59,7 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
     return classTest != null
         ? Scaffold(
             appBar: AppBar(
-              title: const Text('Class Test'),
+              title: Text('class_test'.tr),
               actions: [
                 !widget.isClassTestDeleted
                     ? IconButton(
@@ -94,7 +94,7 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
                     children: [
                       TextField(
                         enabled: false,
-                        decoration: buildInputDecoration('Type'),
+                        decoration: buildInputDecoration('type'.tr),
                         controller: typeController,
                       ),
                       const SizedBox(height: 40),
