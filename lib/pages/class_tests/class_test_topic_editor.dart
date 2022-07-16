@@ -104,7 +104,7 @@ class _ClassTestTopicEditorState extends State<ClassTestTopicEditor> {
                       children: [
                         Flexible(
                           child: TextField(
-                            enabled: isEditable,
+                            readOnly: !isEditable,
                             controller: TextEditingController(
                                 text: widget.topics[i].topic),
                             onChanged: (s) => widget.topics[i].topic = s,
@@ -115,7 +115,7 @@ class _ClassTestTopicEditorState extends State<ClassTestTopicEditor> {
                         const VerticalDivider(),
                         Flexible(
                           child: TextField(
-                            enabled: isEditable,
+                            readOnly: !isEditable,
                             controller: TextEditingController(
                                 text: widget.topics[i].resources),
                             onChanged: (s) => widget.topics[i].resources = s,

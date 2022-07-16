@@ -59,22 +59,25 @@ class _HomePageState extends State<HomePage> {
                 )
               : Container(),
           TextButton.icon(
-            onPressed: () => showConfirmationDialog(
-              context: context,
-              title: 'logout'.tr,
-              content: 'confirm_logout_text'.tr,
-              cancelText: 'cancel_caps'.tr,
-              confirmText: 'logout_caps'.tr,
-              onConfirm: () async {
-                if (widget.hasAccount) {
+            onPressed: () {
+              if (!widget.hasAccount) {
+                Get.to(() => const SignUpPage(migrate: true));
+                return;
+              }
+
+              showConfirmationDialog(
+                context: context,
+                title: 'logout'.tr,
+                content: 'confirm_logout_text'.tr,
+                cancelText: 'cancel_caps'.tr,
+                confirmText: 'logout_caps'.tr,
+                onConfirm: () async {
                   await FirebaseAuth.instance.signOut();
                   if (!mounted) return;
                   Get.off(() => const LoginPage());
-                } else {
-                  Get.to(() => const SignUpPage(migrate: true));
-                }
-              },
-            ),
+                },
+              );
+            },
             label: Text(widget.hasAccount ? 'logout'.tr : 'create_account'.tr,
                 style: const TextStyle(color: Colors.white)),
             icon: Icon(

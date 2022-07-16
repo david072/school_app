@@ -122,7 +122,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                     children: [
                       TextFormField(
                         controller: titleController,
-                        enabled: false,
+                        readOnly: true,
                         decoration: buildInputDecoration('title'.tr),
                         validator: InputValidator.validateNotEmpty,
                       ),
@@ -155,7 +155,8 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                       const SizedBox(height: 40),
                       TextFormField(
                         controller: descriptionController,
-                        enabled: false,
+                        enabled: descriptionController.text.isNotEmpty,
+                        readOnly: true,
                         decoration: InputDecoration(
                           alignLabelWithHint: true,
                           labelText: 'description'.tr,

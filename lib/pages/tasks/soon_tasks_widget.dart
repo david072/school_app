@@ -219,8 +219,12 @@ class _TaskListWidgetState extends State<TaskListWidget> {
   @override
   void initState() {
     super.initState();
-    subscription = Database.queryTasksAndClassTests()
-        .listen((tasks) => setState(() => items = tasks));
+    subscription = Database.queryTasksAndClassTests().listen((tasks) =>
+        setState(() => items = tasks
+            .where((task) =>
+                widget.subjectFilter == null ||
+                task.subject.id == widget.subjectFilter!.id)
+            .toList()));
   }
 
   @override
