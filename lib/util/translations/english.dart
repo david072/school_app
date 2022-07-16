@@ -53,6 +53,9 @@ class English {
         'task_notification_title': '@title due soon (@subjectAbb)',
         'task_notification_content':
             'The task \'@title\' (@subjectName) is due @relDueDate.',
+        'class_test_notification_title': '@type due soon (@subjectAbb)',
+        'class_test_notification_content':
+            'The @type (@subjectName) is due @relDueDate.',
         'notification_channel_name': 'Task reminders',
         'notification_channel_description':
             'The app sends reminders for not completed tasks on this channel.',

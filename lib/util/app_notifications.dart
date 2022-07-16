@@ -46,7 +46,8 @@ class AppNotifications {
   }
 
   static Future<void> createTaskNotification(
-      String taskId, String title, String body) async {
+      String taskId, String title, String body,
+      {bool addMarkCompletedAction = true}) async {
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: _getNotificationId(),
@@ -55,12 +56,14 @@ class AppNotifications {
         body: body,
         payload: {_taskIdPayloadKey: taskId},
       ),
-      actionButtons: [
-        NotificationActionButton(
-          key: _markTaskCompletedActionKey,
-          label: 'notification_action_mark_completed'.tr,
-        ),
-      ],
+      actionButtons: addMarkCompletedAction
+          ? [
+              NotificationActionButton(
+                key: _markTaskCompletedActionKey,
+                label: 'notification_action_mark_completed'.tr,
+              ),
+            ]
+          : null,
     );
   }
 

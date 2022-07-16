@@ -5,6 +5,7 @@ import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/tasks/abstract_task.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
+import 'package:school_app/util/util.dart';
 
 class ClassTestTopic {
   String topic;
@@ -104,6 +105,24 @@ class ClassTest extends AbstractTask {
           ? 'delete_class_test_permanently_confirm'
           : 'delete_class_test_confirm')
       .tr;
+
+  @override
+  String notificationTitle() => 'class_test_notification_title'.trParams({
+        'type': type,
+        'subjectAbb': subject.abbreviation,
+      });
+
+  @override
+  String notificationContent() => 'class_test_notification_content'.trParams({
+        'type': type,
+        'subjectName': subject.name,
+      });
+
+  @override
+  bool needsReminder() {
+    final now = DateTime.now().date;
+    return reminder.isBefore(now) || reminder.isAtSameMomentAs(now);
+  }
 
   @override
   void delete() {

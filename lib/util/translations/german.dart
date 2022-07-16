@@ -54,6 +54,9 @@ class German {
         'task_notification_title': '@title bald fällig (@subjectAbb)',
         'task_notification_content':
             'Die Aufgabe \'@title\' (@subjectName) ist @relDueDate fällig.',
+        'class_test_notification_title': '@type bald fällig (@subjectAbb)',
+        'class_test_notification_content':
+            'Die @type (@subjectName) ist @relDueDate fällig.',
         'notification_channel_name': 'Aufgaben Erinnerungen',
         'notification_channel_description':
             'Die App sendet Erinnerungen für nicht abgeschlossene Aufgaben über diesen Kanal.',

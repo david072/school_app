@@ -29,6 +29,17 @@ abstract class AbstractTask {
 
   String deleteDialogContent();
 
+  String notificationTitle();
+
+  String notificationContent();
+
+  bool isOver() {
+    final now = DateTime.now().date;
+    return dueDate.isBefore(now) || dueDate.isAtSameMomentAs(now);
+  }
+
+  bool needsReminder();
+
   void delete();
 
   String formatRelativeDueDate() => formatRelativeDate(

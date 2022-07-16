@@ -5,6 +5,7 @@ import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/tasks/abstract_task.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
+import 'package:school_app/util/util.dart';
 
 class Task extends AbstractTask {
   @override
@@ -147,6 +148,26 @@ class Task extends AbstractTask {
     } else {
       return Colors.grey.shade800;
     }
+  }
+
+  @override
+  String notificationTitle() => 'task_notification_title'.trParams({
+        'title': title,
+        'subjectAbb': subject.abbreviation,
+      });
+
+  @override
+  String notificationContent() => 'task_notification_content'.trParams({
+        'title': title,
+        'subjectName': subject.name,
+        'relDueDate': formatRelativeDueDate(),
+      });
+
+  @override
+  bool needsReminder() {
+    final now = DateTime.now().date;
+    return !completed &&
+        (reminder.isBefore(now) || reminder.isAtSameMomentAs(now));
   }
 
   @override

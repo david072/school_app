@@ -7,6 +7,9 @@ import 'package:intl/locale.dart' as intl_locale;
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/database/database_sqlite.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
+import 'package:school_app/data/tasks/class_test.dart';
+import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/firebase_options.dart';
 import 'package:school_app/main.dart';
 import 'package:school_app/util/app_notifications.dart';
@@ -18,6 +21,8 @@ import 'package:workmanager/workmanager.dart';
 class BackgroundWorker {
   static const _workName = 'notification-background-worker';
   static const _processedTaskIdsKey = 'background-worker-processed-task-ids';
+  static const _processedClassTestIdsKey =
+      'background-worker-processed-class-test-ids';
 
   static const _lastRunHourKey = 'background-worker-last-run-hour';
   static const _runHours = [13, 14, 15, 16, 18];
@@ -56,40 +61,33 @@ class BackgroundWorker {
 
     if (!await setupDatabase()) return true;
 
-    var tasks = await Database.I.queryTasksOnce();
+    var tasks = await Database.queryTasksAndClassTestsOnce();
     var now = DateTime.now().date;
     for (final task in tasks) {
-      if (await hasProcessedTask(task.id)) continue;
+      if (await hasProcessedTask(task)) continue;
 
-      if (task.dueDate.isBefore(now) || task.dueDate.isAtSameMomentAs(now)) {
-        Database.I.deleteTask(task.id);
+      if (task.isOver()) {
+        task.delete();
         continue;
       }
 
-      if (!task.completed &&
-          (task.reminder.isBefore(now) ||
-              task.reminder.isAtSameMomentAs(now))) {
+      if (task.needsReminder()) {
         AppNotifications.createTaskNotification(
           task.id,
-          'task_notification_title'.trParams({
-            'title': task.title,
-            'subjectAbb': task.subject.abbreviation,
-          }),
-          'task_notification_content'.trParams({
-            'title': task.title,
-            'subjectName': task.subject.name,
-            'relDueDate': task.formatRelativeDueDate(),
-          }),
+          task.notificationTitle(),
+          task.notificationContent(),
+          addMarkCompletedAction: task is Task,
         );
       }
 
-      markTaskProcessed(task.id);
+      markTaskProcessed(task);
     }
 
-    var deletedTasks = await Database.I.queryDeletedTasksOnce();
+    var deletedTasks =
+        await Database.queryTasksAndClassTestsOnce(areDeleted: true);
     for (final task in deletedTasks) {
       if (task.deletedAt!.add(const Duration(days: 30)).isBefore(now)) {
-        Database.I.permanentlyDeleteTask(task.id);
+        task.delete();
       }
     }
 
@@ -108,21 +106,32 @@ class BackgroundWorker {
     return true;
   }
 
-  static Future<bool> hasProcessedTask(String id) async {
-    sharedPreferences ??= await SharedPreferences.getInstance();
-
-    var list = sharedPreferences!.getStringList(_processedTaskIdsKey);
-    if (list == null) return false;
-
-    return list.contains(id);
+  static String processedTaskListKey(AbstractTask task) {
+    if (task is Task) {
+      return _processedTaskIdsKey;
+    } else if (task is ClassTest) {
+      return _processedClassTestIdsKey;
+    } else {
+      throw 'task has invalid type';
+    }
   }
 
-  static Future<void> markTaskProcessed(String id) async {
+  static Future<bool> hasProcessedTask(AbstractTask task) async {
     sharedPreferences ??= await SharedPreferences.getInstance();
 
-    var list = sharedPreferences!.getStringList(_processedTaskIdsKey) ?? [];
-    if (!list.contains(id)) list.add(id);
-    sharedPreferences!.setStringList(_processedTaskIdsKey, list);
+    var list = sharedPreferences!.getStringList(processedTaskListKey(task));
+    if (list == null) return false;
+
+    return list.contains(task.id);
+  }
+
+  static Future<void> markTaskProcessed(AbstractTask task) async {
+    sharedPreferences ??= await SharedPreferences.getInstance();
+
+    var list =
+        sharedPreferences!.getStringList(processedTaskListKey(task)) ?? [];
+    if (!list.contains(task.id)) list.add(task.id);
+    sharedPreferences!.setStringList(processedTaskListKey(task), list);
   }
 
   static Future<int> getNextRunHour() async {
@@ -134,7 +143,7 @@ class BackgroundWorker {
       nextRunHour = _runHours[0];
     } else {
       nextRunHour =
-      _runHours[(_runHours.indexOf(lastRunHour) + 1) % _runHours.length];
+          _runHours[(_runHours.indexOf(lastRunHour) + 1) % _runHours.length];
     }
 
     return nextRunHour;

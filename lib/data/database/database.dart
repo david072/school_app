@@ -116,6 +116,27 @@ abstract class Database {
     }
   }
 
+  static Future<List<AbstractTask>> queryTasksAndClassTestsOnce(
+      {bool areDeleted = false}) async {
+    Future<List<Task>> tasksFuture;
+    Future<List<ClassTest>> classTestsFuture;
+
+    if (!areDeleted) {
+      tasksFuture = I.queryTasksOnce();
+      classTestsFuture = I.queryClassTestsOnce();
+    } else {
+      tasksFuture = I.queryDeletedTasksOnce();
+      classTestsFuture = I.queryDeletedClassTestsOnce();
+    }
+
+    final results = await Future.wait([tasksFuture, classTestsFuture]);
+    List<AbstractTask> result = [];
+    updateTasks(result, results[0] as List<Task>);
+    updateClassTests(result, results[1] as List<ClassTest>);
+
+    return result;
+  }
+
   static List<AbstractTask> updateClassTests(
       List<AbstractTask> list, List<ClassTest> newItems) {
     list.removeWhere((item) => item is ClassTest);
