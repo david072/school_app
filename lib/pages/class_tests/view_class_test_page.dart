@@ -14,9 +14,11 @@ class ViewClassTestPage extends StatefulWidget {
   const ViewClassTestPage({
     Key? key,
     required this.testId,
+    this.isClassTestDeleted = false,
   }) : super(key: key);
 
   final String testId;
+  final bool isClassTestDeleted;
 
   @override
   State<ViewClassTestPage> createState() => _ViewClassTestPageState();
@@ -32,7 +34,12 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
   @override
   void initState() {
     super.initState();
-    subscription = Database.I.queryClassTest(widget.testId).listen(listen);
+    if (!widget.isClassTestDeleted) {
+      subscription = Database.I.queryClassTest(widget.testId).listen(listen);
+    } else {
+      subscription =
+          Database.I.queryDeletedClassTest(widget.testId).listen(listen);
+    }
   }
 
   void listen(ClassTest ct) {
@@ -54,11 +61,13 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
             appBar: AppBar(
               title: const Text('Class Test'),
               actions: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => Get.to(
-                      () => CreateClassTestPage(classTestToEdit: classTest)),
-                ),
+                !widget.isClassTestDeleted
+                    ? IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => Get.to(() =>
+                            CreateClassTestPage(classTestToEdit: classTest)),
+                      )
+                    : Container(),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () => showConfirmationDialog(

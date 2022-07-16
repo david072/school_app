@@ -109,6 +109,9 @@ class English {
                 'This cannot be undone.',
         'delete_class_test_confirm':
             'Do you really want to delete this class test?',
+        'delete_class_test_permanently_confirm':
+            'Do you really want to permanently delete this class test? '
+                'This cannot be undone.',
         'due_date_colon': 'Due date:',
         'no_reminder': 'None',
         'reminder_one_day': 'One day before',
@@ -117,6 +120,6 @@ class English {
         'reminder_four_days': 'Four days before',
         'reminder_one_week': 'One week before',
         'reminder_two_weeks': 'Two weeks before',
-        'trash_bin_title': 'Trash bin',
+        'trash_bin_title': 'Trash Bin',
       };
 }

@@ -100,10 +100,19 @@ class ClassTest extends AbstractTask {
   }
 
   @override
-  String deleteDialogContent() => 'delete_class_test_confirm'.tr;
+  String deleteDialogContent() => (deletedAt != null
+          ? 'delete_class_test_permanently_confirm'
+          : 'delete_class_test_confirm')
+      .tr;
 
   @override
-  void delete() => Database.I.deleteClassTest(id);
+  void delete() {
+    if (deletedAt == null) {
+      Database.I.deleteClassTest(id);
+    } else {
+      Database.I.permanentlyDeleteClassTest(id);
+    }
+  }
 
   @override
   DataCell getCompletedCell(TasksListMode mode) =>

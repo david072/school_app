@@ -16,6 +16,7 @@ class DatabaseSqlite extends Database {
   static const _tasksTable = 'tasks';
   static const _deletedTasksTable = 'deleted_tasks';
   static const _classTestsTable = 'class_tests';
+  static const _deletedClassTestsTable = 'deleted_class_tests';
 
   b.BriteDatabase? database;
 
@@ -231,7 +232,7 @@ class DatabaseSqlite extends Database {
     // Add deleted_at
     database!.update(
       _deletedTasksTable,
-      {'deleted_at': DateTime.now().date},
+      {'deleted_at': DateTime.now().date.millisecondsSinceEpoch},
       where: 'id = ?',
       whereArgs: [newId],
     );
@@ -344,8 +345,63 @@ class DatabaseSqlite extends Database {
   @override
   void deleteClassTest(String id) async {
     await _open();
+    var row = await database!.query(
+      _classTestsTable,
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+
+    database!.insert(_deletedClassTestsTable, {
+      ...row[0],
+      'deleted_at': DateTime.now().date.millisecondsSinceEpoch,
+    });
+
     database!.delete(
       _classTestsTable,
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+  }
+
+  @override
+  Stream<List<ClassTest>> queryDeletedClassTests() async* {
+    await _open();
+
+    var query = database!.createQuery(_deletedClassTestsTable);
+    await for (final func in query) {
+      var rows = await func();
+      yield await rows.mapWaiting((r) => ClassTest.fromRow(r, isDeleted: true));
+    }
+  }
+
+  @override
+  Future<List<ClassTest>> queryDeletedClassTestsOnce() async {
+    await _open();
+
+    var query = await database!.query(_deletedClassTestsTable);
+    return query.mapWaiting((r) => ClassTest.fromRow(r, isDeleted: true));
+  }
+
+  @override
+  Stream<ClassTest> queryDeletedClassTest(String id) async* {
+    await _open();
+
+    var query = database!.createQuery(
+      _deletedClassTestsTable,
+      where: 'id = ?',
+      whereArgs: [int.parse(id)],
+    );
+    await for (final func in query) {
+      var rows = await func();
+      yield await ClassTest.fromRow(rows[0], isDeleted: true);
+    }
+  }
+
+  @override
+  void permanentlyDeleteClassTest(String id) async {
+    await _open();
+    database!.delete(
+      _deletedClassTestsTable,
       where: 'id = ?',
       whereArgs: [int.parse(id)],
     );
@@ -375,6 +431,7 @@ class DatabaseSqlite extends Database {
     var db = await sqflite.openDatabase(
       await _databasePath(),
       onCreate: (db, version) async {
+        // Subjects table
         await db.execute('CREATE TABLE $_subjectsTable('
             'id INTEGER PRIMARY KEY AUTOINCREMENT,'
             'name TEXT,'
@@ -383,6 +440,7 @@ class DatabaseSqlite extends Database {
             'notes TEXT'
             ')');
 
+        // Tasks table and deleted tasks table
         const tasksTableSql = 'id INTEGER PRIMARY KEY AUTOINCREMENT,'
             'title TEXT,'
             'description TEXT,'
@@ -391,19 +449,23 @@ class DatabaseSqlite extends Database {
             'completed INTEGER,'
             'subject_id INTEGER';
         await db.execute('CREATE TABLE $_tasksTable($tasksTableSql)');
-
         await db.execute('CREATE TABLE $_deletedTasksTable('
             '$tasksTableSql,'
             'deleted_at INTEGER'
             ')');
 
-        await db.execute('CREATE TABLE $_classTestsTable('
-            'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+        // Class tests table and deleted class tests table
+        const classTestsTableSql = 'id INTEGER PRIMARY KEY AUTOINCREMENT,'
             'due_date INTEGER,'
             'reminder INTEGER,'
             'subject_id INTEGER,'
             'topics STRING,'
-            'type STRING'
+            'type STRING';
+        await db.execute(
+            'CREATE TABLE $_deletedClassTestsTable($classTestsTableSql)');
+        await db.execute('CREATE TABLE $_deletedClassTestsTable('
+            '$classTestsTableSql,'
+            'deleted_at INTEGER'
             ')');
       },
       onUpgrade: (db, oldVersion, newVersion) async {

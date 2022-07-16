@@ -115,6 +115,7 @@ class _TasksListState extends State<TasksList> {
                           } else if (task is ClassTest) {
                             Get.to(() => ViewClassTestPage(
                                   testId: task.id,
+                                  isClassTestDeleted: isDeletedMode,
                                 ));
                           }
                         },
@@ -174,7 +175,7 @@ class _TasksListState extends State<TasksList> {
     } else {
       cells = [
         DataCell(Text(
-            '${formatDate((task as Task).deletedAt!)} '
+            '${formatDate(task.deletedAt!)} '
             '(${task.formatRelativeDeletedAtDate()})',
             style: Theme.of(context).textTheme.bodyLarge)),
         completedCell,

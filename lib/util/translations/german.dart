@@ -112,7 +112,10 @@ class German {
             'wirklich permanent löschen? Dies kann nicht rückgängig gemacht '
             'werden.',
         'delete_class_test_confirm':
-            'Do you really want to delete this class test?',
+            'Möchtest du diese Klassenarbeit wirklich löschen?',
+        'delete_class_test_permanently_confirm':
+            'Möchtest du diese Klassenarbeit wirklich löschen? Dies kann nicht'
+                'rückgängig gemacht werden.',
         'due_date_colon': 'Fälligkeitsdatum:',
         'no_reminder': 'Keine',
         'reminder_one_day': 'Einen Tag vorher',

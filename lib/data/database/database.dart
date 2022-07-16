@@ -74,15 +74,35 @@ abstract class Database {
 
   void deleteClassTest(String id);
 
+  // Deleted class tests
+  Stream<List<ClassTest>> queryDeletedClassTests();
+
+  Future<List<ClassTest>> queryDeletedClassTestsOnce();
+
+  Stream<ClassTest> queryDeletedClassTest(String id);
+
+  void permanentlyDeleteClassTest(String id);
+
   // Miscellaneous
   void deleteAllData();
 
   static Stream<List<AbstractTask>> queryTasksAndClassTests(
-      {DateTime? maxDueDate}) async* {
+      {DateTime? maxDueDate, bool areDeleted = false}) async* {
     var controller = StreamController<List<AbstractTask>>();
 
-    I.queryTasks(maxDueDate: maxDueDate).listen(controller.sink.add);
-    I.queryClassTests(maxDueDate: maxDueDate).listen(controller.sink.add);
+    Stream<List<Task>> tasksStream;
+    Stream<List<ClassTest>> classTestsStream;
+
+    if (!areDeleted) {
+      tasksStream = I.queryTasks(maxDueDate: maxDueDate);
+      classTestsStream = I.queryClassTests(maxDueDate: maxDueDate);
+    } else {
+      tasksStream = I.queryDeletedTasks();
+      classTestsStream = I.queryDeletedClassTests();
+    }
+
+    tasksStream.listen(controller.sink.add);
+    classTestsStream.listen(controller.sink.add);
 
     List<AbstractTask> result = [];
     await for (final tasks in controller.stream) {

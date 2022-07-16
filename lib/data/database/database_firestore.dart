@@ -15,6 +15,7 @@ class DatabaseFirestore implements Database {
   static const _tasksCollection = 'tasks';
   static const _deletedTasksCollection = 'deleted_tasks';
   static const _classTestsCollection = 'class_tests';
+  static const _deletedClassTestsCollection = 'deleted_class_tests';
 
   @override
   Stream<List<Subject>> querySubjects() async* {
@@ -307,7 +308,48 @@ class DatabaseFirestore implements Database {
   }
 
   @override
-  void deleteClassTest(String id) => _delete(_classTestsCollection, id);
+  void deleteClassTest(String id) async {
+    var classTest = await _collection(_classTestsCollection).doc(id).get();
+
+    var data = classTest.data()!;
+    data['deleted_at'] = DateTime.now().date.millisecondsSinceEpoch;
+    _collection(_deletedClassTestsCollection).add(data);
+    classTest.reference.delete();
+  }
+
+  @override
+  Stream<List<ClassTest>> queryDeletedClassTests() async* {
+    var stream = _collection(_deletedClassTestsCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .orderBy('deleted_at', descending: true)
+        .snapshots();
+
+    await for (final docs in stream) {
+      yield await docs.docs
+          .mapWaiting((d) => ClassTest.fromDocument(d, isDeleted: true));
+    }
+  }
+
+  @override
+  Future<List<ClassTest>> queryDeletedClassTestsOnce() async {
+    var snapshot = await _collection(_deletedClassTestsCollection)
+        .where('user_id', isEqualTo: _requireUser().uid)
+        .get();
+    return snapshot.docs
+        .mapWaiting((d) => ClassTest.fromDocument(d, isDeleted: true));
+  }
+
+  @override
+  Stream<ClassTest> queryDeletedClassTest(String id) async* {
+    var stream = _collection(_deletedClassTestsCollection).doc(id).snapshots();
+    await for (final doc in stream) {
+      yield await ClassTest.fromDocument(doc, isDeleted: true);
+    }
+  }
+
+  @override
+  void permanentlyDeleteClassTest(String id) =>
+      _delete(_deletedClassTestsCollection, id);
 
   @override
   void deleteAllData() {
