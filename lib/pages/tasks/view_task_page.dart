@@ -149,7 +149,10 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                         left: Text('subject_colon'.tr),
                         right: Text(
                           task!.subject.name,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(color: task!.subject.color),
                         ),
                       ),
                       const SizedBox(height: 40),

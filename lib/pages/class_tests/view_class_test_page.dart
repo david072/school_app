@@ -120,7 +120,10 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
                         left: Text('subject_colon'.tr),
                         right: Text(
                           classTest!.subject.name,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(color: classTest!.subject.color),
                         ),
                       ),
                       const SizedBox(height: 40),

@@ -233,7 +233,11 @@ class _SubjectPickerState extends State<SubjectPicker> {
                       .textTheme
                       .caption
                       ?.copyWith(fontStyle: FontStyle.italic)
-                  : Theme.of(context).textTheme.bodyLarge,
+                  : Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: subjects!
+                            .firstWhere((s) => s.id == widget.selectedSubjectId)
+                            .color,
+                      ),
             ),
           );
   }

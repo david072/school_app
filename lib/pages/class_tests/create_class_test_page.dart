@@ -126,7 +126,10 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            !isEditMode ? 'create_class_test_title' : 'edit_class_test_title'),
+          !isEditMode
+              ? 'create_class_test_title'.tr
+              : 'edit_class_test_title'.tr,
+        ),
       ),
       body: Center(
         child: SingleChildScrollView(
