@@ -1,13 +1,14 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
-import 'package:school_app/data/task.dart';
-import 'package:school_app/pages/tasks/clickable_row.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
+import 'package:school_app/data/tasks/task.dart';
+import 'package:school_app/pages/tasks/completing_text_field.dart';
+import 'package:school_app/pages/tasks/create_task_widgets.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({
@@ -24,11 +25,15 @@ class CreateTaskPage extends StatefulWidget {
 }
 
 class _CreateTaskPageState extends State<CreateTaskPage> {
+  static const titleSuggestionsKey = 'used-task-titles';
+
   final GlobalKey formKey = GlobalKey<FormState>();
 
   var enabled = true;
 
-  late String title;
+  final titleController = TextEditingController();
+  final titleKey = GlobalKey<CompletingTextFormFieldState>();
+
   late String description;
   late DateTime dueDate;
   late Subject? subject;
@@ -40,19 +45,22 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   void initState() {
     super.initState();
 
-    title = widget.taskToEdit?.title ?? "";
+    if (widget.taskToEdit != null) {
+      titleController.text = widget.taskToEdit!.title;
+    }
+
     description = widget.taskToEdit?.description ?? "";
     dueDate = widget.taskToEdit?.dueDate ?? DateTime.now().date;
     subject = widget.taskToEdit?.subject ?? widget.initialSubject;
     reminderOffset = widget.taskToEdit != null
-        ? widget.taskToEdit!.dueDate.difference(widget.taskToEdit!.reminder)
+        ? widget.taskToEdit!.reminderOffset()
         : Duration.zero;
     reminderMode = widget.taskToEdit != null
         ? reminderModeFromOffset(reminderOffset)
         : ReminderMode.none;
   }
 
-  void createSubject() {
+  void createTask() {
     setState(() => enabled = false);
 
     bool isValid = true;
@@ -70,35 +78,62 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       return;
     }
 
+    final title = titleController.text.trim();
+    saveTitleSuggestion(title);
+
     if (widget.taskToEdit == null) {
-      Database.I.createTask(
+      Database.I.createTask(Task(
+        '',
         title,
         description,
         dueDate,
         dueDate.subtract(reminderOffset),
-        subject!.id,
-      );
+        subject!,
+        false,
+      ));
     } else {
-      Database.I.editTask(
+      Database.I.editTask(Task(
         widget.taskToEdit!.id,
         title,
         description,
         dueDate,
         dueDate.subtract(reminderOffset),
-        subject!.id,
-      );
+        subject!,
+        widget.taskToEdit!.completed,
+      ));
     }
 
     Get.back();
+  }
+
+  void saveTitleSuggestion(String title) async {
+    var sp = await SharedPreferences.getInstance();
+    var list = sp.getStringList(titleSuggestionsKey) ?? [];
+    list.addIf(!list.contains(title), title);
+    sp.setStringList(titleSuggestionsKey, list);
+  }
+
+  Future<void> removeTitleSuggestion(String title) async {
+    var sp = await SharedPreferences.getInstance();
+    var list = sp.getStringList(titleSuggestionsKey) ?? [];
+    list.remove(title);
+    sp.setStringList(titleSuggestionsKey, list);
+  }
+
+  Future<List<String>> getTitleSuggestions() async {
+    var sp = await SharedPreferences.getInstance();
+    return sp.getStringList(titleSuggestionsKey) ?? [];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.taskToEdit == null
-            ? 'create_task_title'.tr
-            : 'edit_task_title'.tr),
+        title: Text(
+          widget.taskToEdit == null
+              ? 'create_task_title'.tr
+              : 'edit_task_title'.tr,
+        ),
       ),
       body: Center(
         child: SizedBox(
@@ -110,22 +145,34 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  TextFormField(
-                    initialValue: widget.taskToEdit?.title,
-                    enabled: enabled,
-                    decoration: buildInputDecoration('title'.tr),
-                    onChanged: (s) => title = s,
+                  CompletingTextFormField(
+                    key: titleKey,
+                    controller: titleController,
+                    suggestionsCallback: getTitleSuggestions,
+                    labelText: 'title'.tr,
+                    itemBuilder: (_, suggestion) => ListTile(
+                      title: Text(suggestion),
+                      trailing: IconButton(
+                        constraints: const BoxConstraints(),
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.close),
+                        onPressed: () async {
+                          await removeTitleSuggestion(suggestion);
+                          titleKey.currentState?.updateSuggestions();
+                        },
+                      ),
+                    ),
                     validator: InputValidator.validateNotEmpty,
                   ),
                   const SizedBox(height: 40),
-                  _DatePicker(
+                  DatePicker(
                     enabled: enabled,
                     prefix: 'due_date'.tr,
                     date: dueDate,
                     onChanged: (date) => setState(() => dueDate = date),
                   ),
                   const SizedBox(height: 20),
-                  _ReminderPicker(
+                  ReminderPicker(
                     enabled: enabled,
                     mode: reminderMode,
                     reminderOffset: reminderOffset,
@@ -136,7 +183,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                     }),
                   ),
                   const SizedBox(height: 20),
-                  _SubjectPicker(
+                  SubjectPicker(
                     enabled: enabled,
                     onChanged: (s) => setState(() => subject = s),
                     selectedSubjectId: subject?.id,
@@ -156,7 +203,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   const SizedBox(height: 80),
                   MaterialButton(
-                    onPressed: enabled ? createSubject : null,
+                    onPressed: enabled ? createTask : null,
                     minWidth: double.infinity,
                     color: Theme.of(context).colorScheme.primary,
                     child: enabled
@@ -170,285 +217,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _DatePicker extends StatelessWidget {
-  _DatePicker({
-    Key? key,
-    this.enabled = true,
-    required this.prefix,
-    this.highlightPrefix = false,
-    DateTime? firstDate,
-    DateTime? lastDate,
-    required this.date,
-    required this.onChanged,
-  }) : super(key: key) {
-    var now = DateTime.now();
-    this.firstDate = firstDate ?? now;
-    this.lastDate = lastDate ?? DateTime(now.year + 5, 12, 31);
-  }
-
-  final bool enabled;
-  final String prefix;
-  final bool highlightPrefix;
-  late final DateTime firstDate;
-  late final DateTime lastDate;
-  final DateTime date;
-  final void Function(DateTime) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClickableRow(
-      onTap: enabled
-          ? () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: date,
-                firstDate: firstDate,
-                lastDate: lastDate,
-              );
-              if (picked != null && picked != date) onChanged(picked);
-            }
-          : null,
-      left: Text(
-        '$prefix:',
-        style: !highlightPrefix
-            ? Theme.of(context).textTheme.bodyText2
-            : Theme.of(context).textTheme.bodyText1,
-      ),
-      right: Text(
-        formatDate(date),
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
-    );
-  }
-}
-
-class _ReminderPicker extends StatelessWidget {
-  const _ReminderPicker({
-    Key? key,
-    this.enabled = true,
-    required this.mode,
-    required this.reminderOffset,
-    required this.dueDate,
-    required this.onChanged,
-  }) : super(key: key);
-
-  final bool enabled;
-  final ReminderMode mode;
-  final Duration reminderOffset;
-  final DateTime dueDate;
-  final void Function(Duration, ReminderMode) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClickableRow(
-      onTap: enabled
-          ? () => showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: Text('reminder_colon'.tr),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: ReminderMode.values.map((val) {
-                        if (val == ReminderMode.custom) {
-                          return _DatePicker(
-                            prefix: 'user_defined'.tr,
-                            highlightPrefix: mode == val,
-                            date: dueDate.subtract(reminderOffset),
-                            firstDate: DateTime(DateTime.now().year - 5),
-                            lastDate: dueDate,
-                            onChanged: (date) {
-                              var offset = dueDate.difference(date);
-                              Get.back();
-                              onChanged(offset, ReminderMode.custom);
-                            },
-                          );
-                        }
-
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: InkWell(
-                                onTap: () {
-                                  Get.back();
-                                  onChanged(val.offset, val);
-                                },
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.only(top: 8, bottom: 8),
-                                  child: Text(val.string,
-                                      style: mode == val
-                                          ? Theme.of(context)
-                                              .textTheme
-                                              .bodyText1
-                                          : Theme.of(context)
-                                              .textTheme
-                                              .bodyText2),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-              )
-          : null,
-      left: Text('reminder_colon'.tr),
-      right: Text(
-        mode != ReminderMode.custom
-            ? mode.string
-            : formatDate(dueDate.subtract(reminderOffset)),
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
-    );
-  }
-}
-
-class _SubjectPicker extends StatefulWidget {
-  const _SubjectPicker({
-    Key? key,
-    this.enabled = true,
-    this.selectedSubjectId,
-    required this.onChanged,
-  }) : super(key: key);
-
-  final bool enabled;
-  final String? selectedSubjectId;
-  final void Function(Subject) onChanged;
-
-  @override
-  State<_SubjectPicker> createState() => _SubjectPickerState();
-}
-
-class _SubjectPickerState extends State<_SubjectPicker> {
-  List<Subject>? subjects;
-  late StreamSubscription<List<Subject>> subscription;
-
-  @override
-  void initState() {
-    super.initState();
-    getSubjects();
-  }
-
-  // For some reason, stream.first apparently does not work properly on
-  // generator functions, so I have to do it myself.
-  void getSubjects() {
-    subscription = Database.I.querySubjects().listen((data) {
-      setState(() => subjects = data);
-      subscription.cancel();
-    });
-  }
-
-  @override
-  void dispose() {
-    subscription.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return subjects == null
-        ? Row(
-            children: const [
-              Expanded(
-                child: Center(child: CircularProgressIndicator()),
-              )
-            ],
-          )
-        : ClickableRow(
-            onTap: widget.enabled
-                ? () => showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: Text('select_subject'.tr),
-                        content: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: subjects!
-                                .map(
-                                  (el) => _AlertDialogSubject(
-                                    subject: el,
-                                    selectedSubjectId: widget.selectedSubjectId,
-                                    onChanged: widget.onChanged,
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ),
-                      ),
-                    )
-                : null,
-            left: Text('subject_colon'.tr),
-            right: Text(
-              widget.selectedSubjectId == null
-                  ? 'Fach auswählen'
-                  : subjects!
-                      .firstWhere((el) => el.id == widget.selectedSubjectId)
-                      .name,
-              style: widget.selectedSubjectId == null
-                  ? Theme.of(context)
-                      .textTheme
-                      .caption
-                      ?.copyWith(fontStyle: FontStyle.italic)
-                  : Theme.of(context).textTheme.bodyLarge,
-            ),
-          );
-  }
-}
-
-class _AlertDialogSubject extends StatelessWidget {
-  const _AlertDialogSubject({
-    Key? key,
-    required this.subject,
-    required this.selectedSubjectId,
-    required this.onChanged,
-  }) : super(key: key);
-
-  final Subject subject;
-  final String? selectedSubjectId;
-  final void Function(Subject) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Get.back();
-        onChanged(subject);
-      },
-      child: Row(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8, bottom: 8),
-              child: Text(
-                subject.name,
-                style:
-                    selectedSubjectId != null && subject.id == selectedSubjectId
-                        ? Theme.of(context).textTheme.bodyText1
-                        : Theme.of(context).textTheme.bodyText2,
-              ),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: subject.color,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            height: 25,
-            width: 25,
-          )
-        ],
       ),
     );
   }

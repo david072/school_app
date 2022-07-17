@@ -78,8 +78,8 @@ class _SubjectsWidgetState extends State<SubjectsWidget> {
                   ),
           ),
           Footer(
-            text: 'subjects'.tr,
-            onAdd: () => Get.to(() => const CreateSubjectPage()),
+            text: Text('${'subjects'.tr}: ${subjects.length}'),
+            onClick: () => Get.to(() => const CreateSubjectPage()),
           ),
         ],
       ),
@@ -122,23 +122,23 @@ class _SubjectState extends State<_Subject> {
         ),
       ],
       functions: [
-        () => showDialog(
-              context: context,
-              builder: (context) => SubjectNotesDialog(
-                notes: widget.subject.notes,
-                subjectId: widget.subject.id,
-              ),
-            ),
-        () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
-        () => showConfirmationDialog(
-              context: context,
-              title: 'delete'.tr,
-              content: 'confirm_delete_subject'
-                  .trParams({'name': widget.subject.name}),
-              cancelText: 'cancel_caps'.tr,
-              confirmText: 'delete_caps'.tr,
-              onConfirm: () => Database.I.deleteSubject(widget.subject.id),
-            )
+            () => showDialog(
+          context: context,
+          builder: (context) => SubjectNotesDialog(
+            notes: widget.subject.notes,
+            subjectId: widget.subject.id,
+          ),
+        ),
+            () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
+            () => showConfirmationDialog(
+          context: context,
+          title: 'delete'.tr,
+          content: 'confirm_delete_subject'
+              .trParams({'name': widget.subject.name}),
+          cancelText: 'cancel_caps'.tr,
+          confirmText: 'delete_caps'.tr,
+          onConfirm: () => Database.I.deleteSubject(widget.subject.id),
+        )
       ],
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -166,7 +166,9 @@ class _SubjectState extends State<_Subject> {
             ),
             SizedBox(height: isSmallScreen(context) ? 5 : 10),
             Text(
-                '${widget.subject.taskCount} ${'task'.trPlural('tasks', widget.subject.taskCount)}',
+                '${widget.subject.taskCount} '
+                '(+ ${widget.subject.completedTasksCount}) '
+                '${'task'.trPlural('tasks', widget.subject.taskCount)}',
                 style: Theme.of(context).textTheme.caption),
           ],
         ),

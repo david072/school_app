@@ -8,7 +8,9 @@ class Subject {
   final String name;
   final String abbreviation;
   final Color color;
+
   final int taskCount;
+  final int completedTasksCount;
 
   final String notes;
 
@@ -17,9 +19,19 @@ class Subject {
     this.name,
     this.abbreviation,
     this.color,
-    this.taskCount, [
+    this.taskCount,
+    this.completedTasksCount, [
     this.notes = "",
   ]);
+
+  Subject.data(
+    this.name,
+    this.abbreviation,
+    this.color, [
+    this.id = '',
+    this.notes = '',
+  ])  : taskCount = 0,
+        completedTasksCount = 0;
 
   static Future<Subject> fromDocument(
       DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -31,15 +43,23 @@ class Subject {
   }
 
   static Future<Subject> _fromMap(String id, Map<String, dynamic> map) async {
-    var taskCount = await Database.I.queryTaskCountForSubject(id);
+    var taskCounts = await Database.I.queryTaskCountForSubject(id);
 
     return Subject(
       id,
       map['name'],
       map['abbreviation'],
       Color(map['color']),
-      taskCount,
+      taskCounts[0],
+      taskCounts[1],
       map['notes'] ?? "",
     );
   }
+
+  Map<String, dynamic> data() => {
+        'name': name,
+        'abbreviation': abbreviation,
+        'color': color,
+        'notes': notes,
+      };
 }

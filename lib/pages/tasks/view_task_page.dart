@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:school_app/data/database/database.dart';
-import 'package:school_app/data/task.dart';
-import 'package:school_app/pages/tasks/clickable_row.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
+import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
@@ -83,12 +84,8 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                 IconButton(
                   onPressed: () => showConfirmationDialog(
                       context: context,
-                      title:
-                          (!isTaskDeleted ? 'delete' : 'delete_permanently').tr,
-                      content: (!isTaskDeleted
-                              ? 'delete_task_confirm'
-                              : 'delete_task_permanently_confirm')
-                          .trParams({'name': task!.title}),
+                      title: task!.deleteDialogTitle(),
+                      content: task!.deleteDialogContent(),
                       cancelText: 'cancel_caps'.tr,
                       confirmText: 'delete_caps'.tr,
                       onConfirm: () {
@@ -103,18 +100,35 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                 ),
               ],
             ),
-            floatingActionButton: !isTaskDeleted
-                ? FloatingActionButton.extended(
-                    onPressed: () {
+            floatingActionButton: FloatingActionButton.extended(
+              onPressed: !isTaskDeleted
+                  ? () {
                       setState(() => completed = !completed);
                       Database.I.updateTaskStatus(task!.id, completed);
-                    },
-                    label: Text(!completed
+                    }
+                  : null,
+              label: Text(
+                // When the task is deleted, show the completion status.
+                // Otherwise, show what the button will do
+                !completed
+                    ? !isTaskDeleted
                         ? 'mark_task_completed'.tr
-                        : 'mark_task_uncompleted'.tr),
-                    icon: Icon(!completed ? Icons.done : Icons.close),
-                  )
-                : null,
+                        : 'not_completed'.tr
+                    : !isTaskDeleted
+                        ? 'mark_task_uncompleted'.tr
+                        : 'completed'.tr,
+              ),
+              icon: Icon(
+                // Same as above ^
+                !completed
+                    ? !isTaskDeleted
+                        ? Icons.done
+                        : Icons.close
+                    : !isTaskDeleted
+                        ? Icons.close
+                        : Icons.done,
+              ),
+            ),
             body: Center(
               child: SizedBox(
                 width: formWidth(context),
@@ -125,7 +139,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                     children: [
                       TextFormField(
                         controller: titleController,
-                        enabled: false,
+                        readOnly: true,
                         decoration: buildInputDecoration('title'.tr),
                         validator: InputValidator.validateNotEmpty,
                       ),
@@ -133,7 +147,9 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                       ClickableRow(
                         left: Text('due_date_colon'.tr),
                         right: Text(
-                          '${formatDate(task!.dueDate)} (${task!.formatRelativeDueDate()})',
+                          '${DateFormat('EEE').format(task!.dueDate)}, '
+                          '${formatDate(task!.dueDate)} '
+                          '(${task!.formatRelativeDueDate()})',
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ),
@@ -150,17 +166,21 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                         left: Text('subject_colon'.tr),
                         right: Text(
                           task!.subject.name,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(color: task!.subject.color),
                         ),
                       ),
                       const SizedBox(height: 40),
                       TextFormField(
                         controller: descriptionController,
-                        enabled: false,
+                        enabled: descriptionController.text.isNotEmpty,
+                        readOnly: true,
                         decoration: InputDecoration(
                           alignLabelWithHint: true,
                           labelText: 'description'.tr,
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.multiline,
                         maxLines: null,

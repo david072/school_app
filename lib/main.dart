@@ -42,7 +42,7 @@ void main() {
     themeMode: ThemeMode.light,
     translations: AppTranslations(),
     locale: Get.deviceLocale,
-    fallbackLocale: const Locale('de', 'DE'),
+    fallbackLocale: const Locale('en', 'US'),
   ));
 }
 

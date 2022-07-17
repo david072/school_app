@@ -4,6 +4,8 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:lit_relative_date_time/controller/relative_date_format.dart';
+import 'package:lit_relative_date_time/model/relative_date_time.dart';
 import 'package:school_app/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -55,7 +57,7 @@ bool validateForm(GlobalKey key) {
 Future<void> showPopupMenu(
     {required BuildContext context,
     required List<PopupMenuEntry<int>> items,
-    required Offset longPressPosition,
+    required Offset position,
     List<void Function()>? functions}) async {
   final RenderBox? overlay =
       Overlay.of(context)?.context.findRenderObject() as RenderBox?;
@@ -70,7 +72,7 @@ Future<void> showPopupMenu(
     context: context,
     items: items,
     position: RelativeRect.fromRect(
-      longPressPosition & const Size(1, 1),
+      position & const Size(1, 1),
       Offset.zero & overlay.size,
     ),
   );
@@ -115,7 +117,7 @@ class _LongPressPopupMenuState extends State<LongPressPopupMenu> {
     await showPopupMenu(
       context: context,
       items: widget.items,
-      longPressPosition: longPressPosition,
+      position: longPressPosition,
       functions: widget.functions,
     );
   }
@@ -227,3 +229,44 @@ Future<ThemeMode> getThemeMode() async {
       return ThemeMode.values[themeValue!];
   }
 }
+
+class ClickableRow extends StatelessWidget {
+  const ClickableRow({
+    Key? key,
+    required this.left,
+    required this.right,
+    this.onTap,
+  }) : super(key: key);
+
+  final Widget left;
+  final Widget right;
+  final void Function()? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      child: Row(
+        children: [
+          left,
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: right,
+            ),
+          )
+        ],
+      ),
+    );
+
+    return onTap != null
+        ? InkWell(
+            onTap: onTap,
+            child: child,
+          )
+        : child;
+  }
+}
+
+String formatRelativeDate(RelativeDateTime rdt) =>
+    RelativeDateFormat(Get.locale ?? const Locale('de')).format(rdt);

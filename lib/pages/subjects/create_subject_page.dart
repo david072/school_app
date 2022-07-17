@@ -46,10 +46,10 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
     }
 
     if (widget.subjectToEdit == null) {
-      Database.I.createSubject(name, abbreviation, color);
+      Database.I.createSubject(Subject.data(name, abbreviation, color));
     } else {
-      Database.I
-          .editSubject(widget.subjectToEdit!.id, name, abbreviation, color);
+      Database.I.editSubject(
+          Subject.data(name, abbreviation, color, widget.subjectToEdit!.id));
     }
 
     Get.back();
@@ -99,7 +99,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                     ],
                   ),
                   const SizedBox(height: 40),
-                  InkWell(
+                  ClickableRow(
                     onTap: () => showDialog(
                       context: context,
                       builder: (_) => _ColorPicker(
@@ -107,25 +107,13 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                         onColorChanged: (c) => setState(() => color = c),
                       ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 8),
-                      child: Row(
-                        children: [
-                          Text('color'.tr),
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                    left: Text('color'.tr),
+                    right: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(5),
                       ),
                     ),
                   ),
@@ -150,7 +138,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
   }
 }
 
-class _ColorPicker extends StatelessWidget {
+class _ColorPicker extends StatefulWidget {
   const _ColorPicker({
     Key? key,
     required this.color,
@@ -161,16 +149,42 @@ class _ColorPicker extends StatelessWidget {
   final void Function(Color) onColorChanged;
 
   @override
+  State<_ColorPicker> createState() => _ColorPickerState();
+}
+
+class _ColorPickerState extends State<_ColorPicker> {
+  late Color pickerColor;
+
+  @override
+  void initState() {
+    super.initState();
+    pickerColor = widget.color;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('color_picker_title'.tr),
       content: SingleChildScrollView(
         child: ColorPicker(
-          pickerColor: color,
-          onColorChanged: onColorChanged,
+          pickerColor: pickerColor,
+          onColorChanged: (color) => setState(() => pickerColor = color),
           enableAlpha: false,
         ),
       ),
+      actions: [
+        TextButton(
+          child: Text('cancel_caps'.tr),
+          onPressed: () => Get.back(),
+        ),
+        TextButton(
+          child: Text('confirm_caps'.tr),
+          onPressed: () {
+            widget.onColorChanged(pickerColor);
+            Get.back();
+          },
+        ),
+      ],
     );
   }
 }

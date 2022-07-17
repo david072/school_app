@@ -2,7 +2,7 @@
     package="de.david072.school_app">
 
     <application
-        android:label="school_app"
+        android:label="Scoog"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

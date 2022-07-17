@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
-import 'package:school_app/data/task.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 
 class TrashBinPage extends StatefulWidget {
@@ -14,15 +14,14 @@ class TrashBinPage extends StatefulWidget {
 }
 
 class _TrashBinPageState extends State<TrashBinPage> {
-  late StreamSubscription<List<Task>> subscription;
+  late StreamSubscription<List<AbstractTask>> subscription;
 
-  List<Task> tasks = [];
+  List<AbstractTask> tasks = [];
 
   @override
   void initState() {
     super.initState();
-    subscription = Database.I
-        .queryDeletedTasks()
+    subscription = Database.queryTasksAndClassTests(areDeleted: true)
         .listen((event) => setState(() => tasks = event));
   }
 
@@ -42,8 +41,8 @@ class _TrashBinPageState extends State<TrashBinPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TasksList(
-            mode: TasksListMode.deleted,
-            tasks: tasks,
+            isDeletedMode: true,
+            items: tasks,
           ),
         ],
       ),
