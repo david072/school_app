@@ -7,7 +7,7 @@ const firestore = app.firestore();
 const LINK_MAX_LIFETIME = 3.6e7; // 10 hours
 
 export const link = functions
-    .region("europe-west1")
+    .region("europe-west3")
     .https
     .onRequest(async (req, res) => {
         if (req.query.id === undefined) {
@@ -45,3 +45,15 @@ export const link = functions
 function hasLinkExpired(data: admin.firestore.DocumentData): boolean {
     return data["created_at"] + LINK_MAX_LIFETIME <= Date.now();
 }
+
+export const linkExpiryCheck = functions
+    .region("europe-west3")
+    .pubsub
+    .schedule("every 24 hours")
+    .onRun(async () => {
+        const links = await firestore.collection("links").get();
+        for (const link of links.docs) {
+            if (!hasLinkExpired(link.data())) continue;
+            link.ref.delete();
+        }
+    });
