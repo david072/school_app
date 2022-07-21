@@ -428,8 +428,7 @@ class DatabaseSqlite extends Database {
             'subject_id INTEGER,'
             'topics STRING,'
             'type STRING';
-        await db.execute(
-            'CREATE TABLE $_deletedClassTestsTable($classTestsTableSql)');
+        await db.execute('CREATE TABLE $_classTestsTable($classTestsTableSql)');
         await db.execute('CREATE TABLE $_deletedClassTestsTable('
             '$classTestsTableSql,'
             'deleted_at INTEGER'

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:school_app/data/app_state.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/auth/signup_page.dart';
 import 'package:school_app/pages/home/account_dialog.dart';
@@ -11,12 +12,7 @@ import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 import 'package:school_app/util/util.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({
-    Key? key,
-    this.hasAccount = true,
-  }) : super(key: key);
-
-  final bool hasAccount;
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -49,7 +45,7 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.settings),
             onPressed: () => Get.to(() => const SettingsPage()),
           ),
-          widget.hasAccount
+          AppState.I.hasAccount
               ? IconButton(
                   icon: const Icon(Icons.account_circle),
                   onPressed: () => showDialog(
@@ -60,7 +56,7 @@ class _HomePageState extends State<HomePage> {
               : Container(),
           TextButton.icon(
             onPressed: () {
-              if (!widget.hasAccount) {
+              if (!AppState.I.hasAccount) {
                 Get.to(() => const SignUpPage(migrate: true));
                 return;
               }
@@ -78,10 +74,11 @@ class _HomePageState extends State<HomePage> {
                 },
               );
             },
-            label: Text(widget.hasAccount ? 'logout'.tr : 'create_account'.tr,
+            label: Text(
+                AppState.I.hasAccount ? 'logout'.tr : 'create_account'.tr,
                 style: const TextStyle(color: Colors.white)),
             icon: Icon(
-              widget.hasAccount ? Icons.logout : Icons.login,
+              AppState.I.hasAccount ? Icons.logout : Icons.login,
               color: Colors.white,
             ),
           ),

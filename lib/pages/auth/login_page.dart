@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:school_app/data/app_state.dart';
 import 'package:school_app/data/auth.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
@@ -42,6 +43,8 @@ class _LoginPageState extends State<LoginPage> {
 
       if (!mounted) return;
       Database.use(DatabaseFirestore());
+      AppState.init(hasAccount: true);
+
       Get.off(() => const HomePage());
       return;
     }
@@ -149,8 +152,9 @@ class _LoginPageState extends State<LoginPage> {
 
                                   if (!mounted) return;
                                   Database.use(DatabaseSqlite());
-                                  Get.off(
-                                      () => const HomePage(hasAccount: false));
+                                  AppState.init(hasAccount: false);
+
+                                  Get.off(() => const HomePage());
                                 }
                               : null,
                           child: !isContinuingWithoutAccount
