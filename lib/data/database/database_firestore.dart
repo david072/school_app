@@ -16,6 +16,10 @@ class DatabaseFirestore implements Database {
   static const _classTestsCollection = 'class_tests';
   static const _deletedClassTestsCollection = 'deleted_class_tests';
 
+  static const _linkBaseUrl =
+      'https://europe-west3-school-app-3bd33.cloudfunctions.net/link?id=';
+  static const _linksCollection = 'links';
+
   @override
   Stream<List<Subject>> querySubjects() async* {
     var controller = StreamController<List<Subject>>();
@@ -335,6 +339,21 @@ class DatabaseFirestore implements Database {
         doc.reference.delete();
       }
     });
+  }
+
+  @override
+  Future<String> createTaskLink(Task task) async {
+    var linkDocument = await _collection(_linksCollection).add({
+      'title': task.title,
+      'due_date': task.dueDate.millisecondsSinceEpoch,
+      'reminder': task.reminder.millisecondsSinceEpoch,
+      'description': task.description,
+      'subject': task.subject.data()..remove('notes'),
+      'created_at': DateTime.now().millisecondsSinceEpoch,
+    });
+    print("asdf");
+
+    return '$_linkBaseUrl${linkDocument.id}';
   }
 
   CollectionReference<Map<String, dynamic>> _collection(String collection) =>

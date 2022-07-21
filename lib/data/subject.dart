@@ -59,7 +59,7 @@ class Subject {
   Map<String, dynamic> data() => {
         'name': name,
         'abbreviation': abbreviation,
-        'color': color,
+        'color': color.value,
         'notes': notes,
       };
 }

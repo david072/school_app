@@ -374,8 +374,13 @@ class DatabaseSqlite extends Database {
     );
   }
 
+  // Firebase specific
   @override
-  void deleteAllData() async => throw Exception("This should not be called!");
+  void deleteAllData() async => throw 'This should not be called!';
+
+  @override
+  Future<String> createTaskLink(Task task) =>
+      throw 'This should not be called!';
 
   /// NOTE: Calls to this function wait for a previous call to finish. This
   /// prevents overriding [database] with a following call to the function.
