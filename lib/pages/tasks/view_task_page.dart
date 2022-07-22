@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:school_app/data/app_state.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/tasks/abstract_task.dart';
 import 'package:school_app/data/tasks/task.dart';
@@ -76,14 +75,12 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
             appBar: AppBar(
               title: Text('task'.tr),
               actions: [
-                AppState.I.hasAccount
-                    ? IconButton(
-                        icon: const Icon(Icons.share),
-                        onPressed: () => showDialog(
-                            context: context,
-                            builder: (context) => _ShareDialog(task: task!)),
-                      )
-                    : const SizedBox(),
+                IconButton(
+                  icon: const Icon(Icons.share),
+                  onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) => _ShareDialog(task: task!)),
+                ),
                 !isTaskDeleted
                     ? IconButton(
                         icon: const Icon(Icons.edit),

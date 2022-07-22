@@ -380,7 +380,7 @@ class DatabaseSqlite extends Database {
 
   @override
   Future<String> createTaskLink(Task task) =>
-      throw 'This should not be called!';
+      DatabaseFirestore().createTaskLink(task);
 
   /// NOTE: Calls to this function wait for a previous call to finish. This
   /// prevents overriding [database] with a following call to the function.
