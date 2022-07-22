@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "de.david072.school_app",
+      "sha256_cert_fingerprints": [
+        "BF:17:78:B7:56:1E:24:AB:CC:2F:9C:28:CD:1B:92:E2:3D:E1:3A:96:66:4A:FD:4F:A0:00:3A:9E:87:86:B7:D4"
+      ]
+    }
+  }
+]
