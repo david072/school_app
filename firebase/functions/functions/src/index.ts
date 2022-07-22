@@ -1,46 +1,51 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import * as express from "express";
 
 const app = admin.initializeApp();
 const firestore = app.firestore();
 
 const LINK_MAX_LIFETIME = 3.6e7; // 10 hours
 
-export const link = functions
-    .region("europe-west3")
-    .https
-    .onRequest(async (req, res) => {
-        if (req.query.id === undefined) {
-            res.status(400).send("Please specify 'id' in the url!");
-            return;
-        }
+const router = express();
 
-        const documentId = req.query.id.toString();
-        const link = await firestore
-            .collection("links")
-            .doc(documentId)
-            .get()
-            .catch(() => {
-                res.status(404).send("No link found");
-                return undefined;
-            });
-        if (link === undefined) return;
+async function getLink(req: express.Request, res: express.Response) {
+    if (req.query.id === undefined) {
+        res.status(400).send("Please specify 'id' in the url!");
+        return;
+    }
 
-        const data = link.data();
-        if (data === undefined) {
-            res.status(400).send("The requested document does not have data!");
-            return;
-        }
-
-        if (hasLinkExpired(data)) {
-            await link.ref.delete();
+    const documentId = req.query.id.toString();
+    const link = await firestore
+        .collection("links")
+        .doc(documentId)
+        .get()
+        .catch(() => {
             res.status(404).send("No link found");
-            return;
-        }
+            return undefined;
+        });
+    if (link === undefined) return;
 
-        delete data["created_at"];
-        res.status(200).json(data);
-    });
+    const data = link.data();
+    if (data === undefined) {
+        res.status(400).send("The requested document does not have data!");
+        return;
+    }
+
+    if (hasLinkExpired(data)) {
+        await link.ref.delete();
+        res.status(404).send("No link found");
+        return;
+    }
+
+    delete data["created_at"];
+    res.status(200).json(data);
+}
+
+router.get("/link", getLink);
+router.get("/", getLink);
+
+export const link = functions.region("europe-west3").https.onRequest(router);
 
 function hasLinkExpired(data: admin.firestore.DocumentData): boolean {
     return data["created_at"] + LINK_MAX_LIFETIME <= Date.now();

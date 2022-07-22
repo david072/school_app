@@ -69,8 +69,10 @@ class _SubjectPageState extends State<SubjectPage> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  onPressed: () =>
-                      Get.to(() => CreateSubjectPage(subjectToEdit: subject!)),
+                  onPressed: () => Get.to(() => CreateSubjectPage(
+                        initialData: subject!,
+                        editMode: true,
+                      )),
                 ),
                 IconButton(
                   onPressed: () => showConfirmationDialog(

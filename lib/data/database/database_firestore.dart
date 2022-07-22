@@ -16,8 +16,7 @@ class DatabaseFirestore implements Database {
   static const _classTestsCollection = 'class_tests';
   static const _deletedClassTestsCollection = 'deleted_class_tests';
 
-  static const _linkBaseUrl =
-      'https://europe-west3-school-app-3bd33.cloudfunctions.net/link?id=';
+  static const _linkBaseUrl = 'https://school-app-3bd33.web.app/link?id=';
   static const _linksCollection = 'links';
 
   @override
@@ -36,7 +35,7 @@ class DatabaseFirestore implements Database {
         .where('user_id', isEqualTo: _requireUserUID())
         .snapshots(includeMetadataChanges: false)
         .listen((event) async {
-      controller.sink.add(await _querySubjectsOnce());
+      controller.sink.add(await querySubjectsOnce());
     });
 
     await for (final subjects in controller.stream) {
@@ -44,7 +43,8 @@ class DatabaseFirestore implements Database {
     }
   }
 
-  Future<List<Subject>> _querySubjectsOnce() async {
+  @override
+  Future<List<Subject>> querySubjectsOnce() async {
     var subjects = await _collection(_subjectsCollection)
         .where('user_id', isEqualTo: _requireUserUID())
         .get();
@@ -85,8 +85,9 @@ class DatabaseFirestore implements Database {
     return [taskCount, completedTaskCount];
   }
 
+  // Doesn't use async features, but the return type has to be a future because of sqlite
   @override
-  String createSubject(Subject subject) {
+  Future<String> createSubject(Subject subject) async {
     var newSubject = _collection(_subjectsCollection).doc();
     newSubject.set({
       ...subject.data(),
@@ -351,7 +352,6 @@ class DatabaseFirestore implements Database {
       'subject': task.subject.data()..remove('notes'),
       'created_at': DateTime.now().millisecondsSinceEpoch,
     });
-    print("asdf");
 
     return '$_linkBaseUrl${linkDocument.id}';
   }

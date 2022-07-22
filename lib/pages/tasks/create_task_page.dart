@@ -13,11 +13,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({
     Key? key,
-    this.taskToEdit,
+    this.initialData,
+    this.editMode = false,
     this.initialSubject,
   }) : super(key: key);
 
-  final Task? taskToEdit;
+  final Task? initialData;
+  final bool editMode;
   final Subject? initialSubject;
 
   @override
@@ -45,17 +47,27 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   void initState() {
     super.initState();
 
-    if (widget.taskToEdit != null) {
-      titleController.text = widget.taskToEdit!.title;
+    if (widget.initialData != null) {
+      titleController.text = widget.initialData!.title;
     }
 
-    description = widget.taskToEdit?.description ?? "";
-    dueDate = widget.taskToEdit?.dueDate ?? DateTime.now().date;
-    subject = widget.taskToEdit?.subject ?? widget.initialSubject;
-    reminderOffset = widget.taskToEdit != null
-        ? widget.taskToEdit!.reminderOffset()
+    description = widget.initialData?.description ?? "";
+    dueDate = widget.initialData?.dueDate ?? DateTime.now().date;
+
+    if (widget.initialData?.subject != null) {
+      if (widget.initialData!.subject.id.isEmpty) {
+        subject = widget.initialSubject;
+      } else {
+        subject = widget.initialData!.subject;
+      }
+    } else {
+      subject = widget.initialSubject;
+    }
+
+    reminderOffset = widget.initialData != null
+        ? widget.initialData!.reminderOffset()
         : Duration.zero;
-    reminderMode = widget.taskToEdit != null
+    reminderMode = widget.initialData != null
         ? reminderModeFromOffset(reminderOffset)
         : ReminderMode.none;
   }
@@ -81,7 +93,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     final title = titleController.text.trim();
     saveTitleSuggestion(title);
 
-    if (widget.taskToEdit == null) {
+    if (!widget.editMode) {
       Database.I.createTask(Task(
         '',
         title,
@@ -93,17 +105,17 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       ));
     } else {
       Database.I.editTask(Task(
-        widget.taskToEdit!.id,
+        widget.initialData!.id,
         title,
         description,
         dueDate,
         dueDate.subtract(reminderOffset),
         subject!,
-        widget.taskToEdit!.completed,
+        widget.initialData!.completed,
       ));
     }
 
-    Get.back();
+    Get.back(result: true);
   }
 
   void saveTitleSuggestion(String title) async {
@@ -130,9 +142,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.taskToEdit == null
-              ? 'create_task_title'.tr
-              : 'edit_task_title'.tr,
+          !widget.editMode ? 'create_task_title'.tr : 'edit_task_title'.tr,
         ),
       ),
       body: Center(
@@ -190,7 +200,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   const SizedBox(height: 40),
                   TextFormField(
-                    initialValue: widget.taskToEdit?.description,
+                    initialValue: widget.initialData?.description,
                     enabled: enabled,
                     onChanged: (s) => description = s,
                     decoration: InputDecoration(
@@ -207,7 +217,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                     minWidth: double.infinity,
                     color: Theme.of(context).colorScheme.primary,
                     child: enabled
-                        ? Text(widget.taskToEdit == null
+                        ? Text(!widget.editMode
                             ? 'create_caps'.tr
                             : 'save_caps'.tr)
                         : const CircularProgressIndicator(),

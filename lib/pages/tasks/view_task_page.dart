@@ -84,8 +84,10 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                 !isTaskDeleted
                     ? IconButton(
                         icon: const Icon(Icons.edit),
-                        onPressed: () =>
-                            Get.to(() => CreateTaskPage(taskToEdit: task)),
+                        onPressed: () => Get.to(() => CreateTaskPage(
+                              initialData: task,
+                              editMode: true,
+                            )),
                       )
                     : Container(),
                 IconButton(

@@ -44,6 +44,13 @@ class DatabaseSqlite extends Database {
   }
 
   @override
+  Future<List<Subject>> querySubjectsOnce() async {
+    await _open();
+    var rows = await database!.query(_subjectsTable);
+    return await rows.mapWaiting(Subject.fromRow);
+  }
+
+  @override
   Stream<Subject> querySubject(String id) async* {
     await _open();
     var subject = database!.createQuery(
@@ -89,9 +96,10 @@ class DatabaseSqlite extends Database {
   }
 
   @override
-  void createSubject(Subject subject) async {
+  Future<String> createSubject(Subject subject) async {
     await _open();
-    database!.insert(_subjectsTable, subject.data());
+    var id = await database!.insert(_subjectsTable, subject.data());
+    return id.toString();
   }
 
   @override
@@ -489,7 +497,7 @@ class DatabaseSqlite extends Database {
 
     for (final row in subjects) {
       var subject = await Subject.fromRow(row);
-      var id = firestoreDb.createSubject(subject);
+      var id = await firestoreDb.createSubject(subject);
       subjectIdsMap[row['id'] as int] = id;
     }
 

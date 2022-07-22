@@ -83,7 +83,10 @@ class _TasksListState extends State<TasksList> {
                           functions: [
                             () {
                               if (task is Task) {
-                                Get.to(() => CreateTaskPage(taskToEdit: task));
+                                Get.to(() => CreateTaskPage(
+                                      initialData: task,
+                                      editMode: true,
+                                    ));
                               } else if (task is ClassTest) {
                                 Get.to(() =>
                                     CreateClassTestPage(classTestToEdit: task));
