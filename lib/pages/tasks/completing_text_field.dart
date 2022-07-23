@@ -37,7 +37,7 @@ class CompletingTextFormFieldState extends State<CompletingTextFormField>
 
   final typeFocusNode = FocusNode();
 
-  // FIXME: This sould actually keep the box open and update the entries,
+  // FIXME: This should actually keep the box open and update the entries,
   //  but it no workie
   void updateSuggestions() {
     setState(() => suggestionsController.toggle());

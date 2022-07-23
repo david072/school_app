@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/tasks/abstract_task.dart';
 import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
+import 'package:school_app/pages/tasks/view_task_widgets.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
 
@@ -79,7 +79,7 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
                   icon: const Icon(Icons.share),
                   onPressed: () => showDialog(
                       context: context,
-                      builder: (context) => _ShareDialog(task: task!)),
+                      builder: (context) => ShareDialog(task: task!)),
                 ),
                 !isTaskDeleted
                     ? IconButton(
@@ -205,59 +205,5 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
               child: CircularProgressIndicator(),
             ),
           );
-  }
-}
-
-class _ShareDialog extends StatefulWidget {
-  const _ShareDialog({
-    Key? key,
-    required this.task,
-  }) : super(key: key);
-
-  final Task task;
-
-  @override
-  State<_ShareDialog> createState() => _ShareDialogState();
-}
-
-class _ShareDialogState extends State<_ShareDialog> {
-  String? link;
-
-  @override
-  void initState() {
-    Database.I
-        .createTaskLink(widget.task)
-        .then((l) => setState(() => link = l));
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Link'),
-      content: link != null
-          ? Text(link!)
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [CircularProgressIndicator()],
-            ),
-      actions: link != null
-          ? [
-              TextButton(
-                child: const Text('COPY'),
-                onPressed: () async {
-                  await Clipboard.setData(ClipboardData(text: link));
-
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Link copied to clipboard!'),
-                    ),
-                  );
-                },
-              ),
-            ]
-          : [],
-    );
   }
 }

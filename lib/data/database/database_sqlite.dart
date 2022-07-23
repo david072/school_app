@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/subject.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
 import 'package:school_app/data/tasks/class_test.dart';
 import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/util/util.dart';
@@ -387,8 +388,8 @@ class DatabaseSqlite extends Database {
   void deleteAllData() async => throw 'This should not be called!';
 
   @override
-  Future<String> createTaskLink(Task task) =>
-      DatabaseFirestore().createTaskLink(task);
+  Future<String> createLink(AbstractTask task) =>
+      DatabaseFirestore().createLink(task);
 
   /// NOTE: Calls to this function wait for a previous call to finish. This
   /// prevents overriding [database] with a following call to the function.

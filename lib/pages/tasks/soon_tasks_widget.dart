@@ -12,6 +12,7 @@ import 'package:school_app/pages/class_tests/view_class_test_page.dart';
 import 'package:school_app/pages/home/footer.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
 import 'package:school_app/pages/tasks/view_task_page.dart';
+import 'package:school_app/pages/tasks/view_task_widgets.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
 
@@ -64,12 +65,16 @@ class _TasksListState extends State<TasksList> {
                           context: context,
                           items: !isDeletedMode
                               ? [
-                                  PopupMenuItem(
+                                  const PopupMenuItem(
                                     value: 0,
-                                    child: Text('edit'.tr),
+                                    child: Text('Share'),
                                   ),
                                   PopupMenuItem(
                                     value: 1,
+                                    child: Text('edit'.tr),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 2,
                                     child: Text('delete'.tr),
                                   ),
                                 ]
@@ -81,6 +86,10 @@ class _TasksListState extends State<TasksList> {
                                 ],
                           position: longPressPosition,
                           functions: [
+                            () => showDialog(
+                                  context: context,
+                                  builder: (_) => ShareDialog(task: task),
+                                ),
                             () {
                               if (task is Task) {
                                 Get.to(() => CreateTaskPage(
@@ -88,8 +97,10 @@ class _TasksListState extends State<TasksList> {
                                       editMode: true,
                                     ));
                               } else if (task is ClassTest) {
-                                Get.to(() =>
-                                    CreateClassTestPage(classTestToEdit: task));
+                                Get.to(() => CreateClassTestPage(
+                                      initialData: task,
+                                      editMode: true,
+                                    ));
                               } else {
                                 throw 'task has invalid type';
                               }
@@ -272,7 +283,8 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                       CreateTaskPage(initialSubject: widget.subjectFilter));
                   break;
                 case 1:
-                  Get.to(() => const CreateClassTestPage());
+                  Get.to(() => CreateClassTestPage(
+                      initialSubject: widget.subjectFilter));
                   break;
               }
             },

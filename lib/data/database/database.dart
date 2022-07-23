@@ -83,7 +83,7 @@ abstract class Database {
   // Firebase specific
   void deleteAllData();
 
-  Future<String> createTaskLink(Task task);
+  Future<String> createLink(AbstractTask task);
 
   static Stream<List<AbstractTask>> queryTasksAndClassTests(
       {DateTime? maxDueDate, bool areDeleted = false}) async* {

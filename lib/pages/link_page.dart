@@ -6,7 +6,9 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
+import 'package:school_app/data/tasks/class_test.dart';
 import 'package:school_app/data/tasks/task.dart';
+import 'package:school_app/pages/class_tests/create_class_test_page.dart';
 import 'package:school_app/pages/subjects/create_subject_page.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
 
@@ -28,6 +30,28 @@ class _LinkPageState extends State<LinkPage> with AfterLayoutMixin {
     var json = await http.get(widget.uri);
     Map<String, dynamic> data = jsonDecode(json.body);
 
+    // Verify known type
+    var type = data['type'];
+    if (type != Task.sharingType && type != ClassTest.sharingType) {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Unknown type'),
+          content: const Text('The task\'s type is unknown.\n'
+              'Please make sure your app is up to date.'),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      Get.back();
+      return;
+    }
+
+    // Get / Create subject if necessary
     var subject = await getSubject(data['subject']['name']);
     subject ??= await showDialog(
       context: context,
@@ -73,16 +97,32 @@ class _LinkPageState extends State<LinkPage> with AfterLayoutMixin {
       return;
     }
 
-    var initialData = Task(
-      '',
-      data['title'],
-      data['description'],
-      DateTime.fromMillisecondsSinceEpoch(data['due_date']),
-      DateTime.fromMillisecondsSinceEpoch(data['reminder']),
-      subject,
-      false,
-    );
-    Get.off(() => CreateTaskPage(initialData: initialData));
+    var dateTime = DateTime.fromMillisecondsSinceEpoch;
+    switch (data['type']) {
+      case Task.sharingType:
+        var initialData = Task(
+          '',
+          data['title'],
+          data['description'],
+          dateTime(data['due_date']),
+          dateTime(data['reminder']),
+          subject,
+          false,
+        );
+        Get.off(() => CreateTaskPage(initialData: initialData));
+        break;
+      case ClassTest.sharingType:
+        var initialData = ClassTest(
+          '',
+          dateTime(data['due_date']),
+          dateTime(data['reminder']),
+          subject,
+          ClassTest.decodeTopicsList(data['topics']),
+          data['test_type'],
+        );
+        Get.off(() => CreateClassTestPage(initialData: initialData));
+        break;
+    }
   }
 
   Future<Subject?> getSubject(String name) async {

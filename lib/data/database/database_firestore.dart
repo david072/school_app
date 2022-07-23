@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:school_app/data/database/database.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
 import 'package:school_app/data/tasks/class_test.dart';
 import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/util/util.dart';
@@ -343,16 +344,9 @@ class DatabaseFirestore implements Database {
   }
 
   @override
-  Future<String> createTaskLink(Task task) async {
-    var linkDocument = await _collection(_linksCollection).add({
-      'title': task.title,
-      'due_date': task.dueDate.millisecondsSinceEpoch,
-      'reminder': task.reminder.millisecondsSinceEpoch,
-      'description': task.description,
-      'subject': task.subject.data()..remove('notes'),
-      'created_at': DateTime.now().millisecondsSinceEpoch,
-    });
-
+  Future<String> createLink(AbstractTask task) async {
+    var linkDocument =
+        await _collection(_linksCollection).add(task.sharingData());
     return '$_linkBaseUrl${linkDocument.id}';
   }
 
