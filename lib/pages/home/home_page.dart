@@ -10,7 +10,7 @@ import 'package:school_app/pages/auth/signup_page.dart';
 import 'package:school_app/pages/home/account_dialog.dart';
 import 'package:school_app/pages/home/settings_page.dart';
 import 'package:school_app/pages/home/trash_bin_page.dart';
-import 'package:school_app/pages/link_page.dart';
+import 'package:school_app/pages/sharing/link_page.dart';
 import 'package:school_app/pages/subjects/subjects_widget.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
 import 'package:school_app/util/util.dart';
