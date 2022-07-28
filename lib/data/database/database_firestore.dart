@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:school_app/data/database/database.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
 import 'package:school_app/data/tasks/class_test.dart';
 import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/util/util.dart';
@@ -15,6 +16,9 @@ class DatabaseFirestore implements Database {
   static const _deletedTasksCollection = 'deleted_tasks';
   static const _classTestsCollection = 'class_tests';
   static const _deletedClassTestsCollection = 'deleted_class_tests';
+
+  static const _linkBaseUrl = 'https://school-app-3bd33.web.app/link?id=';
+  static const _linksCollection = 'links';
 
   @override
   Stream<List<Subject>> querySubjects() async* {
@@ -32,7 +36,7 @@ class DatabaseFirestore implements Database {
         .where('user_id', isEqualTo: _requireUserUID())
         .snapshots(includeMetadataChanges: false)
         .listen((event) async {
-      controller.sink.add(await _querySubjectsOnce());
+      controller.sink.add(await querySubjectsOnce());
     });
 
     await for (final subjects in controller.stream) {
@@ -40,7 +44,8 @@ class DatabaseFirestore implements Database {
     }
   }
 
-  Future<List<Subject>> _querySubjectsOnce() async {
+  @override
+  Future<List<Subject>> querySubjectsOnce() async {
     var subjects = await _collection(_subjectsCollection)
         .where('user_id', isEqualTo: _requireUserUID())
         .get();
@@ -81,8 +86,9 @@ class DatabaseFirestore implements Database {
     return [taskCount, completedTaskCount];
   }
 
+  // Doesn't use async features, but the return type has to be a future because of sqlite
   @override
-  String createSubject(Subject subject) {
+  Future<String> createSubject(Subject subject) async {
     var newSubject = _collection(_subjectsCollection).doc();
     newSubject.set({
       ...subject.data(),
@@ -335,6 +341,13 @@ class DatabaseFirestore implements Database {
         doc.reference.delete();
       }
     });
+  }
+
+  @override
+  Future<String> createLink(AbstractTask task) async {
+    var linkDocument =
+        await _collection(_linksCollection).add(task.sharingData());
+    return '$_linkBaseUrl${linkDocument.id}';
   }
 
   CollectionReference<Map<String, dynamic>> _collection(String collection) =>

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
+import 'package:school_app/pages/tasks/view_task_widgets.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
 
@@ -10,11 +11,13 @@ import '../../data/subject.dart';
 class CreateSubjectPage extends StatefulWidget {
   const CreateSubjectPage({
     Key? key,
-    this.subjectToEdit,
+    this.initialData,
+    this.editMode = false,
   }) : super(key: key);
 
   /// Optional subject. If not null, the screen will edit instead of create.
-  final Subject? subjectToEdit;
+  final Subject? initialData;
+  final bool editMode;
 
   @override
   State<CreateSubjectPage> createState() => _CreateSubjectPageState();
@@ -32,12 +35,12 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
   @override
   void initState() {
     super.initState();
-    name = widget.subjectToEdit?.name ?? "";
-    abbreviation = widget.subjectToEdit?.abbreviation ?? "";
-    color = widget.subjectToEdit?.color ?? randomColor();
+    name = widget.initialData?.name ?? "";
+    abbreviation = widget.initialData?.abbreviation ?? "";
+    color = widget.initialData?.color ?? randomColor();
   }
 
-  void createSubject() {
+  Future<void> createSubject() async {
     setState(() => enabled = false);
 
     if (!validateForm(formKey)) {
@@ -45,22 +48,24 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
       return;
     }
 
-    if (widget.subjectToEdit == null) {
-      Database.I.createSubject(Subject.data(name, abbreviation, color));
+    Subject? createdSubject;
+    if (!widget.editMode) {
+      var id = await Database.I
+          .createSubject(Subject.data(name, abbreviation, color));
+      createdSubject = Subject.data(name, abbreviation, color, id);
     } else {
       Database.I.editSubject(
-          Subject.data(name, abbreviation, color, widget.subjectToEdit!.id));
+          Subject.data(name, abbreviation, color, widget.initialData!.id));
     }
 
-    Get.back();
+    Get.back(result: createdSubject);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(widget.subjectToEdit == null ? 'cs_title'.tr : 'es_title'.tr),
+        title: Text(!widget.editMode ? 'cs_title'.tr : 'es_title'.tr),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -78,7 +83,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                       Flexible(
                         flex: 2,
                         child: TextFormField(
-                          initialValue: widget.subjectToEdit?.name,
+                          initialValue: widget.initialData?.name,
                           enabled: enabled,
                           decoration: buildInputDecoration('name'.tr),
                           onChanged: (s) => name = s,
@@ -89,7 +94,7 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                       Flexible(
                         flex: 1,
                         child: TextFormField(
-                          initialValue: widget.subjectToEdit?.abbreviation,
+                          initialValue: widget.initialData?.abbreviation,
                           enabled: enabled,
                           decoration: buildInputDecoration('abbreviation'.tr),
                           onChanged: (s) => abbreviation = s,
@@ -123,9 +128,11 @@ class _CreateSubjectPageState extends State<CreateSubjectPage> {
                     minWidth: double.infinity,
                     color: Theme.of(context).colorScheme.primary,
                     child: enabled
-                        ? Text(widget.subjectToEdit == null
-                            ? 'create_caps'.tr
-                            : 'save_caps'.tr)
+                        ? Text(
+                            !widget.editMode
+                                ? 'create_caps'.tr
+                                : 'save_caps'.tr,
+                          )
                         : const CircularProgressIndicator(),
                   ),
                 ],

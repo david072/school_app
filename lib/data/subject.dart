@@ -33,6 +33,15 @@ class Subject {
   ])  : taskCount = 0,
         completedTasksCount = 0;
 
+  Subject.empty()
+      : id = '',
+        name = '',
+        abbreviation = '',
+        color = const Color(0x00000000),
+        taskCount = 0,
+        completedTasksCount = 0,
+        notes = '';
+
   static Future<Subject> fromDocument(
       DocumentSnapshot<Map<String, dynamic>> doc) {
     return _fromMap(doc.id, doc.data()!);
@@ -59,7 +68,7 @@ class Subject {
   Map<String, dynamic> data() => {
         'name': name,
         'abbreviation': abbreviation,
-        'color': color,
+        'color': color.value,
         'notes': notes,
       };
 }

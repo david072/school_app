@@ -18,13 +18,15 @@ abstract class Database {
   // Subjects
   Stream<List<Subject>> querySubjects();
 
+  Future<List<Subject>> querySubjectsOnce();
+
   Stream<Subject> querySubject(String id);
 
   Future<Subject> querySubjectOnce(String id);
 
   Future<List<int>> queryTaskCountForSubject(String id);
 
-  void createSubject(Subject subject);
+  Future<String> createSubject(Subject subject);
 
   void editSubject(Subject data);
 
@@ -78,8 +80,10 @@ abstract class Database {
 
   void permanentlyDeleteClassTest(String id);
 
-  // Miscellaneous
+  // Firebase specific
   void deleteAllData();
+
+  Future<String> createLink(AbstractTask task);
 
   static Stream<List<AbstractTask>> queryTasksAndClassTests(
       {DateTime? maxDueDate, bool areDeleted = false}) async* {

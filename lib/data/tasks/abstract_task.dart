@@ -55,6 +55,8 @@ abstract class AbstractTask {
   Duration reminderOffset() => dueDate.difference(reminder);
 
   Map<String, dynamic> data();
+
+  Map<String, dynamic> sharingData();
 }
 
 enum ReminderMode {

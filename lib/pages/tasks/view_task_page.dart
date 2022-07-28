@@ -7,6 +7,7 @@ import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/tasks/abstract_task.dart';
 import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/pages/tasks/create_task_page.dart';
+import 'package:school_app/pages/tasks/view_task_widgets.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
 
@@ -74,11 +75,19 @@ class _ViewTaskPageState extends State<ViewTaskPage> {
             appBar: AppBar(
               title: Text('task'.tr),
               actions: [
+                IconButton(
+                  icon: const Icon(Icons.share),
+                  onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) => ShareDialog(task: task!)),
+                ),
                 !isTaskDeleted
                     ? IconButton(
                         icon: const Icon(Icons.edit),
-                        onPressed: () =>
-                            Get.to(() => CreateTaskPage(taskToEdit: task)),
+                        onPressed: () => Get.to(() => CreateTaskPage(
+                              initialData: task,
+                              editMode: true,
+                            )),
                       )
                     : Container(),
                 IconButton(

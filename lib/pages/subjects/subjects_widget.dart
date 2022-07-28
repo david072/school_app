@@ -122,23 +122,26 @@ class _SubjectState extends State<_Subject> {
         ),
       ],
       functions: [
-            () => showDialog(
-          context: context,
-          builder: (context) => SubjectNotesDialog(
-            notes: widget.subject.notes,
-            subjectId: widget.subject.id,
-          ),
-        ),
-            () => Get.to(() => CreateSubjectPage(subjectToEdit: widget.subject)),
-            () => showConfirmationDialog(
-          context: context,
-          title: 'delete'.tr,
-          content: 'confirm_delete_subject'
-              .trParams({'name': widget.subject.name}),
-          cancelText: 'cancel_caps'.tr,
-          confirmText: 'delete_caps'.tr,
-          onConfirm: () => Database.I.deleteSubject(widget.subject.id),
-        )
+        () => showDialog(
+              context: context,
+              builder: (context) => SubjectNotesDialog(
+                notes: widget.subject.notes,
+                subjectId: widget.subject.id,
+              ),
+            ),
+        () => Get.to(() => CreateSubjectPage(
+              initialData: widget.subject,
+              editMode: true,
+            )),
+        () => showConfirmationDialog(
+              context: context,
+              title: 'delete'.tr,
+              content: 'confirm_delete_subject'
+                  .trParams({'name': widget.subject.name}),
+              cancelText: 'cancel_caps'.tr,
+              confirmText: 'delete_caps'.tr,
+              onConfirm: () => Database.I.deleteSubject(widget.subject.id),
+            )
       ],
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),

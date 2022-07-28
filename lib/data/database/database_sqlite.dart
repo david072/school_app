@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/subject.dart';
+import 'package:school_app/data/tasks/abstract_task.dart';
 import 'package:school_app/data/tasks/class_test.dart';
 import 'package:school_app/data/tasks/task.dart';
 import 'package:school_app/util/util.dart';
@@ -41,6 +42,13 @@ class DatabaseSqlite extends Database {
     await for (final subjects in controller.stream) {
       yield subjects;
     }
+  }
+
+  @override
+  Future<List<Subject>> querySubjectsOnce() async {
+    await _open();
+    var rows = await database!.query(_subjectsTable);
+    return await rows.mapWaiting(Subject.fromRow);
   }
 
   @override
@@ -89,9 +97,10 @@ class DatabaseSqlite extends Database {
   }
 
   @override
-  void createSubject(Subject subject) async {
+  Future<String> createSubject(Subject subject) async {
     await _open();
-    database!.insert(_subjectsTable, subject.data());
+    var id = await database!.insert(_subjectsTable, subject.data());
+    return id.toString();
   }
 
   @override
@@ -374,8 +383,13 @@ class DatabaseSqlite extends Database {
     );
   }
 
+  // Firebase specific
   @override
-  void deleteAllData() async => throw Exception("This should not be called!");
+  void deleteAllData() async => throw 'This should not be called!';
+
+  @override
+  Future<String> createLink(AbstractTask task) =>
+      DatabaseFirestore().createLink(task);
 
   /// NOTE: Calls to this function wait for a previous call to finish. This
   /// prevents overriding [database] with a following call to the function.
@@ -428,8 +442,7 @@ class DatabaseSqlite extends Database {
             'subject_id INTEGER,'
             'topics STRING,'
             'type STRING';
-        await db.execute(
-            'CREATE TABLE $_deletedClassTestsTable($classTestsTableSql)');
+        await db.execute('CREATE TABLE $_classTestsTable($classTestsTableSql)');
         await db.execute('CREATE TABLE $_deletedClassTestsTable('
             '$classTestsTableSql,'
             'deleted_at INTEGER'
@@ -485,7 +498,7 @@ class DatabaseSqlite extends Database {
 
     for (final row in subjects) {
       var subject = await Subject.fromRow(row);
-      var id = firestoreDb.createSubject(subject);
+      var id = await firestoreDb.createSubject(subject);
       subjectIdsMap[row['id'] as int] = id;
     }
 

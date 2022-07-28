@@ -7,6 +7,7 @@ import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/tasks/class_test.dart';
 import 'package:school_app/pages/class_tests/class_test_topic_editor.dart';
 import 'package:school_app/pages/class_tests/create_class_test_page.dart';
+import 'package:school_app/pages/tasks/view_task_widgets.dart';
 import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
 
@@ -61,11 +62,20 @@ class _ViewClassTestPageState extends State<ViewClassTestPage> {
             appBar: AppBar(
               title: Text('class_test'.tr),
               actions: [
+                IconButton(
+                  icon: const Icon(Icons.share),
+                  onPressed: () => showDialog(
+                    context: context,
+                    builder: (_) => ShareDialog(task: classTest!),
+                  ),
+                ),
                 !widget.isClassTestDeleted
                     ? IconButton(
                         icon: const Icon(Icons.edit),
-                        onPressed: () => Get.to(() =>
-                            CreateClassTestPage(classTestToEdit: classTest)),
+                        onPressed: () => Get.to(() => CreateClassTestPage(
+                              initialData: classTest,
+                              editMode: true,
+                            )),
                       )
                     : Container(),
                 IconButton(

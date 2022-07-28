@@ -13,10 +13,14 @@ import 'package:school_app/util/util.dart';
 class CreateClassTestPage extends StatefulWidget {
   const CreateClassTestPage({
     Key? key,
-    this.classTestToEdit,
+    this.initialData,
+    this.editMode = false,
+    this.initialSubject,
   }) : super(key: key);
 
-  final ClassTest? classTestToEdit;
+  final ClassTest? initialData;
+  final bool editMode;
+  final Subject? initialSubject;
 
   @override
   State<CreateClassTestPage> createState() => _CreateClassTestPageState();
@@ -41,24 +45,32 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
   late ReminderMode reminderMode = ReminderMode.none;
   late Duration reminderOffset = Duration.zero;
 
-  bool get isEditMode => widget.classTestToEdit != null;
+  bool get isEditMode => widget.editMode;
 
   @override
   void initState() {
     super.initState();
 
-    dueDate = widget.classTestToEdit?.dueDate ?? DateTime.now().date;
-    subject = widget.classTestToEdit?.subject;
-    topics = widget.classTestToEdit?.topics ??
+    dueDate = widget.initialData?.dueDate ?? DateTime.now().date;
+
+    if (widget.initialData?.subject != null) {
+      if (widget.initialData!.subject.id.isEmpty) {
+        subject = widget.initialSubject;
+      } else {
+        subject = widget.initialData!.subject;
+      }
+    } else {
+      subject = widget.initialSubject;
+    }
+
+    topics = widget.initialData?.topics ??
         [ClassTestTopic(topic: '', resources: '')];
     reminderOffset =
-        isEditMode ? widget.classTestToEdit!.reminderOffset() : Duration.zero;
+        isEditMode ? widget.initialData!.reminderOffset() : Duration.zero;
     reminderMode =
         isEditMode ? reminderModeFromOffset(reminderOffset) : ReminderMode.none;
 
-    if (isEditMode) {
-      typeController.text = widget.classTestToEdit!.type;
-    }
+    typeController.text = widget.initialData!.type;
   }
 
   Future<void> createClassTest() async {
@@ -104,7 +116,7 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
       ));
     } else {
       Database.I.editClassTest(ClassTest(
-        widget.classTestToEdit!.id,
+        widget.initialData!.id,
         dueDate,
         dueDate.subtract(reminderOffset),
         subject!,

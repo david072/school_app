@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:school_app/data/app_state.dart';
 import 'package:school_app/data/auth.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
@@ -45,7 +46,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
       if (!mounted) return;
       Database.use(DatabaseFirestore());
-      Get.back();
+      AppState.init(hasAccount: true);
+
+      if (!widget.migrate) Get.back();
       Get.off(() => const HomePage());
       return;
     }

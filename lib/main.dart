@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/background_worker.dart';
+import 'package:school_app/data/app_state.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/database/database_firestore.dart';
 import 'package:school_app/data/database/database_sqlite.dart';
@@ -98,7 +99,9 @@ class _SetupState extends State<Setup> with AfterLayoutMixin {
       // Go to HomePage without login if the user does not have an account
       if (sharedPreferences.getBool(noAccountKey) ?? false) {
         Database.use(DatabaseSqlite());
-        Get.off(const HomePage(hasAccount: false));
+        AppState.init(hasAccount: false);
+
+        Get.off(const HomePage());
         return;
       }
 
@@ -108,6 +111,8 @@ class _SetupState extends State<Setup> with AfterLayoutMixin {
         Get.off(() => const LoginPage());
       } else {
         Database.use(DatabaseFirestore());
+        AppState.init(hasAccount: true);
+
         Get.off(() => const HomePage());
       }
     } catch (e, stack) {
