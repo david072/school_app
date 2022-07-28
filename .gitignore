@@ -45,3 +45,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Google Services configuration files
+google-services.json
+GoogleService-Info.plist
