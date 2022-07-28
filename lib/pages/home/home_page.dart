@@ -8,11 +8,12 @@ import 'package:school_app/data/app_state.dart';
 import 'package:school_app/pages/auth/login_page.dart';
 import 'package:school_app/pages/auth/signup_page.dart';
 import 'package:school_app/pages/home/account_dialog.dart';
-import 'package:school_app/pages/home/settings_page.dart';
 import 'package:school_app/pages/home/trash_bin_page.dart';
+import 'package:school_app/pages/settings/settings_page.dart';
 import 'package:school_app/pages/sharing/link_page.dart';
 import 'package:school_app/pages/subjects/subjects_widget.dart';
 import 'package:school_app/pages/tasks/soon_tasks_widget.dart';
+import 'package:school_app/util/sizes.dart';
 import 'package:school_app/util/util.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -49,14 +50,17 @@ class _HomePageState extends State<HomePage> with AfterLayoutMixin {
     var isHorizontal =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
-    List<Widget> children = [
-      TaskListWidget(
-        isHorizontal: isHorizontal,
-        maxDateTime: DateTime.now().date.add(const Duration(days: 21)),
-      ),
-      const VerticalDivider(width: 0),
-      const SubjectsWidget(),
-    ];
+    final taskListWidget = TaskListWidget(
+      isHorizontal: isHorizontal,
+      maxDateTime: DateTime.now().date.add(const Duration(days: 21)),
+    );
+    List<Widget> children = !isSmallScreen(context)
+        ? [
+            taskListWidget,
+            const VerticalDivider(width: 0),
+            const SubjectsWidget(),
+          ]
+        : [taskListWidget];
 
     return Scaffold(
       appBar: AppBar(

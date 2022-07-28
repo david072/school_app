@@ -24,15 +24,16 @@ class Task extends AbstractTask {
   @override
   final DateTime? deletedAt;
 
-  const Task(this.id,
-      this.title,
-      this.description,
-      this.dueDate,
-      this.reminder,
-      this.subject,
-      this.completed, [
-        this.deletedAt,
-      ]);
+  const Task(
+    this.id,
+    this.title,
+    this.description,
+    this.dueDate,
+    this.reminder,
+    this.subject,
+    this.completed, [
+    this.deletedAt,
+  ]);
 
   static Future<Task> fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
     return _fromMap(doc.id, doc.data()!);
@@ -69,76 +70,72 @@ class Task extends AbstractTask {
   }
 
   @override
-  String deleteDialogContent() =>
-      (deletedAt != null
+  String deleteDialogContent() => (deletedAt != null
           ? 'delete_task_permanently_confirm'
           : 'delete_task_confirm')
-          .trParams({'name': title});
+      .trParams({'name': title});
 
   @override
-  DataCell getCompletedCell() => DataCell(
-    Builder(
-      builder: (_) {
-        // (HACK) to make the UI element update instantly
-        var value = completed;
-        return StatefulBuilder(
-          builder: (context, setState) => SizedBox(
-            width: 20,
-            height: 20,
-            child: Checkbox(
-              onChanged: deletedAt != null
-                  ? null
-                  : (b) {
-                if (b == null) return;
-                setState(() => value = b);
-                Database.I.updateTaskStatus(id, b);
-              },
-              value: value,
-            ),
-          ),
-        );
-      },
-    ),
-  );
-
-  @override
-  DataCell getTitleCell(BuildContext context) => DataCell(
-    RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: title,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          WidgetSpan(
-              child: description.isNotEmpty
-                  ? const SizedBox(width: 10)
-                  : Container()),
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: description.isNotEmpty
-                ? IconButton(
-              constraints: const BoxConstraints(),
-              padding: EdgeInsets.zero,
-              icon: Icon(Icons.sticky_note_2_outlined,
-                  color: Theme.of(context).hintColor),
-              onPressed: () => showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('description'.tr),
-                  content: Text(description),
-                ),
+  Widget getCompletedWidget() => Builder(
+        builder: (_) {
+          // (HACK) to make the UI element update instantly
+          var value = completed;
+          return StatefulBuilder(
+            builder: (context, setState) => SizedBox(
+              width: 20,
+              height: 20,
+              child: Checkbox(
+                onChanged: deletedAt != null
+                    ? null
+                    : (b) {
+                        if (b == null) return;
+                        setState(() => value = b);
+                        Database.I.updateTaskStatus(id, b);
+                      },
+                value: value,
               ),
-            )
-                : Container(),
-          )
-        ],
-      ),
-    ),
-  );
+            ),
+          );
+        },
+      );
 
   @override
-  Color? tableRowBackgroundColor() {
+  Widget getTitleWidget(BuildContext context, {required bool emphasized}) =>
+      RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: title,
+              style: emphasized ? Theme.of(context).textTheme.bodyLarge : null,
+            ),
+            WidgetSpan(
+                child: description.isNotEmpty
+                    ? const SizedBox(width: 10)
+                    : Container()),
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: description.isNotEmpty
+                  ? IconButton(
+                      constraints: const BoxConstraints(),
+                      padding: EdgeInsets.zero,
+                      icon: Icon(Icons.sticky_note_2_outlined,
+                          color: Theme.of(context).hintColor),
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('description'.tr),
+                          content: Text(description),
+                        ),
+                      ),
+                    )
+                  : Container(),
+            )
+          ],
+        ),
+      );
+
+  @override
+  Color? rowBackgroundColor() {
     if (!completed) return null;
     if (!Get.isDarkMode) {
       return Colors.grey.shade300;
@@ -149,16 +146,16 @@ class Task extends AbstractTask {
 
   @override
   String notificationTitle() => 'task_notification_title'.trParams({
-    'title': title,
-    'subjectAbb': subject.abbreviation,
-  });
+        'title': title,
+        'subjectAbb': subject.abbreviation,
+      });
 
   @override
   String notificationContent() => 'task_notification_content'.trParams({
-    'title': title,
-    'subjectName': subject.name,
-    'relDueDate': formatRelativeDueDate(),
-  });
+        'title': title,
+        'subjectName': subject.name,
+        'relDueDate': formatRelativeDueDate(),
+      });
 
   @override
   bool needsReminder() {

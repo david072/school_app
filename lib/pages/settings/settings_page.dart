@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:school_app/main.dart';
+import 'package:school_app/pages/subjects/subjects_widget.dart';
 import 'package:school_app/util/util.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,8 +40,23 @@ class _SettingsPageState extends State<SettingsPage> {
         title: Text('settings_title'.tr),
       ),
       body: SettingsList(
+        contentPadding: const EdgeInsets.only(top: 15),
         platform: DevicePlatform.android,
         sections: [
+          SettingsSection(
+            tiles: [
+              SettingsTile.navigation(
+                leading: const Icon(Icons.book_outlined),
+                title: Text('subjects'.tr),
+                onPressed: (_) => Get.to(
+                  () => Scaffold(
+                    appBar: AppBar(title: Text('subjects'.tr)),
+                    body: Column(children: const [SubjectsWidget()]),
+                  ),
+                ),
+              ),
+            ],
+          ),
           SettingsSection(
             title: Text('appearance'.tr),
             tiles: [
@@ -52,24 +68,24 @@ class _SettingsPageState extends State<SettingsPage> {
                   builder: (context) => AlertDialog(
                     title: Text('select_theme'.tr),
                     content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: ThemeMode.values.map((value) {
-                        return RadioListTile<ThemeMode>(
-                          value: value,
-                          groupValue: mode,
-                          title: Text(modeString(value)),
-                          onChanged: (newValue) {
-                            setState(() => mode = newValue ?? mode);
-                            Get.changeThemeMode(mode);
-                            SharedPreferences.getInstance().then(
-                                (sp) => sp.setInt(themeModeKey, mode.value));
-                            Get.back();
-                          },
-                        );
-                      }).toList(),
+                              mainAxisSize: MainAxisSize.min,
+                              children: ThemeMode.values.map((value) {
+                                return RadioListTile<ThemeMode>(
+                                  value: value,
+                                  groupValue: mode,
+                                  title: Text(modeString(value)),
+                                  onChanged: (newValue) {
+                                    setState(() => mode = newValue ?? mode);
+                                    Get.changeThemeMode(mode);
+                                    SharedPreferences.getInstance().then(
+                                            (sp) => sp.setInt(themeModeKey, mode.value));
+                                    Get.back();
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ),
                     ),
-                  ),
-                ),
                 value: Text(modeString()),
               ),
             ],

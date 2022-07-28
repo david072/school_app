@@ -35,109 +35,148 @@ class _TasksListState extends State<TasksList> {
 
   bool get isDeletedMode => widget.isDeletedMode;
 
+  void goToViewPage(AbstractTask task) {
+    if (task is Task) {
+      Get.to(() => ViewTaskPage(
+            taskId: task.id,
+            isTaskDeleted: isDeletedMode,
+          ));
+    } else if (task is ClassTest) {
+      Get.to(() => ViewClassTestPage(
+            testId: task.id,
+            isClassTestDeleted: isDeletedMode,
+          ));
+    }
+  }
+
+  showContextPopupMenu(AbstractTask task) => showPopupMenu(
+        context: context,
+        items: !isDeletedMode
+            ? [
+                const PopupMenuItem(
+                  value: 0,
+                  child: Text('Share'),
+                ),
+                PopupMenuItem(
+                  value: 1,
+                  child: Text('edit'.tr),
+                ),
+                PopupMenuItem(
+                  value: 2,
+                  child: Text('delete'.tr),
+                ),
+              ]
+            : [
+                PopupMenuItem(
+                  value: 1,
+                  child: Text('delete_permanently'.tr),
+                ),
+              ],
+        position: longPressPosition,
+        functions: [
+          () => showDialog(
+                context: context,
+                builder: (_) => ShareDialog(task: task),
+              ),
+          () {
+            if (task is Task) {
+              Get.to(() => CreateTaskPage(
+                    initialData: task,
+                    editMode: true,
+                  ));
+            } else if (task is ClassTest) {
+              Get.to(() => CreateClassTestPage(
+                    initialData: task,
+                    editMode: true,
+                  ));
+            } else {
+              throw 'task has invalid type';
+            }
+          },
+          () => showConfirmationDialog(
+                context: context,
+                title: !isDeletedMode ? 'delete'.tr : 'delete_permanently'.tr,
+                content: task.deleteDialogContent(),
+                cancelText: 'cancel_caps'.tr,
+                confirmText: 'delete_caps'.tr,
+                onConfirm: () => task.delete(),
+              ),
+        ],
+      );
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, constraints) => SingleChildScrollView(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: GestureDetector(
-            onTapDown: (details) => longPressPosition = details.globalPosition,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minWidth: constraints.minWidth),
-              child: DataTable(
-                columnSpacing: isSmallScreen(context) ? 20 : null,
-                showCheckboxColumn: false,
-                columns: [
-                  DataColumn(
-                      label: Text((!isDeletedMode ? 'done' : 'deleted_at').tr)),
-                  DataColumn(
-                      label: Text(!isDeletedMode ? 'due'.tr : 'done'.tr)),
-                  DataColumn(label: Text('title'.tr)),
-                  DataColumn(label: Text('subject'.tr)),
-                ],
-                rows: widget.items
-                    .map(
-                      (task) => _taskRow(
-                        context,
-                        task,
-                        () => showPopupMenu(
-                          context: context,
-                          items: !isDeletedMode
-                              ? [
-                                  const PopupMenuItem(
-                                    value: 0,
-                                    child: Text('Share'),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 1,
-                                    child: Text('edit'.tr),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 2,
-                                    child: Text('delete'.tr),
-                                  ),
-                                ]
-                              : [
-                                  PopupMenuItem(
-                                    value: 1,
-                                    child: Text('delete_permanently'.tr),
-                                  ),
-                                ],
-                          position: longPressPosition,
-                          functions: [
-                            () => showDialog(
-                                  context: context,
-                                  builder: (_) => ShareDialog(task: task),
-                                ),
-                            () {
-                              if (task is Task) {
-                                Get.to(() => CreateTaskPage(
-                                      initialData: task,
-                                      editMode: true,
-                                    ));
-                              } else if (task is ClassTest) {
-                                Get.to(() => CreateClassTestPage(
-                                      initialData: task,
-                                      editMode: true,
-                                    ));
-                              } else {
-                                throw 'task has invalid type';
-                              }
-                            },
-                            () => showConfirmationDialog(
-                                  context: context,
-                                  title: !isDeletedMode
-                                      ? 'delete'.tr
-                                      : 'delete_permanently'.tr,
-                                  content: task.deleteDialogContent(),
-                                  cancelText: 'cancel_caps'.tr,
-                                  confirmText: 'delete_caps'.tr,
-                                  onConfirm: () => task.delete(),
-                                ),
-                          ],
-                        ),
-                        () {
-                          if (task is Task) {
-                            Get.to(() => ViewTaskPage(
-                                  taskId: task.id,
-                                  isTaskDeleted: isDeletedMode,
-                                ));
-                          } else if (task is ClassTest) {
-                            Get.to(() => ViewClassTestPage(
-                                  testId: task.id,
-                                  isClassTestDeleted: isDeletedMode,
-                                ));
-                          }
-                        },
-                      ),
-                    )
-                    .toList(),
+      builder: (context, constraints) => !isSmallScreen(context)
+          ? SingleChildScrollView(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: GestureDetector(
+                  onTapDown: (details) =>
+                      longPressPosition = details.globalPosition,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: constraints.minWidth),
+                    child: DataTable(
+                      columnSpacing: isSmallScreen(context) ? 20 : null,
+                      showCheckboxColumn: false,
+                      columns: [
+                        DataColumn(
+                            label: Text(
+                                (!isDeletedMode ? 'done' : 'deleted_at').tr)),
+                        DataColumn(
+                            label: Text(!isDeletedMode ? 'due'.tr : 'done'.tr)),
+                        DataColumn(label: Text('title'.tr)),
+                        DataColumn(label: Text('subject'.tr)),
+                      ],
+                      rows: widget.items
+                          .map(
+                            (task) => _taskRow(
+                              context,
+                              task,
+                              () => showContextPopupMenu(task),
+                              () => goToViewPage(task),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ),
               ),
+            )
+          : ListView.builder(
+              itemCount: widget.items.length,
+              itemBuilder: (context, i) {
+                final task = widget.items[i];
+                return GestureDetector(
+                  onTapDown: (details) =>
+                      longPressPosition = details.globalPosition,
+                  child: ListTile(
+                    onTap: () => goToViewPage(task),
+                    onLongPress: () => showContextPopupMenu(task),
+                    tileColor: task.rowBackgroundColor(),
+                    leading: task.getCompletedWidget(),
+                    title: widget.items[i]
+                        .getTitleWidget(context, emphasized: false),
+                    subtitle: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          task.subject.name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(color: task.subject.color),
+                        ),
+                        Text(task.formatRelativeDueDate()),
+                      ],
+                    ),
+                    isThreeLine: true,
+                  ),
+                );
+              },
             ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -147,8 +186,9 @@ class _TasksListState extends State<TasksList> {
     void Function() onLongPress,
     void Function() onSelectChanged,
   ) {
-    DataCell completedCell = task.getCompletedCell();
-    DataCell titleCell = task.getTitleCell(context);
+    DataCell completedCell = DataCell(task.getCompletedWidget());
+    DataCell titleCell =
+        DataCell(task.getTitleWidget(context, emphasized: true));
     Subject subject = task.subject;
     String relativeDueDate = task.formatRelativeDueDate();
 
@@ -196,7 +236,7 @@ class _TasksListState extends State<TasksList> {
 
     return DataRow(
       color: MaterialStateProperty.resolveWith(
-          (states) => task.tableRowBackgroundColor()),
+          (states) => task.rowBackgroundColor()),
       cells: cells,
       onLongPress: onLongPress,
       onSelectChanged: (_) => onSelectChanged(),

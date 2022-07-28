@@ -17,11 +17,11 @@ abstract class AbstractTask {
 
   DateTime? get deletedAt;
 
-  Color? tableRowBackgroundColor();
+  Color? rowBackgroundColor();
 
-  DataCell getCompletedCell();
+  Widget getCompletedWidget();
 
-  DataCell getTitleCell(BuildContext context);
+  Widget getTitleWidget(BuildContext context, {required bool emphasized});
 
   String deleteDialogTitle() =>
       (deletedAt == null ? 'delete' : 'delete_permanently').tr;

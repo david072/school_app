@@ -70,7 +70,7 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
     reminderMode =
         isEditMode ? reminderModeFromOffset(reminderOffset) : ReminderMode.none;
 
-    typeController.text = widget.initialData!.type;
+    typeController.text = widget.initialData?.type ?? "";
   }
 
   Future<void> createClassTest() async {

@@ -36,16 +36,18 @@ class ClassTest extends AbstractTask {
   @override
   final DateTime? deletedAt;
 
-  const ClassTest(this.id,
-      this.dueDate,
-      this.reminder,
-      this.subject,
-      this.topics,
-      this.type, [
-        this.deletedAt,
-      ]);
+  const ClassTest(
+    this.id,
+    this.dueDate,
+    this.reminder,
+    this.subject,
+    this.topics,
+    this.type, [
+    this.deletedAt,
+  ]);
 
-  static Future<ClassTest> fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
+  static Future<ClassTest> fromDocument(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
     return _fromMap(doc.id, doc.data()!);
   }
 
@@ -104,15 +106,15 @@ class ClassTest extends AbstractTask {
 
   @override
   String notificationTitle() => 'class_test_notification_title'.trParams({
-    'type': type,
-    'subjectAbb': subject.abbreviation,
-  });
+        'type': type,
+        'subjectAbb': subject.abbreviation,
+      });
 
   @override
   String notificationContent() => 'class_test_notification_content'.trParams({
-    'type': type,
-    'subjectName': subject.name,
-  });
+        'type': type,
+        'subjectName': subject.name,
+      });
 
   @override
   bool needsReminder() {
@@ -130,16 +132,17 @@ class ClassTest extends AbstractTask {
   }
 
   @override
-  DataCell getCompletedCell() => const DataCell(Icon(Icons.description));
+  Widget getCompletedWidget() => const Icon(Icons.description);
 
   @override
-  DataCell getTitleCell(BuildContext context) => DataCell(Text(
-    type,
-    style: Theme.of(context).textTheme.bodyLarge,
-  ));
+  Widget getTitleWidget(BuildContext context, {required bool emphasized}) =>
+      Text(
+        type,
+        style: emphasized ? Theme.of(context).textTheme.bodyLarge : null,
+      );
 
   @override
-  Color? tableRowBackgroundColor() {
+  Color? rowBackgroundColor() {
     if (!Get.isDarkMode) {
       return Colors.grey.shade200;
     } else {
