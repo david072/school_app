@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:school_app/data/database/database.dart';
 import 'package:school_app/data/subject.dart';
 import 'package:school_app/data/tasks/abstract_task.dart';
+import 'package:school_app/pages/subjects/create_subject_page.dart';
 import 'package:school_app/pages/tasks/view_task_widgets.dart';
 import 'package:school_app/util/util.dart';
 
@@ -164,27 +165,13 @@ class SubjectPicker extends StatefulWidget {
 
 class _SubjectPickerState extends State<SubjectPicker> {
   List<Subject>? subjects;
-  late StreamSubscription<List<Subject>> subscription;
 
   @override
   void initState() {
     super.initState();
-    getSubjects();
-  }
-
-  // For some reason, stream.first apparently does not work properly on
-  // generator functions, so I have to do it myself.
-  void getSubjects() {
-    subscription = Database.I.querySubjects().listen((data) {
+    Database.I.querySubjects().listen((data) {
       setState(() => subjects = data);
-      subscription.cancel();
     });
-  }
-
-  @override
-  void dispose() {
-    subscription.cancel();
-    super.dispose();
   }
 
   @override
@@ -208,15 +195,44 @@ class _SubjectPickerState extends State<SubjectPicker> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
-                            children: subjects!
-                                .map(
-                                  (el) => _AlertDialogSubject(
-                                    subject: el,
-                                    selectedSubjectId: widget.selectedSubjectId,
-                                    onChanged: widget.onChanged,
+                            children: [
+                              ...subjects!
+                                  .map(
+                                    (el) => _AlertDialogSubject(
+                                      subject: el,
+                                      selectedSubjectId:
+                                          widget.selectedSubjectId,
+                                      onChanged: widget.onChanged,
+                                    ),
+                                  )
+                                  .toList(),
+                              InkWell(
+                                onTap: () async {
+                                  var subject = await Get.to<Subject?>(
+                                      () => const CreateSubjectPage());
+                                  if (subject == null) return;
+
+                                  Get.back();
+                                  widget.onChanged(subject);
+                                },
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: 8, bottom: 8),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.add_circle_outline),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        'cs_title'.tr,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2,
+                                      ),
+                                    ],
                                   ),
-                                )
-                                .toList(),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -225,10 +241,12 @@ class _SubjectPickerState extends State<SubjectPicker> {
             left: Text('subject_colon'.tr),
             right: Text(
               widget.selectedSubjectId == null
-                  ? 'Fach auswählen'
+                  ? 'select_subject'.tr
                   : subjects!
-                      .firstWhere((el) => el.id == widget.selectedSubjectId)
-                      .name,
+                          .firstWhereOrNull(
+                              (el) => el.id == widget.selectedSubjectId)
+                          ?.name ??
+                      'select_subject'.tr,
               style: widget.selectedSubjectId == null
                   ? Theme.of(context)
                       .textTheme
@@ -236,8 +254,9 @@ class _SubjectPickerState extends State<SubjectPicker> {
                       ?.copyWith(fontStyle: FontStyle.italic)
                   : Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: subjects!
-                            .firstWhere((s) => s.id == widget.selectedSubjectId)
-                            .color,
+                            .firstWhereOrNull(
+                                (s) => s.id == widget.selectedSubjectId)
+                            ?.color,
                       ),
             ),
           );
