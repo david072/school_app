@@ -31,4 +31,4 @@ jobs:
           # set to false if you want all page build to be committed to your gh-pages branch history
           single-commit: true
       - name: Cleanup
-        run: rm -rf temp
+        run: rm -rf ../../temp
