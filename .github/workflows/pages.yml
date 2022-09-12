@@ -19,7 +19,7 @@ jobs:
       - name: Update Dependencies
         run: cd ../.. && flutter pub get && cd ./ios && pod install && cd ..
       - name: Build
-        run: ../../ios/ipa_exporter .
+        run: cd ../.. && ./ios/ipa_exporter .
       - name: Prepare for deploy
         run: cd ../.. && mkdir temp && cp ./ios/ipa_export/export/app-ios.ipa ./temp && cp ./assets/* ./temp
       - name: Deploy
