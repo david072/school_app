@@ -15,7 +15,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Update Repository
-        run: git fetch origin && git pull
+        run: cd ../.. && git fetch origin && git pull
       - name: Update Dependencies
         run: flutter pub get && cd ./ios && pod install && cd ..
       - name: Build
