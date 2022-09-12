@@ -17,15 +17,15 @@ jobs:
       - name: Update Repository
         run: cd ../.. && git fetch origin && git pull
       - name: Update Dependencies
-        run: flutter pub get && cd ./ios && pod install && cd ..
+        run: cd ../.. && flutter pub get && cd ./ios && pod install && cd ..
       - name: Build
-        run: ./ios/ipa_exporter .
+        run: ../../ios/ipa_exporter .
       - name: Prepare for deploy
-        run: mkdir temp && cp ./ios/ipa_export/export/app-ios.ipa ./temp && cp ./assets/* ./temp
+        run: cd ../.. && mkdir temp && cp ./ios/ipa_export/export/app-ios.ipa ./temp && cp ./assets/* ./temp
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: temp
+          folder: ../../temp
           branch: gh-pages
           # this option will not maintain any history of your previous pages deployment
           # set to false if you want all page build to be committed to your gh-pages branch history
