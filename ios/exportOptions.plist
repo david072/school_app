@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-/
+<plist version="1.0">
+<dict>
+  <key>provisioningProfiles</key>
+  <dict>
+    <key>de.david072.schoolApp</key>
+    <string>School App AdHoc</string>
+  </dict>
+  <key>teamID</key>
+  <string>Z44F95R966</string>
+  <key>method</key>
+  <string>ad-hoc</string>
+  <key>destination</key>
+  <string>export</string>
+  <key>uploadSymbols</key>
+  <true/>
+  <key>uploadBitcode</key>
+  <true/>
+  <key>thinning</key>
+  <string>&lt;none&gt;</string>
+</dict>
+</plist>

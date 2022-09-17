@@ -1,0 +1,34 @@
+name: Github Pages
+
+# run on release creation
+on:
+  workflow_dispatch:
+  release:
+    branches:
+      - master
+
+permissions:
+  contents: write # for committing to gh-pages branch
+
+jobs:
+  build-github-pages:
+    runs-on: self-hosted
+    steps:
+      - name: Update Repository
+        run: cd ../.. && git fetch origin && git pull
+      - name: Update Dependencies
+        run: cd ../.. && flutter pub get && cd ./ios && pod install && cd ..
+      - name: Build
+        run: cd ../../ios && ./ipa_exporter .
+      - name: Prepare for deploy
+        run: cd ../.. && mkdir temp && cp ./ios/ipa_export/export/school_app.ipa ./temp && cp ./assets/* ./temp
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: ../../temp
+          branch: gh-pages
+          # this option will not maintain any history of your previous pages deployment
+          # set to false if you want all page build to be committed to your gh-pages branch history
+          single-commit: true
+      - name: Cleanup
+        run: rm -rf ../../temp
