@@ -92,7 +92,7 @@ class _CreateClassTestPageState extends State<CreateClassTestPage> {
               topic: topic.topic.trim(),
               resources: topic.resources.trim(),
             ))
-        .where((topic) => topic.topic.isNotEmpty && topic.resources.isNotEmpty)
+        .where((topic) => topic.topic.isNotEmpty)
         .toList();
     if (validTopics.isEmpty) {
       ScaffoldMessenger.of(context)
