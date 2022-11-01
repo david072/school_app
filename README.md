@@ -1,4 +1,11 @@
+# Important
+
+This is discontinued, since there are apps that do the same thing (e.g. https://www.notenapp.com/)
+
+---
+
 # School App
+
 An app targeted at students to organize their tasks.
 
 ## Supported devices
